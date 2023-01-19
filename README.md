@@ -42,7 +42,6 @@ For more details on setting up the engine, refer to [Setting up O3DE from GitHub
 
 Since the TechArt repo can be cloned anywhere on your local computer, we just need to tell O3DE where to find the extra objects in this repo by registering them.  From the O3DE engine repo folder, you can register some or all extra objects using the `o3de register` command.  Since these are all optional objects, we may not need or want all the objects.
 
-
 If we want to register a particular individual object such *as a single gem* we would issue the following command:
 
 ```
