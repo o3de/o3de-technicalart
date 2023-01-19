@@ -1,14 +1,62 @@
-# Contributing
+## Contribution Guidelines
 
-Welcome to the Open 3D Engine! To learn more about contributing to the [O3DE code repo](README.md), check out the [Contributor's Guide](https://github.com/o3de/community/blob/main/CONTRIBUTING.md).
+https://www.o3de.org/contribute/#contribution-guidelines
 
-The [O3DE community repo](https://github.com/o3de/community) contains information about how to get started, how the community organizes, and more.
+Before you start participating in and contributing to O3DE code such as this Gem, review our [code of conduct](https://o3de.org/docs/contributing/code-of-conduct/) . Contributing guidelines for our projects are hosted in their GitHub repositories, within the root directory in a `CONTRIBUTING.md` file.
 
-To contribute, please review our [Code of Conduct](https://github.com/o3de/o3de/blob/development/CODE_OF_CONDUCT.md) first. 
+## Contributions:
 
-## Making contributions with the Developer Certificate of Origin (DCO)
+Contributions are more than just welcome. Fork this repo and create a new branch, then submit a pull request:
 
-When contributing, your pull requests will require that you have agreed to our DCO found here: [Developer Certificate of Origin](https://developercertificate.org/).  All commits require the --signoff flag to show DCO compliance.
+1. Fork it: https://github.com/o3de/o3de-technicalart
 
-You can do this by using the -s option in git. 
-Example: ```git commit -s -m 'my commit message'```
+2. Create your feature branch `git checkout -b my-new-feature`
+
+3. Commit your changes `git commit -am 'Add some feature'`
+
+4. Push to the branch `git push origin my-new-feature`
+
+5. Create new Pull Request
+
+## Guide:
+
+### **Development branches:**
+
+- **main**: will be used for release cadence
+
+- **development**: feature development for supported release work
+
+- **prototypes**: PoCs, experimental and prototype work that is not officially supported
+
+### O3DE Modularity
+
+The o3de-technicalart repo is similar to the o3de-extras, which is another engine related collection. Gems (are reusable pieces of an o3de project, which other engines might call a plugin) can have other gems as children, and so on. Please refer to the [o3de-extras README](https://github.com/o3de/o3de-extras#readme) for more detailed information.
+
+### **Folder structure:**
+
+1 Gem per-tool.  The gist is that we want a modular structure to support teams enabling the tool integration gems for the DCC tools they specifically use.  Please adhere to an organization such as this:
+
+```
+o3de-TechlArt (repo)/
+├── Gems/
+│   ├── O3DE/
+│   │   └── StudioTools
+│   ├── DCC/
+│   │   ├── Blender
+│   │   ├── Autodesk/
+│   │   │   ├── Maya
+│   │   │   └── ...
+│   │   ├── Adobe/
+│   │   │   └── Substance3D/
+│   │   │       ├── Designer
+│   │   │       ├── Painter
+│   │   │       └── ...
+│   │   └── ...
+│   └── IDE/
+│       ├── VScode
+│       ├── WingPro
+│       └── ...
+└── Projects/
+    ├── DCC_Test_Project
+    └── ...
+```
