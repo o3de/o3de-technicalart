@@ -20,9 +20,9 @@ TechArt is not currently Canonical, and does not require Automated Review (AR), 
 
 ## Branches
 
-Just like other O3DE repos, the `main` branch is the stable release branch and is tagged for release, while the `development` branch is the cutting edge. When working on the code make a branch of development, make your changes, create your PR, run and pass AR, merge into development.
+Just like other O3DE repos, the `main` branch is the stable release branch and is tagged for release, while the `development` branch is the cutting edge. When working on the code changes intended to merge up into a release make a branch off development, make your changes, create your PR, run and pass any testing (put test data in PR), get review approvals, merge the PR into development.
 
-Additionally, there is another branch called `prototypes`  is where experimental work like research on workflow studies or 'proof of concept' (PoC) work occurs; it is less restrictive but will still require at least one maintainer approving code reviews in order to accept the PR into this branch (this is intended to promote legitimate peer review and collaboration.)
+Additionally, there is another branch called `prototypes`  is where experimental work like research on workflow studies or 'proof of concept' (PoC) work occurs; it is less restrictive but will still require at least one maintainer approving code reviews in order to accept the PR into this branch (this is intended to promote legitimate peer review and collaboration.) Work officially moved into Prototypes should be validated as functional, with some proof of local testing.  If you have a prototype you don't want in the public repo (yet), use a private fork for development.
 
 ## Contribute
 
