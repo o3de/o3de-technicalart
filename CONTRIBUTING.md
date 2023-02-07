@@ -28,7 +28,7 @@ There are several top-level protected branches.  Just like other O3DE repos, the
 
 - **Prototypes**: PoCs, experimental and prototype work that is not officially supported
 
-Additionally, there is another branch called prototypes is where experimental work like research on workflow studies or 'proof of concept' (PoC) work occurs; it is less restrictive but will still require at least one maintainer approving code reviews in order to accept the PR into this branch (this is intended to promote legitimate peer review and collaboration.)
+Prototypes is where experimental work like research on workflow studies or 'proof of concept' (PoC) work occurs; it is less restrictive but will still require at least one maintainer approving code reviews in order to accept the PR into this branch (this is intended to promote legitimate peer review and collaboration.)
 
 ## O3DE Modularity
 
