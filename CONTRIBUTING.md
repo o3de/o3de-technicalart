@@ -14,7 +14,7 @@ Contributions are more than just welcome. Fork this repo and create a new branch
 4. Create your feature branch `git checkout -c user_name/my-new-feature`
 5. Commit your changes `git commit -s -m 'Add some feature'`
 6. Push to the branch `git push -u origin HEAD` (first push, after you can just use `git push`)
-7. Create new Pull Request
+7. Create new Pull Request into development
 
 ## Guide:
 
@@ -28,7 +28,15 @@ There are several top-level protected branches.  Just like other O3DE repos, the
 
 - **Prototypes**: PoCs, experimental and prototype work that is not officially supported
 
-Prototypes is where experimental work like research on workflow studies or 'proof of concept' (PoC) work occurs; it is less restrictive but will still require at least one maintainer approving code reviews in order to accept the PR into this branch (this is intended to promote legitimate peer review and collaboration.)
+Prototypes is where experimental work like research on workflow studies or 'proof of concept' (PoC) work occurs; it is less restrictive but will still require at least one maintainer approving code reviews in order to accept the PR into this branch (this is intended to promote legitimate peer review and collaboration.)  Working in prototypes is similar to the workflow above, but with the following changes
+
+1. Fork it, or clone it: https://github.com/o3de/o3de-technicalart
+2. Get branches: `git fetch --all`
+3. Work off development: `git switch prototypes`
+4. Create your feature branch `git checkout -c user_name/my-new-feature`
+5. Commit your changes `git commit -s -m 'Add some feature'`
+6. Push to the branch `git push -u origin HEAD` (first push, after you can just use `git push`)
+7. Create new Pull Request into prototypes
 
 ## O3DE Modularity
 
