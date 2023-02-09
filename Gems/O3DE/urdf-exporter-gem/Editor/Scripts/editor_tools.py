@@ -20,7 +20,6 @@ def print_property_list(component_id):
     """
     # Print the property list of a component
     property_list = editor.EditorComponentAPIBus(bus.Broadcast, 'BuildComponentPropertyList', component_id)
-    #print(property_list)
 
 def has_component(entity_id, type_id_list):
     """
@@ -46,7 +45,6 @@ def add_component(entity_id, component_name):
     """
     type_id = editor.EditorComponentAPIBus(bus.Broadcast, 'FindComponentTypeIdsByEntityType', [component_name], 0)
     component_type_id = type_id[0]
-    # Add material component
     editor.EditorComponentAPIBus(bus.Broadcast, 'AddComponentsOfType', entity_id, [component_type_id])
 
 def get_property(component_id, property_path):
@@ -84,7 +82,6 @@ def set_property(component_id, property_path):
     if(new_obj.IsSuccess()):
         new_value = new_obj.GetValue()
         float_value = new_value.GetValue()
-        #print("Set new value to {}".format(float_value))
 
 def get_name_from_id(entity_id):
     """
@@ -163,7 +160,7 @@ def convert_entity_object_to_id(entity_object_id):
 
 def find_component_by_type_id(entity_id, component_name):
     """
-    This function will find an component by type_id
+    This function will find a component by type_id
 
     Args:
         entity_id (int): Example [4817570267466324385]
@@ -192,7 +189,6 @@ def get_value_from_property_path(component_object_id, property_path):
         (int): entity_id Example [14241452422305056972]
 
     """
-    print(f'component_object_id; {component_object_id}')
     entity_outcome = editor.EditorComponentAPIBus(bus.Broadcast, "GetComponentProperty", component_object_id, property_path)
     entity_id = entity_outcome.GetValue()
     return entity_id

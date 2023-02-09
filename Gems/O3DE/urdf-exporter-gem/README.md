@@ -159,13 +159,3 @@ O3DE PhysX Shape Collider Component not yet supported.
 
 # O3DE Materials are not yet supported.
 O3DE Materials and Textures are not yet fully supported. The Material component is added when it is on an entity, but colors and or textures are not yet added to the URDF.
-
-
-
-
-
-
-
-
-
-
