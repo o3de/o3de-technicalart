@@ -7,15 +7,14 @@ import math
 import numpy as np
 
 
-def euler_yzx_to_axis_angle(roll, pitch, yaw):
+def euler_yzx_to_axis_angle(roll: float, pitch: float, yaw: float) -> list[float,float,float]:
     """
     This function will convert a xyz Euler to an xyz Axis.
     
-    Args:
-        roll (Float): or x
-        pitch (Float): or z
-        yaw (Float): or y
-    Return: normlized float3 axis xyz
+    :param roll: The roll or x
+    :param pitch: The pitch or z
+    :param yaw: The yaw or y:
+    :return: normlized float3 axis xyz
     """
 
     # Convert the Euler angles to a 3x3 rotation matrix
@@ -60,38 +59,32 @@ def euler_yzx_to_axis_angle(roll, pitch, yaw):
     # Lets return the normalized
     return normalized
 
-def create_directory_folder(directory):
+def create_directory_folder(directory: Path):
     """
     This function will create a directory
     
-    Args:
-        directory (Path): Directory Path
-
+    :param directory : Directory Path
     """
     Path(directory).mkdir(parents=True, exist_ok=True)
 
-def copy_files_assets(source, destination):
+def copy_files_assets(source: Path, destination: Path):
     """
     This function will copy a source file to destination
-
-    Args:
-        source (Path): Source Directory Path to copy from
-        source (Path): Destination Directory Path to copy to
+    
+    :param source: Source Directory Path to copy from
+    :param destination: Destination Directory Path to copy to
     """
     try:
         shutil.copy(source, destination)
     except (FileNotFoundError, IsADirectoryError) as error:
         print(f'Copy Files Assets Error: {error}')
 
-def check_is_ascii(string):
+def check_is_ascii(string: str) -> bool:
     """
     This function will check and validate an string for proper ascii
 
-    Args:
-        string (Path): ASCII String to validate
-
-    Return:
-        (Bool)
+    :param string: ASCII String to validate
+    :return bool:
     """
     try:
         string.encode('ascii')
@@ -100,14 +93,12 @@ def check_is_ascii(string):
     else:
         return True
 
-def create_package_file(robot_name, package_path):
+def create_package_file(robot_name: str, package_path: Path):
     """
     Creates a ros robot urdf description xml package file
     
-    Args:
-        robot_name (String): Name of the robots package
-        package_path (Path): This is the path to the Robot Description
-
+    :param robot_name: Name of the robots package
+    :param package_path: This is the path to the Robot Description
     """
     root_xml = xml_et.Element('package', format='3')
     xml_et.SubElement(root_xml, 'name').text = robot_name
@@ -130,14 +121,12 @@ def create_package_file(robot_name, package_path):
     # Export the XML
     save_urdf_xml('package', 'xml', root_xml, package_path)
 
-def create_cmake_file(robot_name, package_directory_path):
+def create_cmake_file(robot_name: str, package_directory_path: Path):
     """
     Create a Cmake file for the Robot Description
     
-    Args:
-        robot_name (String): Name of the robots package
-        package_directory_path (Path): This is the path to the Robot Description
-
+    :param robot_name: Name of the robots package
+    :param package_directory_path: This is the path to the Robot Description
     """
     text = [ 'cmake_minimum_required(VERSION 3.5)',
             f'project({robot_name})', '',
@@ -158,14 +147,12 @@ def create_cmake_file(robot_name, package_directory_path):
         for item in text:
             f.write(item + '\n')
 
-def create_launch_file(robot_name, urdf_launch_path):
+def create_launch_file(robot_name: str, urdf_launch_path: Path):
     """
     Create a ros launch file for the Robot Description
 
-    Args:
-        robot_name (String): Name of the robots package
-        urdf_launch_path (Path): This is the path to the Robot Description Launch Folder
-
+    :param robot_name: Name of the robots package
+    :param urdf_launch_path: This is the path to the Robot Description Launch Folder
     """
     text = [
             'from ament_index_python.packages import get_package_share_path',
@@ -207,13 +194,12 @@ def create_launch_file(robot_name, urdf_launch_path):
         for item in text:
             f.write(item + '\n')
 
-def create_gazebo_launch_file(robot_name, urdf_launch_path):
+def create_gazebo_launch_file(robot_name: str, urdf_launch_path: Path):
     """
     Create a ros Gazebo launch file for the Robot Description
 
-    Args:
-        robot_name (String): Name of the robots package
-        urdf_launch_path (Path): This is the path to the Robot Description Launch Folder
+    :param robot_name: Name of the robots package
+    :param urdf_launch_path: This is the path to the Robot Description Launch Folder
     """
     slash = '\\\"'
     xml_replace = f"\'\"\', \'{slash}\'"
@@ -264,14 +250,12 @@ def create_gazebo_launch_file(robot_name, urdf_launch_path):
         for item in text:
             f.write(item + '\n')
 
-def create_rviz_file(robot_name, urdf_rviz_path):
+def create_rviz_file(robot_name: str, urdf_rviz_path: Path):
     """
     Create a rviz file
 
-    Args:
-        robot_name (String): Name of the robots package (Not used currently, but this might change)
-        urdf_rviz_path (Path): This is the path to the Robot Description RVIZ Folder
-
+    :param robot_name: Name of the robots package (Not used currently, but this might change)
+    :param urdf_rviz_path (Path): This is the path to the Robot Description RVIZ Folder
     """
     text = [ 'Panels:',
             '  - Class: rviz_common/Displays',
@@ -321,12 +305,11 @@ def create_rviz_file(robot_name, urdf_rviz_path):
             file_rvis.write(item + '\n')      
         file_rvis.close()
 
-def create_empty_world_file(gazebo_world_path):
+def create_empty_world_file(gazebo_world_path: Path):
     """
     Create a Gazebo World File
 
-    Args:
-        gazebo_world_path(Path): This is the path to the Gazebo World Folder
+    :param gazebo_world_path(Path): This is the path to the Gazebo World Folder
     """
     text = [
             '<sdf version="1.7">',
@@ -347,13 +330,11 @@ def create_empty_world_file(gazebo_world_path):
             file_world.write(item + '\n')      
         file_world.close()
 
-def create_urdf_description_folder(robot_description_folder_path):
+def create_urdf_description_folder(robot_description_folder_path: Path):
     """
     This function will create the URDF description folder with subfolders
 
-    Args:
-        robot_description_folder_path (Path): root of the Robot Description
-
+    :param robot_description_folder_path: root of the Robot Description
     """
     create_directory_folder(robot_description_folder_path)
     # Create sub directories
@@ -361,16 +342,14 @@ def create_urdf_description_folder(robot_description_folder_path):
         sub_directory = Path(robot_description_folder_path, directory)
         create_directory_folder(sub_directory)
 
-def save_urdf_xml(file_name, file_ext, root_xml, xml_directory_path):
+def save_urdf_xml(file_name: str, file_ext: str, root_xml: object, xml_directory_path: Path):
     """
     This function will export the URDF xml to the robot description folder
 
-    Args:
-        file_name (String): File Name String
-        file_ext (String): File Ext String
-        root_xml (Path): File path for file
-        xml_directory_path (Path): File path for file directory
-
+    :param file_name: File Name String
+    :param file_ext: File Ext String
+    :param root_xml: Root XML Object
+    :param xml_directory_path: File path for file directory
     """
     # Build Path
     xml_path = Path(xml_directory_path, f'{file_name}.{file_ext}')

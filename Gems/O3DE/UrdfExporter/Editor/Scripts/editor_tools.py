@@ -30,6 +30,7 @@ def has_component(entity_id: object, type_id_list: list) -> bool:
     :return: true if the entity has component(s)
     """
     component_bool = editor.EditorComponentAPIBus(bus.Broadcast, 'HasComponentOfType', entity_id, type_id_list[0])
+    
     return component_bool
 
 def add_component(entity_id: object, component_name: str):
@@ -84,6 +85,7 @@ def get_name_from_id(entity_id: object) -> str:
     :return: The name of entity
     """
     name = editor.EditorEntityInfoRequestBus(bus.Event, 'GetName', entity_id)
+    
     return name
 
 def create_object_from_id(id_int: int) -> object:
@@ -94,6 +96,7 @@ def create_object_from_id(id_int: int) -> object:
     :return: The created object
     """
     object_id = entity.EntityId(id_int)
+    
     return object_id
 
 def get_parent(child_id: object) -> tuple[object, str]:
@@ -118,6 +121,7 @@ def search_for_entity(entity_name: str) -> object:
     search_filter = azlmbr.entity.SearchFilter()
     search_filter.names = [entity_name]
     entity_object_id = azlmbr.entity.SearchBus(bus.Broadcast, 'SearchEntities', search_filter)
+    
     return entity_object_id
 
 def convert_entity_object_to_id(entity_object_id: object) -> int:
@@ -128,6 +132,7 @@ def convert_entity_object_to_id(entity_object_id: object) -> int:
     :return: The id integer
     """
     entity_id = entity_object_id[0]
+    
     return entity_id
 
 def find_component_by_type_id(entity_id: int, component_name: str) -> any:
@@ -143,6 +148,7 @@ def find_component_by_type_id(entity_id: int, component_name: str) -> any:
     component_type_id = type_ids[0]
     component_outcome = editor.EditorComponentAPIBus(bus.Broadcast, "GetComponentOfType", entity_id, component_type_id)
     component_object_value = component_outcome.GetValue()
+    
     return component_object_value
 
 def get_value_from_property_path(component_object_id: object, property_path: str) -> int:
@@ -155,6 +161,7 @@ def get_value_from_property_path(component_object_id: object, property_path: str
     """
     entity_outcome = editor.EditorComponentAPIBus(bus.Broadcast, "GetComponentProperty", component_object_id, property_path)
     entity_id = entity_outcome.GetValue()
+    
     return entity_id
 
 def get_transforms_from_id(entity_id: object) -> tuple[object, object, object]:

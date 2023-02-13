@@ -25,11 +25,10 @@ def search_tree(root: object, xml_obj: object, urdf_mesh_path: Path, robot_name:
     """
     This function will search the tree from the root base_link Entity ID found by search
 
-    Args:
-        root (Object): Entity Object ID
-        xml_obj (Object): XML Object
-        urdf_mesh_path (Path): The Path to URDF Meshes Folder
-        robot_name (String): Robot Description Name
+    :param root: Entity Object ID
+    :param xml_obj: XML Object
+    :param urdf_mesh_path: The Path to URDF Meshes Folder
+    :param robot_name: Robot Description Name
     """
     # base_link Name_link_obj
     name = editor_tools.get_name_from_id(root)
@@ -62,14 +61,18 @@ def add_elements(entity_id: object, xml_obj: object, urdf_mesh_path: Path, robot
     """
     This function will add the XML elements from the search loop
 
-    Args:
-        entity_id (Object): Entity Object ID
-        xml_obj (Object): XML Object
-        urdf_mesh_path (Path): The Path to URDF Meshes Folder
-        robot_name (String): Robot Description Name
+    :param entity_id: Entity Object ID
+    :param xml_obj: XML Object
+    :param urdf_mesh_path: The Path to URDF Meshes Folder
+    :param robot_name: Robot Description Name
     """
     joint_type = ""
+    lead_name = ""
     lead_entity_object_id = None
+    neg_limit_value = 0
+    pos_limit_value = 0
+    joint_origin_xyz = 0
+    joint_origin_rpy = 0
     
     # search through childern of root, find the entity names and ids
     child_name = editor_tools.get_name_from_id(entity_id)
@@ -118,8 +121,7 @@ def add_elements(entity_id: object, xml_obj: object, urdf_mesh_path: Path, robot
         if joint_type == "":
             local_translation, local_rotation, local_uniform_scale  = editor_tools.get_transforms_from_id(entity_id)
             joint_link_obj = xml_et.SubElement(xml_obj, "joint", name=f"{child_name}_to_{parent_name}", type="fixed")
-            xml_et.SubElement(joint_link_obj, "origin", xyz=f"{float(local_translation.x)} {float(local_translation.y)} {float(local_translation.z)}",
-                                rpy=f"0 0 0")
+            xml_et.SubElement(joint_link_obj, "origin", xyz=f"{float(local_translation.x)} {float(local_translation.y)} {float(local_translation.z)}", rpy="0 0 0")
             xml_et.SubElement(joint_link_obj, "parent", link=f"{parent_name}")
             xml_et.SubElement(joint_link_obj, "child", link=f"{child_name}")
             xml_et.SubElement(joint_link_obj, "axis", xyz="0.0 0.0 1.0") # Defaults for now WIP
@@ -131,10 +133,9 @@ def add_elements(entity_id: object, xml_obj: object, urdf_mesh_path: Path, robot
 
             joint_link_obj = xml_et.SubElement(xml_obj, "joint", name=f"{child_name}_to_{lead_name}", type=f"{joint_type}")
             try:
-                xml_et.SubElement(joint_link_obj, "origin", xyz=f"{float(joint_origin_xyz.x)} {float(joint_origin_xyz.y)} {float(joint_origin_xyz.z)}",
-                                rpy=f"0 0 0")
+                xml_et.SubElement(joint_link_obj, "origin", xyz=f"{float(joint_origin_xyz.x)} {float(joint_origin_xyz.y)} {float(joint_origin_xyz.z)}", rpy="0 0 0")
             except AttributeError:
-                xml_et.SubElement(joint_link_obj, "origin", xyz=f"0 0 0", rpy=f"0 0 0")
+                xml_et.SubElement(joint_link_obj, "origin", xyz="0 0 0", rpy="0 0 0")
 
             xml_et.SubElement(joint_link_obj, "parent", link=f"{lead_name}")
             xml_et.SubElement(joint_link_obj, "child", link=f"{child_name}")
@@ -145,30 +146,28 @@ def add_elements(entity_id: object, xml_obj: object, urdf_mesh_path: Path, robot
             # Chech for joint types
             if joint_type == "revolute":
                 xml_et.SubElement(joint_link_obj, "dynamics", damping="2.0", friction="1.0") # Defaults for now WIP
-                xml_et.SubElement(joint_link_obj, "limit", effort="1000.0", lower=f"{neg_limit_value}", upper=f"{pos_limit_value}", velocity="1.0") # Defaults for now -> effort="10", velocity="1.0" WIP
+                xml_et.SubElement(joint_link_obj, "limit", effort="1000.0", lower=f"{neg_limit_value}", upper=f"{pos_limit_value}", velocity="1.0")
             if joint_type == "continuous":
                 xml_et.SubElement(joint_link_obj, "dynamics", damping="2.0", friction="1.0") # Defaults for now WIP
-                xml_et.SubElement(joint_link_obj, "limit", effort="1000.0", lower=f"{neg_limit_value}", upper=f"{pos_limit_value}", velocity="1.0") # Defaults for now -> effort="10", velocity="1.0" WIP
+                xml_et.SubElement(joint_link_obj, "limit", effort="1000.0", lower=f"{neg_limit_value}", upper=f"{pos_limit_value}", velocity="1.0")
 
-def look_up_component_type(component_type_name: str, root: object, component_type_id: object, 
+def look_up_component_type(component_type_name: str, root: object, component_type_id: object,
                            urdf_mesh_path: Path, xml_obj: object,
                            robot_name: str) -> tuple [object, object, str, str, object]:
     """
     This function will look at the component type name and if found run the components function to look up
     property paths of the component and build the xml element with properties. 
 
-    Args:
-        component_type_name (String): This is a string describing the component type
-        root (Object): Entity Object ID
-        component_type_id (Object): Component Type on Entity Object ID
-        xml_obj (Object): XML Child Object
+    :param component_type_name (String): This is a string describing the component type
+    :param root (Object): Entity Object ID
+    :param component_type_id: Component Type on Entity Object ID
+    :param xml_obj): XML Child Object
 
-    Return:
-        origin_xyz (Vector3): The joint is Local Position Origin
-        origin_rpy (Vector3): The joint is Local Rotation Origin
-        lead_entity_value (String): The Lead Entity, most cases the Parent
-        joint_type (String): Type of joint name
-        axis (Vector3): This is the axis of rotation for revolute joints,
+    :return: origin_xyz: The joint is Local Position Origin,
+                origin_rpy: The joint is Local Rotation Origin,
+                lead_entity_value: The Lead Entity, most cases the Parent,
+                joint_type: Type of joint name,
+                axis: This is the axis of rotation for revolute joints,
                         the axis of translation for prismatic joints,
                         surface normal for planar joints. Fixed and floating
                         joints do not use the axis field. 
@@ -191,7 +190,7 @@ def look_up_component_type(component_type_name: str, root: object, component_typ
             editor_tools.add_component(root, 'Material')
             mat_index = component_type_name.index('mesh')
             component_is_mesh(root, component_type_id[index], component_type_id[mat_index], urdf_mesh_path, xml_obj, robot_name)
-    
+            
     # Check to see if there is a PhysX Collider
     if 'collision' in component_type_name:
         index = component_type_name.index('collision')
@@ -221,16 +220,17 @@ def look_up_component_type(component_type_name: str, root: object, component_typ
         joint_type = 'prismatic'
     return origin_xyz, origin_rpy, lead_entity_object_id, joint_type, axis, pos_limit_value, neg_limit_value
 
-def component_is_mesh(child_id, component_type_id, material_type_id, urdf_mesh_path, xml_obj, robot_name):
+def component_is_mesh(child_id: object, component_type_id: object,
+                      material_type_id: object, urdf_mesh_path: Path,
+                      xml_obj: Path, robot_name: str):
     """
     This function will look at your entity child_id and the attached component id, find the property path
     and get the file path value and add this value to the package xml link, copy the mesh files to the package
 
-    Args:
-        child_id (Object): Entity Object ID of Child of Parent Entity
-        component_type_id (Object): Mesh Component on Entity Object ID
-        material_type_id (Object): Mesh Material Component on Entity Object ID
-        xml_obj (Object): XML Child Object
+    :param child_id: Entity Object ID of Child of Parent Entity
+    :param component_type_id: Mesh Component on Entity Object ID
+    :param material_type_id: Mesh Material Component on Entity Object ID
+    :param xml_obj: XML Child Object
     """
     mesh_file_path = ""
     # returns a list of mesh component IDs for a component type
@@ -242,7 +242,7 @@ def component_is_mesh(child_id, component_type_id, material_type_id, urdf_mesh_p
     else:
         first_mesh_component_id = None
 
-    if not first_mesh_component_id == None:
+    if not first_mesh_component_id is None:
         # Property path for Controller|Configuration|Mesh Asset
         value_outcome = editor.EditorComponentAPIBus(bus.Broadcast, 'GetComponentProperty', first_mesh_component_id,
                                                         'Controller|Configuration|Mesh Asset')
@@ -300,26 +300,25 @@ def component_is_mesh(child_id, component_type_id, material_type_id, urdf_mesh_p
         xml_et.SubElement(visual, "origin", rpy=f"{float(local_rotation.x)} {float(local_rotation.y)} {float(local_rotation.z)}",
                             xyz=f"{float(local_translation.x)} {float(local_translation.y)} {float(local_translation.z)}")
 
-def component_is_joint(entity_id, component_type_id, joint_type):
+def component_is_joint(entity_id: object, component_type_id: object, joint_type: str) -> tuple[list[float,float,float],
+                        list[float,float,float], object, list[float,float,float], float, float]:
     """
     This function will look at your entity_id and the PhysX Ball Joint component id, find the
     property paths of the component and build the xml element with properties.
 
-    Args:
-        entity_id (Object): Entity Object ID of Child of Parent Entity
-        component_type_id (Object): Mesh Component on Entity Object ID
-        xml_obj (Object): XML Child Object
-        joint_type (String): What type of joint it is
+    :param entity_id: Entity Object ID of Child of Parent Entity
+    :param component_type_id: Mesh Component on Entity Object ID
+    :param xml_obj: XML Child Object
+    :param joint_type: What type of joint it is
 
-    Return:
-        local_position_value (Vector3): The joint is Local Position Origin
-        local_rotation_value (Vector3): The joint is Local Rotation Origin
-        lead_entity_value (String): The Lead Entity, most cases the Parent
-        axis (Vector3): This is the axis of rotation for revolute joints,
+    :return:
+        local_position_value: The joint is Local Position Origin,
+        local_rotation_value: The joint is Local Rotation Origin,
+        lead_entity_value: The Lead Entity, most cases the Parent,
+        axis: This is the axis of rotation for revolute joints,
                         the axis of translation for prismatic joints,
                         surface normal for planar joints. Fixed and floating
                         joints do not use the axis field.
-
     """
     # returns a list of joints, we will call inertial component IDs for a component type
     joint_multiple_component_outcome = editor.EditorComponentAPIBus(bus.Broadcast, 'GetComponentsOfType', entity_id, component_type_id)
@@ -344,11 +343,9 @@ def component_is_joint(entity_id, component_type_id, joint_type):
         
         # get the Lead Entity
         lead_value = editor_tools.get_property(first_joint_component_id, 'Standard Joint Parameters|Lead Entity')
-        print(f'Lead Value {lead_value}')
         if not lead_value is None:
             lead_object_id = editor_tools.get_value_from_property_path(first_joint_component_id, 'Standard Joint Parameters|Lead Entity')
         else:
-            print("No Lead Entity")
             lead_object_id = None
         
         # Joint Specific
@@ -361,15 +358,14 @@ def component_is_joint(entity_id, component_type_id, joint_type):
 
         return local_position_value, local_rotation_value, lead_object_id, axis, pos_limit_value, neg_limit_value
 
-def component_is_rigid_body(entity_id, component_type_id, xml_obj):
+def component_is_rigid_body(entity_id: object, component_type_id: object, xml_obj: object):
     """
     This function will look at your entity_id and the PhysX Rigid Body component id, find the
     property paths of the component and build the xml element with properties.
 
-    Args:
-        entity_id (Object): Entity Object ID of Child of Parent Entity
-        component_type_id (Object): Mesh Component on Entity Object ID
-        xml_obj (Object): XML Child Object
+    :param entity_id: Entity Object ID of Child of Parent Entity
+    :param component_type_id: Mesh Component on Entity Object ID
+    :param xml_obj: XML Child Object
     """
     # returns a list of rigid_body, we will call inertial component IDs for a component type
     inertial_multiple_component_outcome = editor.EditorComponentAPIBus(bus.Broadcast, 'GetComponentsOfType', entity_id, component_type_id)
@@ -404,7 +400,7 @@ def component_is_rigid_body(entity_id, component_type_id, xml_obj):
         except AttributeError:
             xml_et.SubElement(inertial, "inertia", ixx="0.0", ixy="0.0",ixz="0.0", iyy="0.0", iyz="0.0", izz="0.0")
 
-def component_is_collision(entity_id, component_type_id, xml_obj):
+def component_is_collision(entity_id: object, component_type_id: object, xml_obj: object):
     """
     This function will look at your entity_id and the PhysX Collider component id, find the
     property paths of the component and build the xml element with properties./
@@ -429,12 +425,11 @@ def component_is_collision(entity_id, component_type_id, xml_obj):
     URDF_COLLISION_SHAPE_LIST = ['sphere', 'box', 'capsule', 'cylinder']
     /// capsule is not supported in URDF but is in PhysX
 
-    Args:
-        entity_id (Object): Entity Object ID of Child of Parent Entity
-        component_type_id (Object): Mesh Component on Entity Object ID
-        material_type_id (Object): Mesh Material Component on Entity Object ID
-        xml_child_obj (Object): XML Child Object
-        robot_name (String): Robot Description Name
+    :param entity_id: Entity Object ID of Child of Parent Entity
+    :param component_type_id: Mesh Component on Entity Object ID
+    :param material_type_id: Mesh Material Component on Entity Object ID
+    :param xml_child_obj: XML Child Object
+    :param robot_name: Robot Description Name
     """
     # returns a list of collision component IDs for a component type
     collision_multiple_component_outcome = editor.EditorComponentAPIBus(bus.Broadcast, 'GetComponentsOfType', entity_id, component_type_id)
@@ -489,19 +484,16 @@ def component_is_collision(entity_id, component_type_id, xml_obj):
                 shape_length = editor_tools.get_property(first_collision_component_id, shape_length_path)
                 xml_et.SubElement(geometry, shape_name, radius=f"{float(shape_radius)}", length=f"{float(shape_length)}")
 
-def search_for_base_link(robot_name, ros2_path, ros2_ws_src_path):
+def search_for_base_link(robot_name: str, ros2_path: Path, ros2_ws_src_path: Path) -> tuple[bool, str, str]:
     """
     This function will search for base_link entity in the current scene.
 
-    Args:
-        robot_name (String): Robot Description Name
-        ros2_path (Path): Path to main Ros root folder
-        ros2_ws_src_path (Path): Path to Users Ros Workspace
+    :param robot_name: Robot Description Name
+    :param ros2_path: Path to main Ros root folder
+    :param ros2_ws_src_path: Path to Users Ros Workspace
         
-    Returns:
-        (Bool): Found 1 base_link True or False
-        message (String): Message to QT UI if the search found a base_link.
-        rviz_launch_message (String): Launch Command for rvis subproccess
+    :return: tuple of the [Found 1 base_link True or False,
+            Message to QT UI if the search found a base_link, Launch Command for rvis subproccess]
     """
     search_filter = entity.SearchFilter()
     search_filter.names = [const.ROBOT_BASE_LINK_NODE] # List of names (matches if any match); can contain wildcards in the name
@@ -601,14 +593,13 @@ def search_for_base_link(robot_name, ros2_path, ros2_ws_src_path):
         
     return True, message, rviz_launch_message, gazebo_launch_message
 
-def send_ros_build_commands(ros_source, ros2_ws_src_path, ws_source):
+def send_ros_build_commands(ros_source: Path, ros2_ws_src_path: Path, ws_source: Path):
     """
     This function will send ros commands to build the urdf package 
 
-    Args:
-        ros_source (Path): Path to main Ros root folder
-        ros2_ws_src_path (Path): Path to Users Ros Workspace
-        ws_source (Path): Path to main Ros root folder
+    :param ros_source: Path to main Ros root folder
+    :param ros2_ws_src_path: Path to Users Ros Workspace
+    :param ws_source: Path to main Ros root folder
     """
     # Linux Bash Commands
     linux_terminal = 'gnome-terminal -e '
@@ -623,14 +614,13 @@ def send_ros_build_commands(ros_source, ros2_ws_src_path, ws_source):
     output = build.communicate()[0]
     print(f'Build: {output}')
 
-def send_gazebo_sdf_build_commands(urdf_directory_path, robot_name):
+def send_gazebo_sdf_build_commands(urdf_directory_path: Path, robot_name: str):
     """
     This function will send ros commands to build the urdf package 
 
-    Args:
-        ros_source (Path): Path to main Ros root folder
-        ros2_ws_src_path (Path): Path to Users Ros Workspace
-        ws_source (Path): Path to main Ros root folder
+    :param ros_source: Path to main Ros root folder
+    :param ros2_ws_src_path: Path to Users Ros Workspace
+    :param ws_source: Path to main Ros root folder
     """
     # Linux Bash Commands
     linux_terminal = 'gnome-terminal -e '
@@ -649,12 +639,11 @@ def send_gazebo_sdf_build_commands(urdf_directory_path, robot_name):
     output = build.communicate()[0]
     print(f'SDF Build: {output}')
 
-def launch_gazebo(message):
+def launch_gazebo(message: str):
     """
     This function will launch the ROS2 Gazebo application with robot launch description
 
-    Args:
-        message (String): Launch Command for gazebo subprocess.
+    :param message: Launch Command for gazebo subprocess.
     """
     # we are going to pass the system environ
     gazebo_env = os.environ.copy()
@@ -689,12 +678,11 @@ def launch_gazebo(message):
     output = gazebo.communicate()[0]
     print(f'gazebo: {output}')
 
-def launch_rviz(message):
+def launch_rviz(message: str):
     """
     This function will launch the ROS2 rVIS application with robot launch description
 
-    Args:
-        message (String): Launch Command for rvis subprocess.
+    :param message: Launch Command for rvis subprocess.
     """
     # we are going to pass the system environ
     rviz_env = os.environ.copy()
@@ -729,9 +717,3 @@ def launch_rviz(message):
     output = rvis.communicate()[0]
     print(f'rvis: {output}')
 
-
-robot_name = 'my_robot_test'
-test_path = Path('home','shawstarr','ros2_ws','src')
-ros_path = Path('opt','ros','humble')
-print(f'Test Path:-------------------------------------------------- {test_path}')
-search_for_base_link(robot_name, ros_path, test_path)
