@@ -16,7 +16,6 @@ def euler_yzx_to_axis_angle(roll: float, pitch: float, yaw: float) -> list[float
     :param yaw: The yaw or y:
     :return: normlized float3 axis xyz
     """
-
     # Convert the Euler angles to a 3x3 rotation matrix
     yawMatrix = np.matrix([
     [math.cos(yaw), -math.sin(yaw), 0],
@@ -56,7 +55,7 @@ def euler_yzx_to_axis_angle(roll: float, pitch: float, yaw: float) -> list[float
         normalized = [(float(i)-min(raw_value))/(max(raw_value)-min(raw_value)) for i in raw_value]
     else:
         normalized = [0.0,0.0,1.0]
-    # Lets return the normalized
+    # Return the normalized rotation axis
     return normalized
 
 def create_directory_folder(directory: Path):
@@ -360,4 +359,3 @@ def save_urdf_xml(file_name: str, file_ext: str, root_xml: object, xml_directory
     tree.write(xml_path, encoding = "UTF-8", xml_declaration = True)
 
     dump = xml_et.dump(root_xml)
-    print(dump)

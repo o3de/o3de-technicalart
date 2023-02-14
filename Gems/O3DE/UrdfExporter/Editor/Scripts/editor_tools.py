@@ -12,14 +12,13 @@ def print_property_list(component_id: object) -> str:
     """
     This function will get the component property list, this is mostly used for development
 
-    Args:
-        component_id (Object): This is the Entity Component Object ID
-
-    Returns:
-        value(String): value of property list for component
+    :param component_id: This is the Entity Component Object ID
+    :returns value: value of property list for component
     """
     # Print the property list of a component
     property_list = editor.EditorComponentAPIBus(bus.Broadcast, 'BuildComponentPropertyList', component_id)
+    
+    return property_list
 
 def has_component(entity_id: object, type_id_list: list) -> bool:
     """
@@ -57,6 +56,7 @@ def get_property(component_id: object, property_path: str) -> str:
     
     if(object_property.IsSuccess()):
         value = object_property.GetValue()
+        
         return value
     else:
         return None
@@ -108,7 +108,7 @@ def get_parent(child_id: object) -> tuple[object, str]:
     """
     parent_id = editor.EditorEntityInfoRequestBus(bus.Event, 'GetParent', child_id)
     parent_name = get_name_from_id(parent_id)
-    
+
     return parent_id, parent_name
 
 def search_for_entity(entity_name: str) -> object:

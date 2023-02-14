@@ -37,7 +37,7 @@ def search_tree(root: object, xml_obj: object, urdf_mesh_path: Path, robot_name:
     if name == "base_link":
         add_elements(root, xml_obj, urdf_mesh_path, robot_name)
     
-    # GO DOWN THE TREE CHAIN
+    # Go down the tree chain
     model_tree = editor.EditorEntityInfoRequestBus(bus.Event, 'GetChildren', root)
     
     # Loop the tree and find the childern
