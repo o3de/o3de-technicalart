@@ -63,7 +63,7 @@ Select the downloaded urdf-exporter-gem folder.
 Also the o3de Menu Bar will have a new Robot Icon.
 ![image](https://user-images.githubusercontent.com/87207603/215824488-3cccd8f3-277a-4ddf-9751-65d8bb9835f0.png)
 
-11. Lets make a vary simple urdf test:
+11. Lets make a very simple urdf test:
 Create a new Entity and name it base_link. This will be your frist link. Please leave this empty.
 ![image](https://user-images.githubusercontent.com/87207603/215825173-8e06191b-e326-450e-89ca-627730154465.png)
 
