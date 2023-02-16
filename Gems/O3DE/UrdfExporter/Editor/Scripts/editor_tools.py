@@ -101,7 +101,7 @@ def create_object_from_id(id_int: int) -> object:
 
 def get_parent(child_id: object) -> tuple[object, str]:
     """
-    This function will return from the given ID the entity parent
+    This function will return the parent's entity id and name from the given ID of the child
 
     :param child_id : The child entity id to query for the parent
     :return: tuple of the id and name of the parent
