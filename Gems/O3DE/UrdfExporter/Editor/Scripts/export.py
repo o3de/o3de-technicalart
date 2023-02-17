@@ -50,7 +50,7 @@ def search_tree(root: object, xml_obj: object, urdf_mesh_path: Path, robot_name:
         # Get the name of the entity   
         name = editor_tools.get_name_from_id(root)
         
-        # Seach through childs of childern
+        # Search through children of children.
         for sub_child_id in entity_child_id:
             name = editor_tools.get_name_from_id(root)
             add_elements(sub_child_id, xml_obj, urdf_mesh_path, robot_name)
@@ -88,7 +88,7 @@ def add_elements(entity_id: object, xml_obj: object, urdf_mesh_path: Path, robot
                             xyz=f"{float(local_translation.x)} {float(local_translation.y)} {float(local_translation.z)}")
     
     # This function will return the component type names and their ids that a detected
-    component_type_name, component_type_id = editor_tools.get_component_type_id(entity_id)
+    component_type_name, component_type_id = editor_tools.get_urdf_component_type_id(entity_id)
     
     # If not empty
     if len(component_type_name) > 0:
@@ -204,19 +204,19 @@ def look_up_component_type(component_type_name: str, root: object, component_typ
     # Check to see if there is a PhysX Joints
     if 'continuous' in component_type_name:
         index = component_type_name.index('continuous')
-        origin_xyz, origin_rpy, lead_entity_object_id, axis, pos_limit_value, neg_limit_value = component_is_joint(root, component_type_id[index], 'continuous')
+        origin_xyz, origin_rpy, lead_entity_object_id, axis, pos_limit_value, neg_limit_value = get_joint_details(root, component_type_id[index], 'continuous')
         joint_type = 'continuous'
     if 'revolute' in component_type_name:
         index = component_type_name.index('revolute')
-        origin_xyz, origin_rpy, lead_entity_object_id, axis, pos_limit_value, neg_limit_value = component_is_joint(root, component_type_id[index], 'revolute')
+        origin_xyz, origin_rpy, lead_entity_object_id, axis, pos_limit_value, neg_limit_value = get_joint_details(root, component_type_id[index], 'revolute')
         joint_type = 'revolute'
     if 'fixed' in component_type_name:
         index = component_type_name.index('fixed')
-        origin_xyz, origin_rpy, lead_entity_object_id, axis, pos_limit_value, neg_limit_value = component_is_joint(root, component_type_id[index], 'fixed')
+        origin_xyz, origin_rpy, lead_entity_object_id, axis, pos_limit_value, neg_limit_value = get_joint_details(root, component_type_id[index], 'fixed')
         joint_type = 'fixed'
     if 'prismatic' in component_type_name:
         index = component_type_name.index('prismatic')
-        origin_xyz, origin_rpy, lead_entity_object_id, axis, pos_limit_value, neg_limit_value = component_is_joint(root, component_type_id[index], 'prismatic')
+        origin_xyz, origin_rpy, lead_entity_object_id, axis, pos_limit_value, neg_limit_value = get_joint_details(root, component_type_id[index], 'prismatic')
         joint_type = 'prismatic'
     return origin_xyz, origin_rpy, lead_entity_object_id, joint_type, axis, pos_limit_value, neg_limit_value
 
@@ -300,7 +300,7 @@ def component_is_mesh(child_id: object, component_type_id: object,
         xml_et.SubElement(visual, "origin", rpy=f"{float(local_rotation.x)} {float(local_rotation.y)} {float(local_rotation.z)}",
                             xyz=f"{float(local_translation.x)} {float(local_translation.y)} {float(local_translation.z)}")
 
-def component_is_joint(entity_id: object, component_type_id: object, joint_type: str) -> tuple[list[float,float,float],
+def get_joint_details(entity_id: object, component_type_id: object, joint_type: str) -> tuple[list[float,float,float],
                         list[float,float,float], object, list[float,float,float], float, float]:
     """
     This function will look at your entity_id and the PhysX Ball Joint component id, find the

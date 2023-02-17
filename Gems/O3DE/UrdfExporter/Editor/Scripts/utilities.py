@@ -103,7 +103,7 @@ def create_package_file(robot_name: str, package_path: Path):
     xml_et.SubElement(root_xml, 'name').text = robot_name
     xml_et.SubElement(root_xml, 'version').text ='1.0.0'
     xml_et.SubElement(root_xml, 'description').text = 'URDF from O3DE'
-    xml_et.SubElement(root_xml,'author', email='shawstar@amazon.com').text = 'Starr Shaw'
+    xml_et.SubElement(root_xml,'author', email='yourname@domain.com').text = 'Your Name'
     xml_et.SubElement(root_xml,'maintainer', email='shawstar@amazon.com').text = 'Starr Shaw'
     xml_et.SubElement(root_xml,'license').text = 'MIT'
     xml_et.SubElement(root_xml,'url').text = 'https://www.o3de.org/'
