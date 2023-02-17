@@ -1,3 +1,17 @@
+"""
+Copyright (c) Contributors to the Open 3D Engine Project.
+For complete copyright and license terms please see the LICENSE at the root of this distribution.
+
+SPDX-License-Identifier: Apache-2.0 OR MIT
+
+-------------------------------------------------------------------------
+DEPRECATION NOTICE: Editor Entity & Editor Component utils are to be considered deprecated
+and will be replaced with the EditorPythonBindings libraries once they've relocated from
+AutomatedTesting into their own gem (o3de/sig-testing#67
+"""
+# -------------------------------------------------------------------------
+
+
 import azlmbr
 import azlmbr.bus as bus
 import azlmbr.entity as entity
@@ -20,21 +34,21 @@ def get_property_list(component_id: object) -> str:
     
     return property_list
 
-def has_component(entity_id: object, type_id_list: list) -> bool:
+def has_component(entity_id: object, type_id: object) -> bool:
     """
-    This function will check to see if entity has a component.
+    This function will check to see if entity has a component from a component type id
     
     :param entity_id: This is the Entity Object ID
-    :param type_id_list:This is the list of component type ids
+    :param type_id: This is component type id
     :return: true if the entity has component(s)
     """
-    component_bool = editor.EditorComponentAPIBus(bus.Broadcast, 'HasComponentOfType', entity_id, type_id_list[0])
+    component_bool = editor.EditorComponentAPIBus(bus.Broadcast, 'HasComponentOfType', entity_id, type_id)
     
     return component_bool
 
 def add_component(entity_id: object, component_name: str):
     """
-    This function will get the component property list, this is mostly used for development
+    This function will add a component.
 
     :param entity_id:  The entity ID
     :param component_name: The component name
@@ -45,10 +59,10 @@ def add_component(entity_id: object, component_name: str):
 
 def get_property(component_id: object, property_path: str) -> str:
     """
-    This function will get the component property
+    This function will get the component property value
 
     :param component_id : This is the Entity Component Object ID
-    :param property_path: This is the Component Property Path you wish to set a value.
+    :param property_path: This is the Component Property Path you wish to get a value.
     :return: value of property
     """
     # you can now get or set one of those properties by their strings, such as:
@@ -77,7 +91,7 @@ def set_property(component_id: object, property_path: str):
         new_value = new_obj.GetValue()
         float_value = new_value.GetValue()
 
-def get_name_from_id(entity_id: object) -> str:
+def get_entity_name(entity_id: object) -> str:
     """
     This function will get a name from and entity id.
 
@@ -107,7 +121,7 @@ def get_parent(child_id: object) -> tuple[object, str]:
     :return: tuple of the id and name of the parent
     """
     parent_id = editor.EditorEntityInfoRequestBus(bus.Event, 'GetParent', child_id)
-    parent_name = get_name_from_id(parent_id)
+    parent_name = get_entity_name(parent_id)
 
     return parent_id, parent_name
 
