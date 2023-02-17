@@ -75,7 +75,7 @@ def get_property(component_id: object, property_path: str) -> str:
     else:
         return None
 
-def set_property(component_id: object, property_path: str, value: Any):
+def set_property(component_id: object, property_path: str, value: any):
     """
     This function will set the component property
 
@@ -85,7 +85,7 @@ def set_property(component_id: object, property_path: str, value: Any):
     """
     # you can now get or set one of those properties by their strings, such as:
     property_set = editor.EditorComponentAPIBus(bus.Broadcast, 'SetComponentProperty', component_id, property_path, value)
-     assert property_set.IsSuccess(), f"Failure: Unable to set the property {property_path} on {component_id} to {value}".
+    assert property_set.IsSuccess(), f"Failure: Unable to set the property {property_path} on {component_id} to {value}"
 
 def get_entity_name(entity_id: object) -> str:
     """
