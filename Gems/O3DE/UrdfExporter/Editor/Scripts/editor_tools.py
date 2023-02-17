@@ -8,9 +8,9 @@ import azlmbr.asset as asset
 import azlmbr.paths as projectPath
 
 
-def print_property_list(component_id: object) -> str:
+def get_property_list(component_id: object) -> str:
     """
-    This function will get the component property list, this is mostly used for development
+    This function will get the component property list, this is used to print a list for development
 
     :param component_id: This is the Entity Component Object ID
     :returns value: value of property list for component
@@ -22,10 +22,10 @@ def print_property_list(component_id: object) -> str:
 
 def has_component(entity_id: object, type_id_list: list) -> bool:
     """
-    This function will get the component property list, this is mostly used for development
-
-    :param entity_id:       This is the Entity Object ID
-    :param type_id_list:   This is the list of component type ids
+    This function will check to see if entity has a component.
+    
+    :param entity_id: This is the Entity Object ID
+    :param type_id_list:This is the list of component type ids
     :return: true if the entity has component(s)
     """
     component_bool = editor.EditorComponentAPIBus(bus.Broadcast, 'HasComponentOfType', entity_id, type_id_list[0])
@@ -169,7 +169,7 @@ def get_transforms_from_id(entity_id: object) -> tuple[object, object, object]:
     This function will get a transforms from and entity id.
 
     :param entity_id : The entity id to get the transforms for
-    :return: Translation Vector 3 (x,y,x), Entity Rotation Vector 3 (x,y,x), Entity Uniform Scale Vector 3 (x,y,x)
+    :return: Translation Vector 3 (x,y,z), Entity Rotation Vector 3 (x,y,x), Entity Uniform Scale Vector 3 (x,y,x)
     """
     local_translation = azlmbr.components.TransformBus(azlmbr.bus.Event, 'GetLocalTranslation', entity_id)
     local_rotation = azlmbr.components.TransformBus(azlmbr.bus.Event, 'GetLocalRotation', entity_id)
@@ -177,7 +177,7 @@ def get_transforms_from_id(entity_id: object) -> tuple[object, object, object]:
 
     return local_translation, local_rotation, local_uniform_scale
 
-def get_component_type_id(entity_id: object) -> tuple[object, object]:
+def get_urdf_component_type_id(entity_id: object) -> tuple[object, object]:
     """
     This function will find a component types on a giving entity.
     Then build a list of a component type name and type id and return these two list.
