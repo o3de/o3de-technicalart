@@ -1,3 +1,10 @@
+"""
+Copyright (c) Contributors to the Open 3D Engine Project.
+For complete copyright and license terms please see the LICENSE at the root of this distribution.
+
+SPDX-License-Identifier: Apache-2.0 OR MIT
+"""
+# -------------------------------------------------------------------------
 import azlmbr
 import azlmbr.bus as bus
 import azlmbr.entity as entity
@@ -31,7 +38,7 @@ def search_tree(root: object, xml_obj: object, urdf_mesh_path: Path, robot_name:
     :param robot_name: Robot Description Name
     """
     # base_link Name_link_obj
-    name = editor_tools.get_name_from_id(root)
+    name = editor_tools.get_entity_name(root)
     
     # Check if this node name is base_link
     if name == "base_link":
@@ -48,11 +55,11 @@ def search_tree(root: object, xml_obj: object, urdf_mesh_path: Path, robot_name:
         entity_child_id = editor.EditorEntityInfoRequestBus(bus.Event, "GetChildren", child_id)
         
         # Get the name of the entity   
-        name = editor_tools.get_name_from_id(root)
+        name = editor_tools.get_entity_name(root)
         
         # Search through children of children.
         for sub_child_id in entity_child_id:
-            name = editor_tools.get_name_from_id(root)
+            name = editor_tools.get_entity_name(root)
             add_elements(sub_child_id, xml_obj, urdf_mesh_path, robot_name)
             # Search tree for subchildern
             search_tree(sub_child_id, xml_obj, urdf_mesh_path, robot_name)
@@ -75,7 +82,7 @@ def add_elements(entity_id: object, xml_obj: object, urdf_mesh_path: Path, robot
     joint_origin_rpy = 0
     
     # search through childern of root, find the entity names and ids
-    child_name = editor_tools.get_name_from_id(entity_id)
+    child_name = editor_tools.get_entity_name(entity_id)
     
     # XML- this is the XML SubElement Object
     xml_child_obj = xml_et.SubElement(xml_obj, "link", name=child_name)
@@ -112,7 +119,7 @@ def add_elements(entity_id: object, xml_obj: object, urdf_mesh_path: Path, robot
     
     # Get the lead enitity name
     if lead_entity_object_id is None:
-        lead_name = editor_tools.get_name_from_id(lead_entity_object_id)
+        lead_name = editor_tools.get_entity_name(lead_entity_object_id)
     else:
         lead_name = parent_name
     
@@ -335,7 +342,7 @@ def get_joint_details(entity_id: object, component_type_id: object, joint_type: 
         first_joint_component_id = joint_multiple_component_outcome.GetValue()[0]
         
         # Print the property list - This is for working dev of pluing to print out component get_property
-        editor_tools.print_property_list(first_joint_component_id)
+        editor_tools.get_property_list(first_joint_component_id)
         
         # origin
         local_position_value = editor_tools.get_property(first_joint_component_id, 'Standard Joint Parameters|Local Position')
@@ -375,7 +382,7 @@ def component_is_rigid_body(entity_id: object, component_type_id: object, xml_ob
         first_inertial_component_id = inertial_multiple_component_outcome.GetValue()[0]
         
         # Print the property list
-        editor_tools.print_property_list(first_inertial_component_id)
+        editor_tools.get_property_list(first_inertial_component_id)
         
         # Get the Mass property
         mass_value = editor_tools.get_property(first_inertial_component_id, 'Configuration|Mass')
@@ -438,7 +445,7 @@ def component_is_collision(entity_id: object, component_type_id: object, xml_obj
         first_collision_component_id = collision_multiple_component_outcome.GetValue()[0]
         
         # Print the property list
-        editor_tools.print_property_list(first_collision_component_id)
+        editor_tools.get_property_list(first_collision_component_id)
         
         # Get Shape Configuration|Shape LIST OF VALUE CODE: Sphere is 0, Box is 1, Capsule is 2, Cylinder is 3, PhysicAsset is None
         shape_value = editor_tools.get_property(first_collision_component_id, 'Shape Configuration|Shape')

@@ -1,4 +1,10 @@
+"""
+Copyright (c) Contributors to the Open 3D Engine Project.
+For complete copyright and license terms please see the LICENSE at the root of this distribution.
 
+SPDX-License-Identifier: Apache-2.0 OR MIT
+"""
+# -------------------------------------------------------------------------
 from pathlib import Path
 import shutil
 import xml.etree.cElementTree as xml_et
@@ -14,7 +20,7 @@ def euler_yzx_to_axis_angle(roll: float, pitch: float, yaw: float) -> list[float
     :param roll: The roll or x
     :param pitch: The pitch or z
     :param yaw: The yaw or y:
-    :return: normlized float3 axis xyz
+    :return: normalized float3 axis xyz
     """
     # Convert the Euler angles to a 3x3 rotation matrix
     yawMatrix = np.matrix([
@@ -44,7 +50,7 @@ def euler_yzx_to_axis_angle(roll: float, pitch: float, yaw: float) -> list[float
     except ZeroDivisionError:
         multi = 0.0
 
-    #multiply Value
+    # Multiply Value
     rx = multi * (R[2, 1] - R[1, 2]) * theta
     ry = multi * (R[0, 2] - R[2, 0]) * theta
     rz = multi * (R[1, 0] - R[0, 1]) * theta
@@ -86,7 +92,7 @@ def check_is_ascii(string: str) -> bool:
     :return bool:
     """
     try:
-        string.encode('ascii')
+        string.isascii()
     except UnicodeEncodeError:
         return False
     else:
