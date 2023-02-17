@@ -159,3 +159,45 @@ O3DE PhysX Shape Collider Component not yet supported.
 
 7. O3DE Materials are not yet supported.
 O3DE Materials and Textures are not yet fully supported. The Material component is added when it is on an entity, but colors and or textures are not yet added to the URDF.
+
+
+# Backlog:
+
+## euler_yzx_to_axis_angle in utilities:
+https://github.com/o3de/o3de-technicalart/pull/5#discussion_r1107913594
+Do we have any math utils exposed to do this? If we can offload this to o3de optimized C++ libraries, we should.
+
+## create_directory_folder in utilities:
+https://github.com/o3de/o3de-technicalart/pull/5#discussion_r1107919397
+You should have access to the LYTestTools in any O3DE project IIRC. If you do, I'd use the LyTestTools file_system
+
+## create_gazebo_launch_file in utilities:
+https://github.com/o3de/o3de-technicalart/pull/5#discussion_r1107933647
+Have you considered using Jinja2 for all these template files?
+The o3de install Python has Jinja2.11.3 installed in its site-packages.
+https://jinja.palletsprojects.com/en/3.1.x/
+
+## create_empty_world_file in utilities:
+https://github.com/o3de/o3de-technicalart/pull/5#discussion_r1107953028
+Since this is a file that doesn't use any updated strings, we could store a physical template file in the gem then just copy that file to the target destination.
+
+## Moving editor_entity_utils to the EditorPythonBindings 
+cgalvan mentioned this pull request Feb 16, 2023
+Proposed RFC Suggestion: Moving editor_entity_utils to the EditorPythonBindings gem o3de/sig-testing#67 
+
+## Linear Velocity to look at in export.py:
+https://github.com/o3de/o3de-technicalart/pull/5#discussion_r1107012545
+
+Linear velocity is not a row of inertia matrix.
+The inertia matrix is 9 dimensions equivalent to mass for rotation motion (huge simplification).
+In o3de only the diagonal inertia matrix is supported (AFAIK).
+Please adjust the code here.
+
+## PhysX in O3DE vs URDF
+https://github.com/o3de/o3de-technicalart/pull/5#discussion_r1107011206
+
+Note that PhysX and o3de has completely different direction of joints:
+Please refer to my comment in URDF importer on that : https://github.com/o3de/o3de-extras/blob/8069a342837b8bb696d9089b67d3dd5349fe231d/Gems/ROS2/Code/Source/RobotImporter/URDF/JointsMaker.cpp#L28
+
+## Rotation Matrix and how its constructed in o3de:
+https://github.com/o3de/o3de-technicalart/pull/5#discussion_r1107011024
