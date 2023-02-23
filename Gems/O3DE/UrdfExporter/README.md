@@ -192,6 +192,15 @@ O3DE PhysX Shape Collider Component not yet supported.
 7. O3DE Materials are not yet supported.
 O3DE Materials and Textures are not yet fully supported. The Material component is added when it is on an entity, but colors and or textures are not yet added to the URDF.
 
+8. Gazebo importing, you must have your 3D model correctly assembled with the proper physics and colliders. Currently, the sample arm can be seen when time and gravity are paused. The colliders and settings need more work to work correctly in Gaze
+![image](https://user-images.githubusercontent.com/87207603/220388049-556dc95d-0e97-4b10-9e31-05c1f7ddc694.png)
+
+9. Missing Joint Types
+![image](https://user-images.githubusercontent.com/87207603/220390455-515b2366-476d-493d-93ba-33200bab55db.png)
+
+10. Mesh Paths must be in the Assets folder of the Project.
+When building your 3D model in O3DE, make sure your meshes are located in the project assets folder and the meshes are named in lower case. If you would like to import your exported URDF with the O3DE Ros2 Gem, make sure you export your URDF in the project assets folder to import the mesh paths.
+
 
 # Backlog:
 
