@@ -1,11 +1,41 @@
 # urdf-exporter-gem
 O3DE to URDF Exporter Gem
 ![InO3DE](https://user-images.githubusercontent.com/87207603/206539263-a9d45d0c-9799-4843-b343-83ffa05cb535.png)
-# Tested on: O3DE 22.10.0 Release on Linux Ubuntu-22.04, ROS2 Humble Desktop
 
-https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debians.html
 
 # Requirements: ROS2 Humble, Linux OS
+
+    Ubuntu 20.04 or 22.04. Other Ubuntu versions and Linux distros could also work as long as they can support ROS 2.
+    O3DE development branch. The Gem does not work with a release version of O3DE yet.
+    Modern version of ROS 2. This instruction assumes that the desktop version is installed. Otherwise some packages might be missing. We support and tested with:
+        ROS 2 Galactic with Ubuntu 20.04.
+        ROS 2 Humble with Ubuntu 22.04.
+
+
+#### Additional ros packages required
+
+Once the desired version of ROS 2 is installed, you will need to install additional ROS 2 packages. 
+Before running the following commands, make sure that the ROS 2 environment is setup. Replace \<distro\> with the ROS 2 distribution name (galactic, humble, ..) below and run the following command:
+```
+source /opt/ros/<distro>/setup.bash
+```
+
+* gazebo_msgs: `sudo apt install ros-${ROS_DISTRO}-gazebo-msgs`
+* Ackermann messages: `sudo apt install ros-${ROS_DISTRO}-ackermann-msgs`
+* Control toolbox `sudo apt install ros-${ROS_DISTRO}-control-toolbox`
+* Xacro (XML Macros) `sudo apt install ros-${ROS_DISTRO}-xacro`
+ALSO:
+* joint-state-publisher: 'sudo apt install ros-${ROS_DISTRO}-joint-state-publisher'
+* joint-state-publisher-gui: 'sudo apt install ros-${ROS_DISTRO}-joint-state-publisher-gui'
+
+If a `desktop` installation of ROS 2 distro was selected, everything else should be there.
+
+Use this helpful command to install:
+
+```
+sudo apt install ros-${ROS_DISTRO}-ackermann-msgs ros-${ROS_DISTRO}-control-toolbox ros-${ROS_DISTRO}-nav-msgs ros-${ROS_DISTRO}-gazebo-msgs
+```
+
 # sudo apt install python3-colcon-common-extensions
 # ROS2 Required Packages: 
 - gazebo-ros-pkgs
@@ -13,6 +43,8 @@ https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debians.html
 - joint_state_publisher_gui
 - robot_state_publisher
 - xacro
+
+sudo apt install ros-galactic-joint-state-publisher
 
 
 # INSTRUCTIONS:
