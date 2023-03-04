@@ -5,31 +5,41 @@
 #include "Editor/Systems/GNInstance.h"
 #include "Editor/Systems/GNParamContext.h"
 #include <Editor/EBus/IpcHandlerBus.h>
-#include <AzCore/Component/TransformBus.h>
+#include <Editor/EBus/EditorGeomNodesComponentBus.h>
 #include <Editor/Rendering/GNRenderModel.h>
+#include <AzCore/Component/TickBus.h>
+#include <AzToolsFramework/Entity/EntityTypes.h>
 
 namespace GeomNodes
 {
-    class GeomNodesEditorComponent
+    class EditorGeomNodesComponent
         : public AzToolsFramework::Components::EditorComponentBase
         , private Ipc::IpcHandlerNotificationBus::Handler
-        , private AZ::TransformNotificationBus::Handler
+        , private AZ::TickBus::Handler
+        , private EditorGeomNodesComponentRequestBus::Handler
     {
     public:
-        AZ_EDITOR_COMPONENT(GeomNodesEditorComponent, "{E59507EF-9EBB-4F6C-8D89-92DCA57722E5}");
+        AZ_EDITOR_COMPONENT(EditorGeomNodesComponent, "{E59507EF-9EBB-4F6C-8D89-92DCA57722E5}", EditorComponentBase);
 
         static void Reflect(AZ::ReflectContext* context);
 
+        static void GetRequiredServices(AZ::ComponentDescriptor::DependencyArrayType& required);
+        static void GetDependentServices(AZ::ComponentDescriptor::DependencyArrayType& dependent);
         static void GetProvidedServices(AZ::ComponentDescriptor::DependencyArrayType& provided);
-
         static void GetIncompatibleServices(AZ::ComponentDescriptor::DependencyArrayType& incompatible);
 
-        GeomNodesEditorComponent();
-        virtual ~GeomNodesEditorComponent();
+        EditorGeomNodesComponent();
+        virtual ~EditorGeomNodesComponent();
 
         void Init() override;
         void Activate() override;
         void Deactivate() override;
+
+		// AZ::TickBus overrides ...
+		void OnTick(float deltaTime, AZ::ScriptTimePoint time) override;
+
+        // EditorGeomNodesComponentRequestBus overrides ...
+        GNMeshData GetMeshData(AZ::u64 entityId) override;
 
     protected:
         //got this from ScriptEditorComponent
@@ -70,24 +80,23 @@ namespace GeomNodes
 
         const char* CacheString(const char* str);
 
-        void OnTransformChanged(const AZ::Transform& local, const AZ::Transform& world) override;
-        
+        void ManageChildEntities();
+        AZStd::atomic_bool m_manageChildEntities{ false };
+
         AZStd::unordered_map<const void*, AZStd::string> m_cachedStrings;
-
         AZStd::unordered_map<const void*, ElementInfo> m_dataElements;
-
         AZStd::unordered_map<AZStd::string, AZStd::string> m_objectInfos;
 
         StringVector m_enumValues;
 
         GNParamContext m_paramContext;
+        GNModelData m_modelData;
 
         AZStd::string m_blenderFile;
         AZStd::string m_currentObject;
 
         GNInstance* m_instance = nullptr;
-
-        AZStd::unique_ptr<GNRenderModel> m_renderModel;
+        AzToolsFramework::EntityIdList m_entityIdList;
 
         bool m_initialized = false;
     };

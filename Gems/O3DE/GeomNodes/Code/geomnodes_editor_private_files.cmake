@@ -3,10 +3,14 @@ set(FILES
     Source/Editor/Commons.h
     Source/Editor/Math/MathHelper.cpp
     Source/Editor/Math/MathHelper.h
-    Source/Editor/Components/GeomNodesEditorSystemComponent.cpp
-    Source/Editor/Components/GeomNodesEditorSystemComponent.h
-    Source/Editor/Components/GeomNodesEditorComponent.cpp
-    Source/Editor/Components/GeomNodesEditorComponent.h
+    Source/Editor/Components/EditorGeomNodesSystemComponent.cpp
+    Source/Editor/Components/EditorGeomNodesSystemComponent.h
+    Source/Editor/Components/EditorGeomNodesComponent.cpp
+    Source/Editor/Components/EditorGeomNodesComponent.h
+    Source/Editor/Components/EditorGeomNodesMeshComponent.cpp
+    Source/Editor/Components/EditorGeomNodesMeshComponent.h
+    Source/Editor/EBus/EditorGeomNodesComponentBus.h
+    Source/Editor/EBus/EditorGeomNodesMeshComponentBus.h
     Source/Editor/EBus/GeomNodesBus.h
     Source/Editor/EBus/ValidatorBus.h
     Source/Editor/EBus/IpcHandlerBus.h

@@ -76,16 +76,17 @@ namespace GeomNodes
         GUI->ConsumeAttribute(attrib, attrValue, debugName);
     }
 
-    void PropertyFileSelectHandler::WriteGUIValuesIntoProperty([[maybe_unused]] size_t index, PropertyFileSelectCtrl* GUI, property_t& instance, [[maybe_unused]] AzToolsFramework::InstanceDataNode* node)
+    void PropertyFileSelectHandler::WriteGUIValuesIntoProperty([[maybe_unused]] size_t index, [[maybe_unused]] PropertyFileSelectCtrl* GUI, [[maybe_unused]] property_t& instance, [[maybe_unused]] AzToolsFramework::InstanceDataNode* node)
     {
         instance = GUI->GetValue().toUtf8().data();
     }
 
-    bool PropertyFileSelectHandler::ReadValuesIntoGUI([[maybe_unused]] size_t index, PropertyFileSelectCtrl* GUI, const property_t& instance, [[maybe_unused]] AzToolsFramework::InstanceDataNode* node)
+    bool PropertyFileSelectHandler::ReadValuesIntoGUI([[maybe_unused]] size_t index, [[maybe_unused]] PropertyFileSelectCtrl* GUI, [[maybe_unused]] const property_t& instance, [[maybe_unused]] AzToolsFramework::InstanceDataNode* node)
     {
+        QSignalBlocker blocker(GUI);
         GUI->SetNotifyTarget(node->GetParent()->GetInstance(0));
         GUI->SetValue(instance.data());
-        GUI->ForceValidate();
+        //GUI->ForceValidate(); // <= causes an undo bug crash when moving the transform.
         return true;
     }
 

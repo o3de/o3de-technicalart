@@ -45,7 +45,7 @@ namespace GeomNodes
         AZ::SerializeContext* serializeContext = azrtti_cast<AZ::SerializeContext*>(reflection);
         if (serializeContext)
         {
-            // we may have been reflected by GeomNodesEditorComponent already, so check first
+            // we may have been reflected by EditorGeomNodesComponent already, so check first
             if (serializeContext->FindClassData(AZ::Uuid("{AA9713B7-70F1-43CB-9F95-5BEC9F44F556}")) == nullptr)
             {
                 serializeContext->Class<GNParamContext>()->Version(2)->Field("Properties", &GNParamContext::m_group);

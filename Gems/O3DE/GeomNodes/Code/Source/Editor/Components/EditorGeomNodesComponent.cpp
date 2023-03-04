@@ -1,8 +1,12 @@
-#include "Editor/Components/GeomNodesEditorComponent.h"
-
+#include "Editor/Components/EditorGeomNodesComponent.h"
+#include "Editor/Components/EditorGeomNodesMeshComponent.h"
+#include <Editor/EBus/EditorGeomNodesMeshComponentBus.h>
 #include "Editor/UI/UI_common.h"
 #include "Editor/UI/Validators.h"
+
 #include <AzToolsFramework/API/ToolsApplicationAPI.h>
+#include <AzToolsFramework/API/EntityCompositionRequestBus.h>
+#include <AtomLyIntegration/CommonFeatures/Material/MaterialComponentConstants.h>
 #include <AzCore/Utils/Utils.h>
 #include <Editor/Systems/GNProperty.h>
 #include <AzCore/JSON/prettywriter.h>
@@ -15,31 +19,32 @@ namespace GeomNodes
 {
     static void* blendFunctor = reinterpret_cast<void*>(&SelectBlendFromFileDialog);
 
-    GeomNodesEditorComponent::GeomNodesEditorComponent()
+    EditorGeomNodesComponent::EditorGeomNodesComponent()
     {
     }
 
-    GeomNodesEditorComponent::~GeomNodesEditorComponent()
+    EditorGeomNodesComponent::~EditorGeomNodesComponent()
     {
     }
 
-    void GeomNodesEditorComponent::Reflect(AZ::ReflectContext* context)
+    void EditorGeomNodesComponent::Reflect(AZ::ReflectContext* context)
     {
         if (AZ::SerializeContext* serializeContext = azrtti_cast<AZ::SerializeContext*>(context))
         {
-            serializeContext->Class<GeomNodesEditorComponent, AZ::Component>()
+            serializeContext->Class<EditorGeomNodesComponent, EditorComponentBase>()
                 ->Version(1)
-                ->Field("GNParamContext", &GeomNodesEditorComponent::m_paramContext)
-                ->Field("BlenderFile", &GeomNodesEditorComponent::m_blenderFile);
+                ->Field("GNParamContext", &EditorGeomNodesComponent::m_paramContext)
+                ->Field("BlenderFile", &EditorGeomNodesComponent::m_blenderFile);
             
             GNParamContext::Reflect(context);
+            
 
             AZ::EditContext* ec = serializeContext->GetEditContext();
             if (ec)
             {
-                ec->Class<GeomNodesEditorComponent>(
-                      "Geometry Node",
-                      "The Geometry Node component allows you to load a blend file with geometry node and tweak exposed parameters. ")
+                ec->Class<EditorGeomNodesComponent>(
+                    "Geometry Node",
+                    "The Geometry Node component allows you to load a blend file with geometry node and tweak exposed parameters. ")
                     ->ClassElement(AZ::Edit::ClassElements::EditorData, "")
                     ->Attribute(AZ::Edit::Attributes::Category, "Blender")
                     ->Attribute(AZ::Edit::Attributes::AppearsInAddComponentMenu, AZ_CRC("Game", 0x232b318c))
@@ -49,14 +54,14 @@ namespace GeomNodes
                     ->Attribute(AZ::Edit::Attributes::AutoExpand, true)
                     ->DataElement(
                         Handlers::FileSelect,
-                        &GeomNodesEditorComponent::m_blenderFile,
+                        &EditorGeomNodesComponent::m_blenderFile,
                         "Blender File",
                         "Blender file with Geometry Nodes")
-                        ->Attribute(Attributes::FuncValidator, ConvertFunctorToVoid(&Validators::ValidBlenderOrEmpty))
-                        ->Attribute(Attributes::SelectFunction, blendFunctor)
-                    ->Attribute(Attributes::ValidationChange, &GeomNodesEditorComponent::OnPathChange)
-                    ->DataElement(nullptr, &GeomNodesEditorComponent::m_paramContext, "Geom Nodes Parameters", "Parameter template")
-                    ->SetDynamicEditDataProvider(&GeomNodesEditorComponent::GetParamsEditData)
+                    ->Attribute(Attributes::FuncValidator, ConvertFunctorToVoid(&Validators::ValidBlenderOrEmpty))
+                    ->Attribute(Attributes::SelectFunction, blendFunctor)
+                    ->Attribute(Attributes::ValidationChange, &EditorGeomNodesComponent::OnPathChange)
+                    ->DataElement(nullptr, &EditorGeomNodesComponent::m_paramContext, "Geom Nodes Parameters", "Parameter template")
+                    ->SetDynamicEditDataProvider(&EditorGeomNodesComponent::GetParamsEditData)
                         ->Attribute(AZ::Edit::Attributes::Visibility, AZ::Edit::PropertyVisibility::ShowChildrenOnly)
                     ;
 
@@ -82,45 +87,46 @@ namespace GeomNodes
                     ->ClassElement(AZ::Edit::ClassElements::EditorData, "GNPropertyGroup's class attributes.")
                         ->Attribute(AZ::Edit::Attributes::Visibility, AZ::Edit::PropertyVisibility::ShowChildrenOnly)
                     ->DataElement(nullptr, &GNParamBoolean::m_value, "m_value", "A boolean")
-                    ->Attribute(AZ::Edit::Attributes::ChangeNotify, &GeomNodesEditorComponent::OnParamChange)
+                    ->Attribute(AZ::Edit::Attributes::ChangeNotify, &EditorGeomNodesComponent::OnParamChange)
                     ->Attribute(AZ::Edit::Attributes::NameLabelOverride, &GNParamBoolean::m_name);
 
                 ec->Class<GNParamInt>("Geom Nodes Property (int)", "A Geom Nodes int property")
                     ->ClassElement(AZ::Edit::ClassElements::EditorData, "GNPropertyGroup's class attributes.")
                         ->Attribute(AZ::Edit::Attributes::Visibility, AZ::Edit::PropertyVisibility::ShowChildrenOnly)
                     ->DataElement(nullptr, &GNParamInt::m_value, "m_value", "An int")
-                    ->Attribute(AZ::Edit::Attributes::ChangeNotify, &GeomNodesEditorComponent::OnParamChange)
+                    ->Attribute(AZ::Edit::Attributes::ChangeNotify, &EditorGeomNodesComponent::OnParamChange)
                     ->Attribute(AZ::Edit::Attributes::NameLabelOverride, &GNParamInt::m_name);
 
                 ec->Class<GNParamValue>("Geom Nodes Property (double)", "A Geom Nodes double property")
                     ->ClassElement(AZ::Edit::ClassElements::EditorData, "GNPropertyGroup's class attributes.")
                         ->Attribute(AZ::Edit::Attributes::Visibility, AZ::Edit::PropertyVisibility::ShowChildrenOnly)
                     ->DataElement(nullptr, &GNParamValue::m_value, "m_value", "A double/value")
-                        ->Attribute(AZ::Edit::Attributes::ChangeNotify, &GeomNodesEditorComponent::OnParamChange)
+                        ->Attribute(AZ::Edit::Attributes::ChangeNotify, &EditorGeomNodesComponent::OnParamChange)
                         ->Attribute(AZ::Edit::Attributes::NameLabelOverride, &GNParamValue::m_name);
 
                 ec->Class<GNParamString>("Geom Nodes Property (string)", "A Geom Nodes string property")
                     ->ClassElement(AZ::Edit::ClassElements::EditorData, "GNPropertyGroup's class attributes.")
                         ->Attribute(AZ::Edit::Attributes::Visibility, AZ::Edit::PropertyVisibility::ShowChildrenOnly)
                     ->DataElement(nullptr, &GNParamString::m_value, "m_value", "A string")
-                        ->Attribute(AZ::Edit::Attributes::ChangeNotify, &GeomNodesEditorComponent::OnParamChange)
+                        ->Attribute(AZ::Edit::Attributes::ChangeNotify, &EditorGeomNodesComponent::OnParamChange)
                         ->Attribute(AZ::Edit::Attributes::NameLabelOverride, &GNParamString::m_name);
             }
         }
     }
 
-    void GeomNodesEditorComponent::OnPathChange(const AZStd::string& path)
+    void EditorGeomNodesComponent::OnPathChange(const AZStd::string& path)
     {
         if (!path.empty())
         {
-            bool bClearParams = (m_instance && (!m_instance->IsValid() || !m_instance->IsSamePath(path)));
+            bool bClearParams = (m_instance && !m_instance->IsSamePath(path));
             if (bClearParams)
             {
                 m_paramContext.m_group.Clear();
                 ClearDataElements();
+                m_initialized = false;
             }
 
-            if (!m_instance || bClearParams)
+            if (!m_instance || bClearParams || (m_instance && !m_instance->IsValid()))
             {
                 if (m_instance)
                     delete m_instance;
@@ -131,7 +137,6 @@ namespace GeomNodes
 
                 m_instance = new GNInstance;
                 m_instance->Init(path, scriptPath, exePath.c_str(), GetEntityId());
-                m_initialized = false;
                 if (m_instance->IsValid())
                 {
                     //AZ::EntityId entityId = AZ::EntityId(123456);
@@ -142,7 +147,7 @@ namespace GeomNodes
         }
     }
 
-    void GeomNodesEditorComponent::OnParamChange()
+    void EditorGeomNodesComponent::OnParamChange()
     {
         auto gnParam = reinterpret_cast<GNParamString*>(m_paramContext.m_group.GetProperty(Field::Objects));
         if (gnParam->m_value != m_currentObject)
@@ -180,10 +185,10 @@ namespace GeomNodes
             m_instance->SendIPCMsg(msg);
         }
 
-        AZ_Printf("GeomNodesEditorComponent", "Parameter has changed");
+        AZ_Printf("EditorGeomNodesComponent", "Parameter has changed");
     }
 
-    void GeomNodesEditorComponent::OnMessageReceived(const AZ::u8* content, const AZ::u64 length)
+    void EditorGeomNodesComponent::OnMessageReceived(const AZ::u8* content, const AZ::u64 length)
     {
         rapidjson::Document jsonDocument;
         jsonDocument.Parse((const char*)content, length);
@@ -221,7 +226,7 @@ namespace GeomNodes
             {
                 
                 AZ::u64 mapId = jsonDocument[Field::MapId].GetInt64();
-                GNModelData modelData(mapId);
+                m_modelData.ReadData(mapId);
                 auto msg = AZStd::string::format(
                     R"JSON(
                     {
@@ -234,21 +239,16 @@ namespace GeomNodes
                     mapId);
                 m_instance->SendIPCMsg(msg);
 
-                if (m_renderModel.get() == nullptr)
-                {
-                    m_renderModel = AZStd::make_unique<GNRenderModel>(GetEntityId());
-                }
-
-                m_renderModel->QueueBuildMeshes(modelData);
+                m_manageChildEntities = true; // tell OnTick that we want to manage the child entities
             }
         }
         else
         {
-            AZ_Warning("GeomNodesEditorComponent", false, "Message is not in JSON format!");
+            AZ_Warning("EditorGeomNodesComponent", false, "Message is not in JSON format!");
         }
     }
 
-    void GeomNodesEditorComponent::LoadObjects(const rapidjson::Value& objectNameArray, const rapidjson::Value& objectArray)
+    void EditorGeomNodesComponent::LoadObjects(const rapidjson::Value& objectNameArray, const rapidjson::Value& objectArray)
     {
         
         // Populate m_enumValues that will store the list of object names
@@ -261,7 +261,7 @@ namespace GeomNodes
         m_currentObject = m_enumValues[0];
     }
 
-    void GeomNodesEditorComponent::LoadObjectNames(const rapidjson::Value& objectNames)
+    void EditorGeomNodesComponent::LoadObjectNames(const rapidjson::Value& objectNames)
     {
         AZ_Assert(objectNames.IsArray(), "Passed JSON Value is not an array!");
 
@@ -275,7 +275,7 @@ namespace GeomNodes
         AZ_Assert(!m_enumValues.empty(), "No Object found! There should be at least one.");
     }
 
-    void GeomNodesEditorComponent::LoadParams(const rapidjson::Value& objectArray)
+    void EditorGeomNodesComponent::LoadParams(const rapidjson::Value& objectArray)
     {
         for (rapidjson::Value::ConstValueIterator itr = objectArray.Begin(); itr != objectArray.End(); ++itr)
         {
@@ -289,7 +289,7 @@ namespace GeomNodes
         }
     }
 
-    void GeomNodesEditorComponent::CreateDataElements(GNPropertyGroup& group)
+    void EditorGeomNodesComponent::CreateDataElements(GNPropertyGroup& group)
     {
         ClearDataElements();
 
@@ -304,7 +304,7 @@ namespace GeomNodes
             &AzToolsFramework::ToolsApplicationRequests::Bus::Events::AddDirtyEntity, GetEntityId());
     }
 
-    void GeomNodesEditorComponent::CreateObjectNames(const StringVector& enumValues, GNPropertyGroup& group)
+    void EditorGeomNodesComponent::CreateObjectNames(const StringVector& enumValues, GNPropertyGroup& group)
     {
         ElementInfo ei;
         ei.m_editData.m_name = CacheString(Field::Objects);
@@ -323,7 +323,7 @@ namespace GeomNodes
         AddDataElement(gnParam, ei);
     }
 
-    void GeomNodesEditorComponent::CreateParam(const AZStd::string& objectName, GNPropertyGroup& group)
+    void EditorGeomNodesComponent::CreateParam(const AZStd::string& objectName, GNPropertyGroup& group)
     {
         auto it = m_objectInfos.find(objectName);
         if (it != m_objectInfos.end())
@@ -344,7 +344,7 @@ namespace GeomNodes
         }
     }
 
-    bool GeomNodesEditorComponent::LoadProperties(const rapidjson::Value& paramVal, GNPropertyGroup& group)
+    bool EditorGeomNodesComponent::LoadProperties(const rapidjson::Value& paramVal, GNPropertyGroup& group)
     {
         // parse params
         for (rapidjson::Value::ConstValueIterator itr = paramVal.Begin(); itr != paramVal.End(); ++itr)
@@ -390,7 +390,7 @@ namespace GeomNodes
         return true;
     }
 
-    void GeomNodesEditorComponent::LoadAttribute(ParamType type, AZ::Edit::ElementData& ed, GNProperty* prop)
+    void EditorGeomNodesComponent::LoadAttribute(ParamType type, AZ::Edit::ElementData& ed, GNProperty* prop)
     {
         switch (type)
         {
@@ -423,30 +423,44 @@ namespace GeomNodes
         }
     }
 
-    void GeomNodesEditorComponent::GetProvidedServices(AZ::ComponentDescriptor::DependencyArrayType& provided)
+	void EditorGeomNodesComponent::GetRequiredServices([[maybe_unused]] AZ::ComponentDescriptor::DependencyArrayType& required)
+	{
+		//required.push_back(AZ_CRC("TransformService", 0x8ee22c50));
+	}
+
+	void EditorGeomNodesComponent::GetDependentServices(AZ::ComponentDescriptor::DependencyArrayType& dependent)
+	{
+		dependent.push_back(AZ_CRC("TransformService", 0x8ee22c50));
+	}
+
+    void EditorGeomNodesComponent::GetProvidedServices(AZ::ComponentDescriptor::DependencyArrayType& provided)
     {
-        provided.push_back(AZ_CRC_CE("GeomNodesEditorSerivce"));
+        provided.push_back(AZ_CRC_CE("EditorGeomNodesService"));
     }
 
-    void GeomNodesEditorComponent::GetIncompatibleServices(
+    void EditorGeomNodesComponent::GetIncompatibleServices(
         [[maybe_unused]] AZ::ComponentDescriptor::DependencyArrayType& incompatible)
     {
-        incompatible.push_back(AZ_CRC("GeomNodesEditorSerivce"));
+        incompatible.push_back(AZ_CRC("EditorGeomNodesService"));
     }
 
-    void GeomNodesEditorComponent::Init()
+    void EditorGeomNodesComponent::Init()
     {
     }
 
-    void GeomNodesEditorComponent::Activate()
+    void EditorGeomNodesComponent::Activate()
     {
-        AZ::TransformNotificationBus::Handler::BusConnect(GetEntityId());
+        AzToolsFramework::Components::EditorComponentBase::Activate();
+        EditorGeomNodesComponentRequestBus::Handler::BusConnect(GetEntityId());
+		AZ::TickBus::Handler::BusConnect();
     }
 
-    void GeomNodesEditorComponent::Deactivate()
+    void EditorGeomNodesComponent::Deactivate()
     {
         // BUG: this gets called when a component is added so deal with it properly as it destroys any current instance we have.
         Clear();
+        AZ::TickBus::Handler::BusDisconnect();
+        AzToolsFramework::Components::EditorComponentBase::Deactivate();
 
         if (m_instance)
         {
@@ -455,24 +469,36 @@ namespace GeomNodes
         }
     }
 
-    void GeomNodesEditorComponent::Clear()
+    void EditorGeomNodesComponent::OnTick(float /*deltaTime*/, AZ::ScriptTimePoint /*time*/)
+    {
+        if (m_manageChildEntities)
+        {
+            ManageChildEntities();
+            m_manageChildEntities = false;
+        }
+    }
+
+    GNMeshData EditorGeomNodesComponent::GetMeshData(AZ::u64 entityId)
+    {
+        return m_modelData.GetMeshData(entityId);
+    }
+
+    void EditorGeomNodesComponent::Clear()
     {
         m_enumValues.clear();
         ClearDataElements();
-        AZ::TransformNotificationBus::Handler::BusDisconnect();
+        EditorGeomNodesComponentRequestBus::Handler::BusDisconnect();
         Ipc::IpcHandlerNotificationBus::Handler::BusDisconnect(GetEntityId());
-        m_renderModel.reset();
-        
     }
 
-    const AZ::Edit::ElementData* GeomNodesEditorComponent::GetParamsEditData(
+    const AZ::Edit::ElementData* EditorGeomNodesComponent::GetParamsEditData(
         const void* handlerPtr, const void* elementPtr, const AZ::Uuid& elementType)
     {
-        const GeomNodesEditorComponent* owner = reinterpret_cast<const GeomNodesEditorComponent*>(handlerPtr);
+        const EditorGeomNodesComponent* owner = reinterpret_cast<const EditorGeomNodesComponent*>(handlerPtr);
         return owner->GetDataElement(elementPtr, elementType);
     }
 
-    void GeomNodesEditorComponent::AddDataElement(GNProperty* gnParam, ElementInfo& ei)
+    void EditorGeomNodesComponent::AddDataElement(GNProperty* gnParam, ElementInfo& ei)
     {
         // add the attributes to the map of default values
         ei.m_uuid = gnParam->GetDataTypeUuid();
@@ -485,7 +511,7 @@ namespace GeomNodes
         m_dataElements.insert(AZStd::make_pair(gnParam, ei));
     }
 
-    const char* GeomNodesEditorComponent::CacheString(const char* str)
+    const char* EditorGeomNodesComponent::CacheString(const char* str)
     {
         if (str == nullptr)
         {
@@ -495,7 +521,52 @@ namespace GeomNodes
         return m_cachedStrings.insert(AZStd::make_pair(str, AZStd::string(str))).first->second.c_str();
     }
 
-    void GeomNodesEditorComponent::ClearDataElements()
+    void EditorGeomNodesComponent::ManageChildEntities()
+    {
+		AzToolsFramework::EntityIdList entityIdList;
+
+		AZ::s32 entityCount = m_modelData.MeshCount() - m_entityIdList.size();
+		if (entityCount > 0)
+		{
+			for ([[maybe_unused]] AZ::s32 i = 0; i < entityCount; i++)
+			{
+				AZ::EntityId entityId;
+				EBUS_EVENT_RESULT(entityId, AzToolsFramework::EditorRequests::Bus, CreateNewEntity, GetEntityId());
+
+				entityIdList.push_back(entityId);
+			}
+
+			AzToolsFramework::EntityCompositionRequests::AddComponentsOutcome addedComponentsResult = AZ::Failure(AZStd::string("Failed to call AddComponentsToEntities on EntityCompositionRequestBus"));
+			AzToolsFramework::EntityCompositionRequestBus::BroadcastResult(addedComponentsResult, &AzToolsFramework::EntityCompositionRequests::AddComponentsToEntities, entityIdList, AZ::ComponentTypeList{ AZ::Render::EditorMaterialComponentTypeId, azrtti_typeid<EditorGeomNodesMeshComponent>() });
+
+			if (addedComponentsResult.IsSuccess())
+			{
+				AzToolsFramework::ToolsApplicationEvents::Bus::Broadcast(&AzToolsFramework::ToolsApplicationEvents::InvalidatePropertyDisplay, AzToolsFramework::Refresh_EntireTree_NewContent);
+			}
+
+			m_entityIdList.insert(m_entityIdList.begin(), entityIdList.begin(), entityIdList.end());
+		}
+		else if (entityCount < 0)
+		{
+			entityCount *= -1; // flipping the sign so we can use it
+
+			for ([[maybe_unused]] AZ::s32 i = 0; i < entityCount; i++) {
+				entityIdList.insert(entityIdList.begin(), m_entityIdList.back());
+				m_entityIdList.pop_back();
+			}
+
+			AzToolsFramework::ToolsApplicationRequestBus::Broadcast(&AzToolsFramework::ToolsApplicationRequests::DeleteEntities, entityIdList);
+		}
+
+		// assign the mesh data to the entityId
+		for (auto entityId : m_entityIdList)
+		{
+			m_modelData.AssignMeshData((AZ::u64)entityId);
+			EditorGeomNodesMeshComponentEventBus::Event(entityId, &EditorGeomNodesMeshComponentEvents::OnMeshDataAssigned, m_modelData.GetMeshData((AZ::u64)entityId));
+		}
+    }
+
+    void EditorGeomNodesComponent::ClearDataElements()
     {
         for (auto it = m_dataElements.begin(); it != m_dataElements.end(); ++it)
         {
@@ -517,7 +588,7 @@ namespace GeomNodes
         }
     }
 
-    const AZ::Edit::ElementData* GeomNodesEditorComponent::GetDataElement(
+    const AZ::Edit::ElementData* EditorGeomNodesComponent::GetDataElement(
         [[maybe_unused]] const void* element, [[maybe_unused]] const AZ::Uuid& typeUuid) const
     {
         auto it = m_dataElements.find(element);
@@ -529,10 +600,5 @@ namespace GeomNodes
             }
         }
         return nullptr;
-    }
-
-    void GeomNodesEditorComponent::OnTransformChanged([[maybe_unused]] const AZ::Transform& local, [[maybe_unused]] const AZ::Transform& world)
-    {
-       //TODO:
     }
 }

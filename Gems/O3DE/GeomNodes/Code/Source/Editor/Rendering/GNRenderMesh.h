@@ -23,14 +23,11 @@ namespace GeomNodes
     //! A concrete implementation of GNRenderMeshInterface to support Atom rendering for the GeomNodes gem.
     //! This is very similar tho how WhiteBox's AtomRenderMesh implementation. Would be nice if some classes can be extensible or reusable.
     class GNRenderMesh
-        :
-        // public GNRenderMeshInterface
-        //, private AZ::Render::MeshHandleStateRequestBus::Handler
-        //, private AZ::TickBus::Handler
-        private AZ::TickBus::Handler
+        : private AZ::Render::MeshHandleStateRequestBus::Handler
+        , private AZ::TickBus::Handler
     {
     public:
-        // AZ_RTTI(GNRenderMesh, "{4E293CD2-F9E6-417C-92B7-DDAF312F46CF}", GNRenderMeshInterface);
+        AZ_RTTI(GNRenderMesh, "{4E293CD2-F9E6-417C-92B7-DDAF312F46CF}");
 
         explicit GNRenderMesh(AZ::EntityId entityId);
         ~GNRenderMesh();
@@ -44,6 +41,8 @@ namespace GeomNodes
 
         // AZ::TickBus overrides ...
         void OnTick(float deltaTime, AZ::ScriptTimePoint time) override;
+
+        AZ::Data::Instance<AZ::RPI::Model> GetModel() const;
 
     private:
         //! Creates an attribute buffer in the slot dictated by AttributeTypeT.
@@ -64,7 +63,7 @@ namespace GeomNodes
         }
 
         // MeshHandleStateRequestBus overrides ...
-        //const AZ::Render::MeshFeatureProcessorInterface::MeshHandle* GetMeshHandle() const override;
+        const AZ::Render::MeshFeatureProcessorInterface::MeshHandle* GetMeshHandle() const override;
 
         bool CreateMeshBuffers(const GNMeshData& meshData);
         bool UpdateMeshBuffers(const GNMeshData& meshData);

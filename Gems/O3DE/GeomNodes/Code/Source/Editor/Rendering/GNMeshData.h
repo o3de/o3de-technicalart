@@ -2,11 +2,16 @@
 
 #include <Editor/Math/MathHelper.h>
 #include <AzCore/Math/Aabb.h>
+#include <AZCore/std/string/string.h>
+
 namespace GeomNodes
 {
+    using MaterialList = AZStd::vector<AZStd::string>;
+
     class GNMeshData
     {
     public:
+        GNMeshData();
         explicit GNMeshData(
             const Vert3Vector& positions
             , const Vert3Vector& normals
@@ -16,6 +21,7 @@ namespace GeomNodes
             , const Vert2Vector& uvs
             , const Vert4Vector& colors
             , const S32Vector& materialIndices
+            , const MaterialList& materials
             , AZ::u64 hash
             , bool isIndexedUVs
             , bool isIndexedColors);
@@ -24,6 +30,7 @@ namespace GeomNodes
 
         const AZ::u32 VertexCount() const;
         const U32Vector& GetIndices() const;
+        void SetIndices(const U32Vector& indices);
         const Vert3Vector& GetPositions() const;
         const Vert3Vector& GetNormals() const;
         const Vert4Vector& GetTangents() const;
@@ -31,22 +38,26 @@ namespace GeomNodes
         const Vert2Vector& GetUVs() const;
         const Vert4Vector& GetColors() const;
         const Mat4Vector& GetInstances() const;
-        const AZ::Matrix4x4 GetTransform() const;
-        const AZ::Transform GetO3DETransform() const;
-        const AZ::Vector3 GetO3DEScale() const;
-        static void GetO3DETransformAndScale(const AZ::Matrix4x4& mat4Transform, AZ::Transform& transform, AZ::Vector3& scale);
+        const MaterialList& GetMaterials() const;
+        void ClearMaterialList();
+        void SetMaterial(AZStd::string materialName);
+        AZStd::string GetMaterial();
 
-        void AddInstance(const AZ::Matrix4x4& mat4);
-        void SetTransform(const AZ::Matrix4x4& transform);
-        
+		void AddInstance(const AZ::Matrix4x4& mat4);
+		
+        U32Vector GetIndicesByMaterialIndex(int materialIndex);
+
         AZ::Aabb GetAabb() const;
         AZ::s64 GetHash() const;
+        void CalculateTangents();
+        void CalculateAABB();
+
+        GNMeshData& operator+=(const GNMeshData& rhs);
 
     private:
-        void CalculateTangents();
-
         U32Vector m_indices;
         S32Vector m_loops;
+        S32Vector m_materialIndices;
 
         Vert3Vector m_positions;
         Vert3Vector m_normals;
@@ -55,13 +66,13 @@ namespace GeomNodes
         Vert2Vector m_uvs;
         Vert4Vector m_colors;
         
+        MaterialList m_materialNames;
+
+        AZStd::string m_materialName;
+        
         AZ::Aabb m_aabb = AZ::Aabb::CreateNull();
         AZ::s64 m_hash = 0;
 
         Mat4Vector m_instances;
-        AZ::Matrix4x4 m_transform;
-        AZ::Transform m_o3deTransform = AZ::Transform::CreateIdentity();
-        AZ::Vector3 m_o3deScale = AZ::Vector3::CreateOne();
-        bool bO3DETransformCalculated = false;
     };
 }

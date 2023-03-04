@@ -21,7 +21,7 @@ namespace GeomNodes
         static constexpr char MapId[] = "MapId";
 
         static constexpr char Params[] = "Params";
-        static constexpr char Materials[] = "Materials";
+        static constexpr char Materials[] = "materials";
         static constexpr char Id[] = "Id";
         static constexpr char Name[] = "Name";
         static constexpr char Type[] = "Type";
@@ -172,7 +172,7 @@ namespace GeomNodes
 
     class GNParamContext
     {
-        friend class GeomNodesEditorComponent;
+        friend class EditorGeomNodesComponent;
 
     public:
         AZ_CLASS_ALLOCATOR(GNParamContext, AZ::SystemAllocator, 0);

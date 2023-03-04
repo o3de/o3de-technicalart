@@ -1,20 +1,27 @@
 #pragma once
 
 #include <Editor/Rendering/GNMeshData.h>
+#include <AzCore/std/containers/map.h>
 
 namespace GeomNodes
 {
     class GNModelData
     {
     public:
-        using MeshList = AZStd::vector<GNMeshData>;
+        using MeshDataList = AZStd::vector<GNMeshData>;
+        using AssignedMeshMap = AZStd::map<AZ::u64, AZ::u32>;
 
         GNModelData();
         GNModelData(AZ::u64 mapId);
         ~GNModelData() = default;
 
+        void ReadData(AZ::u64 mapId);
+
         const AZ::u32 MeshCount() const;
-        const MeshList GetMeshes() const;
+        const MeshDataList GetMeshes() const;
+
+        GNMeshData GetMeshData(AZ::u64 entityId);
+        void AssignMeshData(AZ::u64 entityId);
 
     private:
         template<typename T>
@@ -23,6 +30,7 @@ namespace GeomNodes
         template<typename T>
         T Read(AZ::u64 mapId);
 
-        MeshList m_meshes;
+        MeshDataList m_meshes;
+        AssignedMeshMap m_assignedMeshmap;
     };
 }

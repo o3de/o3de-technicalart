@@ -19,7 +19,7 @@ namespace GeomNodes
     GNRenderMesh::GNRenderMesh(AZ::EntityId entityId)
         : m_entityId(entityId)
     {
-        //AZ::Render::MeshHandleStateRequestBus::Handler::BusConnect(m_entityId);
+        AZ::Render::MeshHandleStateRequestBus::Handler::BusConnect(m_entityId);
     }
 
     GNRenderMesh::~GNRenderMesh()
@@ -27,11 +27,11 @@ namespace GeomNodes
         if (m_meshHandle.IsValid() && m_meshFeatureProcessor)
         {
             m_meshFeatureProcessor->ReleaseMesh(m_meshHandle);
-            /*AZ::Render::MeshHandleStateNotificationBus::Event(
-                m_entityId, &AZ::Render::MeshHandleStateNotificationBus::Events::OnMeshHandleSet, &m_meshHandle);*/
+            AZ::Render::MeshHandleStateNotificationBus::Event(
+                m_entityId, &AZ::Render::MeshHandleStateNotificationBus::Events::OnMeshHandleSet, &m_meshHandle);
         }
 
-        //AZ::Render::MeshHandleStateRequestBus::Handler::BusDisconnect();
+        AZ::Render::MeshHandleStateRequestBus::Handler::BusDisconnect();
         AZ::TickBus::Handler::BusDisconnect();
     }
 
@@ -191,8 +191,8 @@ namespace GeomNodes
 
         m_meshFeatureProcessor->ReleaseMesh(m_meshHandle);
         m_meshHandle = m_meshFeatureProcessor->AcquireMesh(AZ::Render::MeshHandleDescriptor{ m_modelAsset });
-        /*AZ::Render::MeshHandleStateNotificationBus::Event(
-            m_entityId, &AZ::Render::MeshHandleStateNotificationBus::Events::OnMeshHandleSet, &m_meshHandle);*/
+        AZ::Render::MeshHandleStateNotificationBus::Event(
+            m_entityId, &AZ::Render::MeshHandleStateNotificationBus::Events::OnMeshHandleSet, &m_meshHandle);
 
         return true;
     }
@@ -248,14 +248,14 @@ namespace GeomNodes
             }
         }
 
-        m_transform = meshData.GetO3DETransform();
-        m_scale = meshData.GetO3DEScale();
+        /*m_transform = meshData.GetO3DETransform();
+        m_scale = meshData.GetO3DEScale();*/
     }
 
-    void GNRenderMesh::UpdateTransform(const AZ::Transform& /*worldFromLocal*/, const AZ::Vector3& /*scale*/)
+    void GNRenderMesh::UpdateTransform(const AZ::Transform& worldFromLocal, const AZ::Vector3& /*scale*/)
     {
         // TODO: multiply this to worldFromLocal transform
-        m_meshFeatureProcessor->SetTransform(m_meshHandle, m_transform, m_scale);
+        m_meshFeatureProcessor->SetTransform(m_meshHandle, worldFromLocal);
     }
 
     //void GNRenderMesh::UpdateMaterial(const WhiteBoxMaterial& material)
@@ -292,6 +292,11 @@ namespace GeomNodes
         }
     }
 
+    AZ::Data::Instance<AZ::RPI::Model> GNRenderMesh::GetModel() const
+    {
+        return m_model;
+    }
+
     void GNRenderMesh::SetVisiblity(bool visibility)
     {
         m_visible = visibility;
@@ -303,8 +308,8 @@ namespace GeomNodes
         return m_visible;
     }
 
-    /*const AZ::Render::MeshFeatureProcessorInterface::MeshHandle* GNRenderMesh::GetMeshHandle() const
+    const AZ::Render::MeshFeatureProcessorInterface::MeshHandle* GNRenderMesh::GetMeshHandle() const
     {
         return &m_meshHandle;
-    }*/
+    }
 } // namespace WhiteBox

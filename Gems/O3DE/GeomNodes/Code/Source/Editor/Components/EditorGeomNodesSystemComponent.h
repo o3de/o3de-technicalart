@@ -9,17 +9,17 @@
 namespace GeomNodes
 {
     /// System component for GeomNodes editor
-    class GeomNodesEditorSystemComponent
+    class EditorGeomNodesSystemComponent
         : public GeomNodesSystemComponent
         , protected AzToolsFramework::EditorEvents::Bus::Handler
     {
         using BaseSystemComponent = GeomNodesSystemComponent;
     public:
-        AZ_COMPONENT(GeomNodesEditorSystemComponent, "{3B2D4C6C-C359-4890-8D78-0DDA7864131C}", BaseSystemComponent);
+        AZ_COMPONENT(EditorGeomNodesSystemComponent, "{3B2D4C6C-C359-4890-8D78-0DDA7864131C}", BaseSystemComponent);
         static void Reflect(AZ::ReflectContext* context);
 
-        GeomNodesEditorSystemComponent();
-        ~GeomNodesEditorSystemComponent();
+        EditorGeomNodesSystemComponent();
+        ~EditorGeomNodesSystemComponent();
 
     private:
         static void GetProvidedServices(AZ::ComponentDescriptor::DependencyArrayType& provided);

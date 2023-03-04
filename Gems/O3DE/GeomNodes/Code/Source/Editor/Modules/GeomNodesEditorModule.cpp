@@ -1,7 +1,8 @@
 
 #include <GeomNodesModuleInterface.h>
-#include "Editor/Components/GeomNodesEditorSystemComponent.h"
-#include "Editor/Components/GeomNodesEditorComponent.h"
+#include "Editor/Components/EditorGeomNodesSystemComponent.h"
+#include "Editor/Components/EditorGeomNodesComponent.h"
+#include "Editor/Components/EditorGeomNodesMeshComponent.h"
 
 namespace GeomNodes
 {
@@ -19,8 +20,9 @@ namespace GeomNodes
             // This will associate the AzTypeInfo information for the components with the the SerializeContext, BehaviorContext and EditContext.
             // This happens through the [MyComponent]::Reflect() function.
             m_descriptors.insert(m_descriptors.end(), {
-                    GeomNodesEditorSystemComponent::CreateDescriptor(),
-                    GeomNodesEditorComponent::CreateDescriptor(),
+                    EditorGeomNodesSystemComponent::CreateDescriptor(),
+                    EditorGeomNodesComponent::CreateDescriptor(),
+                    EditorGeomNodesMeshComponent::CreateDescriptor(),
             });
         }
 
@@ -31,8 +33,9 @@ namespace GeomNodes
         AZ::ComponentTypeList GetRequiredSystemComponents() const override
         {
             return AZ::ComponentTypeList {
-                azrtti_typeid<GeomNodesEditorSystemComponent>(),
-                azrtti_typeid<GeomNodesEditorComponent>(),
+                azrtti_typeid<EditorGeomNodesSystemComponent>(),
+                azrtti_typeid<EditorGeomNodesComponent>(),
+                azrtti_typeid<EditorGeomNodesMeshComponent>(),
             };
         }
     };

@@ -4,6 +4,10 @@
 
 namespace GeomNodes
 {
+    GNMeshData::GNMeshData()
+    {
+    }
+
     GNMeshData::GNMeshData(
         const Vert3Vector& positions,
         const Vert3Vector& normals,
@@ -12,7 +16,8 @@ namespace GeomNodes
         const S32Vector& loops,
         const Vert2Vector& uvs,
         const Vert4Vector& colors,
-        const S32Vector& /*materialIndices*/,
+        const S32Vector& materialIndices,
+        const MaterialList& materials,
         AZ::u64 hash,
         bool isIndexedUVs,
         bool isIndexedColors)
@@ -29,7 +34,9 @@ namespace GeomNodes
 		{
 			return aznumeric_cast<AZ::u32>(x);
 		});
-
+        
+        m_materialIndices = materialIndices;
+        m_materialNames = materials;
 
         // we still need to build all the vertices, uvs, normals and colors as what we have is incomplete. 
         // the initial data are shared and is done this way so the data coming from blender will be small.
@@ -121,14 +128,6 @@ namespace GeomNodes
         {
             m_colors = finalColors;
         }
-        
-        // calculate the aabb
-        for (const auto& vert : m_positions)
-        {
-            m_aabb.AddPoint(AZ::Vector3(vert[0], vert[1], vert[2]));
-        }
-
-        CalculateTangents();
     }
 
     void GNMeshData::CalculateTangents()
@@ -150,7 +149,7 @@ namespace GeomNodes
             AZ::Vector3 edge1 = V1 - V0;
             AZ::Vector3 edge2 = V2 - V0;
 
-            // Calculate delta UVs
+            // Calculate delta m_uvs
             AZ::Vector2 deltaUV1 = UV1 - UV0;
             AZ::Vector2 deltaUV2 = UV2 - UV0;
 
@@ -178,6 +177,15 @@ namespace GeomNodes
         }
     }
 
+    void GNMeshData::CalculateAABB()
+    {
+		// calculate the aabb
+		for (const auto& vert : m_positions)
+		{
+			m_aabb.AddPoint(AZ::Vector3(vert[0], vert[1], vert[2]));
+		}
+    }
+
     const AZ::u32 GNMeshData::VertexCount() const
     {
         return aznumeric_cast<AZ::u32>(m_indices.size());
@@ -186,6 +194,11 @@ namespace GeomNodes
     const U32Vector& GNMeshData::GetIndices() const
     {
         return m_indices;
+    }
+
+    void GNMeshData::SetIndices(const U32Vector& indices)
+    {
+        m_indices = indices;
     }
 
     const Vert3Vector& GNMeshData::GetPositions() const
@@ -223,27 +236,24 @@ namespace GeomNodes
         return m_instances;
     }
 
-    const AZ::Matrix4x4 GNMeshData::GetTransform() const
+    const MaterialList& GNMeshData::GetMaterials() const
     {
-        return m_transform;
+        return m_materialNames;
     }
 
-    const AZ::Transform GNMeshData::GetO3DETransform() const
+    void GNMeshData::ClearMaterialList()
     {
-        return m_o3deTransform;
+        m_materialNames.clear();
     }
 
-    const AZ::Vector3 GNMeshData::GetO3DEScale() const
+    void GNMeshData::SetMaterial(AZStd::string materialName)
     {
-        return m_o3deScale;
+        m_materialName = materialName;
     }
 
-    void GNMeshData::GetO3DETransformAndScale(const AZ::Matrix4x4& mat4Transform, AZ::Transform& transform, AZ::Vector3& scale)
+    AZStd::string GNMeshData::GetMaterial()
     {
-        AZ::Quaternion o3deQuarternion = AZ::Quaternion::CreateFromMatrix4x4(mat4Transform);
-        AZ::Vector3 o3deTranslation = mat4Transform.GetTranslation();
-        scale = mat4Transform.RetrieveScale();
-        transform = AZ::Transform::CreateFromQuaternionAndTranslation(o3deQuarternion, o3deTranslation);
+        return m_materialName;
     }
 
     void GNMeshData::AddInstance(const AZ::Matrix4x4& mat4)
@@ -251,20 +261,23 @@ namespace GeomNodes
         m_instances.emplace_back(mat4);
     }
 
-    void GNMeshData::SetTransform(const AZ::Matrix4x4& transform)
+    U32Vector GNMeshData::GetIndicesByMaterialIndex(int materialIndex)
     {
-        m_transform = transform;
+        U32Vector indices;
+        indices.reserve(m_indices.size());
 
-        auto transposedMatrix = m_transform.GetTranspose();
+		for (AZ::s32 i = 0; i < m_indices.size(); i += 3)
+		{
+			const AZ::s32 faceIndex = i / 3;
+			if (m_materialIndices[faceIndex] == materialIndex)
+			{
+				indices.push_back(m_indices[i]);
+                indices.push_back(m_indices[i + 1]);
+                indices.push_back(m_indices[i + 2]);
+			}
+		}
 
-        // removed the scale from the 4x4 matrix first before creating the rotation. Note: Matrix4x4 has an ExtractScale method but it doesn't seem to worn well with non-uniform scale.
-        m_o3deScale = MathHelper::ExtractScalingFromMatrix44(transposedMatrix);
-        auto rotation = AZ::Quaternion::CreateFromMatrix4x4(transposedMatrix);
-        rotation = AZ::Quaternion(rotation.GetX(), rotation.GetY(), -rotation.GetZ(), rotation.GetW()); // Flip the Z rotation.
-        rotation.Normalize();
-
-        auto translation = m_transform.GetTranslation();
-        m_o3deTransform = AZ::Transform::CreateFromQuaternionAndTranslation(rotation, translation);
+		return indices;
     }
 
     AZ::Aabb GNMeshData::GetAabb() const
@@ -275,5 +288,58 @@ namespace GeomNodes
     AZ::s64 GNMeshData::GetHash() const
     {
         return m_hash;
+    }
+
+    GNMeshData& GNMeshData::operator+=(const GNMeshData& rhs)
+    {
+		m_materialName = rhs.m_materialName;
+
+		AZ::u32 count = m_positions.max_size() + rhs.m_positions.size() * rhs.m_instances.size();
+		m_indices.reserve(count * 3);
+		m_positions.reserve(count);
+		m_normals.reserve(count);
+		m_tangents.reserve(count);
+		m_bitangents.reserve(count);
+		m_uvs.reserve(count);
+		m_colors.reserve(count);
+
+		for (const auto& instance : rhs.m_instances)
+		{
+			AZ::s32 indexOffsset = m_positions.size();
+			U32Vector rhsIndices = rhs.m_indices;
+
+			for (AZ::u32& index : rhsIndices)
+			{
+				index += indexOffsset;
+			}
+
+			m_indices.insert(m_indices.end(), rhsIndices.begin(), rhsIndices.end());
+
+			Vert3Vector rhsPositions = rhs.m_positions;
+            for (auto& position : rhsPositions)
+			{
+				auto vec3 = instance * MathHelper::Vec3fToVec3(position);
+                position = MathHelper::Vec3ToVec3f(vec3);
+			}
+
+			m_positions.insert(m_positions.end(), rhsPositions.begin(), rhsPositions.end());
+
+			Vert3Vector rhsNormals = rhs.m_normals;
+            for (auto& normal : rhsNormals)
+			{
+				auto vec3 = instance * MathHelper::Vec3fToVec3(normal);
+                vec3.Normalize();
+                normal = MathHelper::Vec3ToVec3f(vec3);
+			}
+
+			m_normals.insert(m_normals.end(), rhsNormals.begin(), rhsNormals.end());
+
+            m_colors.insert(m_colors.end(), rhs.m_colors.begin(), rhs.m_colors.end());
+            m_uvs.insert(m_uvs.end(), rhs.m_uvs.begin(), rhs.m_uvs.end());
+            m_tangents.insert(m_tangents.end(), rhs.m_tangents.begin(), rhs.m_tangents.end());
+            m_bitangents.insert(m_bitangents.end(), rhs.m_bitangents.begin(), rhs.m_bitangents.end());
+		}
+
+        return *this;
     }
 } // namespace GeomNodes
