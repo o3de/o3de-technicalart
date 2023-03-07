@@ -38,8 +38,6 @@ set(FILES
     Source/Editor/Rendering/GNRenderMesh.cpp
     Source/Editor/Rendering/GNRenderMesh.h
     Source/Editor/Rendering/GNRenderMeshInterface.h
-    Source/Editor/Rendering/GNRenderModel.cpp
-    Source/Editor/Rendering/GNRenderModel.h
     Source/Editor/Systems/GeomNodesSystem.cpp
     Source/Editor/Systems/GeomNodesSystem.h
     Source/Editor/Systems/GNInstance.cpp

@@ -564,6 +564,10 @@ namespace GeomNodes
 			m_modelData.AssignMeshData((AZ::u64)entityId);
 			EditorGeomNodesMeshComponentEventBus::Event(entityId, &EditorGeomNodesMeshComponentEvents::OnMeshDataAssigned, m_modelData.GetMeshData((AZ::u64)entityId));
 		}
+
+        
+        AzToolsFramework::ToolsApplicationRequestBus::Broadcast(&AzToolsFramework::ToolsApplicationRequests::MarkEntitiesDeselected, m_entityIdList);
+        AzToolsFramework::ToolsApplicationRequestBus::Broadcast(&AzToolsFramework::ToolsApplicationRequests::MarkEntitySelected, GetEntityId());
     }
 
     void EditorGeomNodesComponent::ClearDataElements()

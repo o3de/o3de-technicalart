@@ -6,7 +6,6 @@
 #include "Editor/Systems/GNParamContext.h"
 #include <Editor/EBus/IpcHandlerBus.h>
 #include <Editor/EBus/EditorGeomNodesComponentBus.h>
-#include <Editor/Rendering/GNRenderModel.h>
 #include <AzCore/Component/TickBus.h>
 #include <AzToolsFramework/Entity/EntityTypes.h>
 

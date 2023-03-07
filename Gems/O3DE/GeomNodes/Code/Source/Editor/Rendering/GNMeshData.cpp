@@ -179,11 +179,11 @@ namespace GeomNodes
 
     void GNMeshData::CalculateAABB()
     {
-		// calculate the aabb
-		for (const auto& vert : m_positions)
-		{
-			m_aabb.AddPoint(AZ::Vector3(vert[0], vert[1], vert[2]));
-		}
+        // calculate the aabb
+        for (const auto& vert : m_positions)
+        {
+            m_aabb.AddPoint(AZ::Vector3(vert[0], vert[1], vert[2]));
+        }
     }
 
     const AZ::u32 GNMeshData::VertexCount() const
@@ -266,18 +266,18 @@ namespace GeomNodes
         U32Vector indices;
         indices.reserve(m_indices.size());
 
-		for (AZ::s32 i = 0; i < m_indices.size(); i += 3)
-		{
-			const AZ::s32 faceIndex = i / 3;
-			if (m_materialIndices[faceIndex] == materialIndex)
-			{
-				indices.push_back(m_indices[i]);
+        for (AZ::s32 i = 0; i < m_indices.size(); i += 3)
+        {
+            const AZ::s32 faceIndex = i / 3;
+            if (m_materialIndices[faceIndex] == materialIndex)
+            {
+                indices.push_back(m_indices[i]);
                 indices.push_back(m_indices[i + 1]);
                 indices.push_back(m_indices[i + 2]);
-			}
-		}
+            }
+        }
 
-		return indices;
+        return indices;
     }
 
     AZ::Aabb GNMeshData::GetAabb() const
@@ -292,53 +292,53 @@ namespace GeomNodes
 
     GNMeshData& GNMeshData::operator+=(const GNMeshData& rhs)
     {
-		m_materialName = rhs.m_materialName;
+        m_materialName = rhs.m_materialName;
 
-		AZ::u32 count = m_positions.max_size() + rhs.m_positions.size() * rhs.m_instances.size();
-		m_indices.reserve(count * 3);
-		m_positions.reserve(count);
-		m_normals.reserve(count);
-		m_tangents.reserve(count);
-		m_bitangents.reserve(count);
-		m_uvs.reserve(count);
-		m_colors.reserve(count);
+        AZ::u32 count = m_positions.max_size() + rhs.m_positions.size() * rhs.m_instances.size();
+        m_indices.reserve(count * 3);
+        m_positions.reserve(count);
+        m_normals.reserve(count);
+        m_tangents.reserve(count);
+        m_bitangents.reserve(count);
+        m_uvs.reserve(count);
+        m_colors.reserve(count);
 
-		for (const auto& instance : rhs.m_instances)
-		{
-			AZ::s32 indexOffsset = m_positions.size();
-			U32Vector rhsIndices = rhs.m_indices;
+        for (const auto& instance : rhs.m_instances)
+        {
+            AZ::s32 indexOffsset = m_positions.size();
+            U32Vector rhsIndices = rhs.m_indices;
 
-			for (AZ::u32& index : rhsIndices)
-			{
-				index += indexOffsset;
-			}
+            for (AZ::u32& index : rhsIndices)
+            {
+                index += indexOffsset;
+            }
 
-			m_indices.insert(m_indices.end(), rhsIndices.begin(), rhsIndices.end());
+            m_indices.insert(m_indices.end(), rhsIndices.begin(), rhsIndices.end());
 
-			Vert3Vector rhsPositions = rhs.m_positions;
+            Vert3Vector rhsPositions = rhs.m_positions;
             for (auto& position : rhsPositions)
-			{
-				auto vec3 = instance * MathHelper::Vec3fToVec3(position);
+            {
+                auto vec3 = instance * MathHelper::Vec3fToVec3(position);
                 position = MathHelper::Vec3ToVec3f(vec3);
-			}
+            }
 
-			m_positions.insert(m_positions.end(), rhsPositions.begin(), rhsPositions.end());
+            m_positions.insert(m_positions.end(), rhsPositions.begin(), rhsPositions.end());
 
-			Vert3Vector rhsNormals = rhs.m_normals;
+            Vert3Vector rhsNormals = rhs.m_normals;
             for (auto& normal : rhsNormals)
-			{
-				auto vec3 = instance * MathHelper::Vec3fToVec3(normal);
+            {
+                auto vec3 = instance * MathHelper::Vec3fToVec3(normal);
                 vec3.Normalize();
                 normal = MathHelper::Vec3ToVec3f(vec3);
-			}
+            }
 
-			m_normals.insert(m_normals.end(), rhsNormals.begin(), rhsNormals.end());
+            m_normals.insert(m_normals.end(), rhsNormals.begin(), rhsNormals.end());
 
             m_colors.insert(m_colors.end(), rhs.m_colors.begin(), rhs.m_colors.end());
             m_uvs.insert(m_uvs.end(), rhs.m_uvs.begin(), rhs.m_uvs.end());
             m_tangents.insert(m_tangents.end(), rhs.m_tangents.begin(), rhs.m_tangents.end());
             m_bitangents.insert(m_bitangents.end(), rhs.m_bitangents.begin(), rhs.m_bitangents.end());
-		}
+        }
 
         return *this;
     }

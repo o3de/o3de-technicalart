@@ -42,8 +42,7 @@ namespace GeomNodes
         void ClearMaterialList();
         void SetMaterial(AZStd::string materialName);
         AZStd::string GetMaterial();
-
-		void AddInstance(const AZ::Matrix4x4& mat4);
+        void AddInstance(const AZ::Matrix4x4& mat4);
 		
         U32Vector GetIndicesByMaterialIndex(int materialIndex);
 
