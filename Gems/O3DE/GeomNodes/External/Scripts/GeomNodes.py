@@ -5,6 +5,7 @@ import time
 import datetime
 import json
 from messages import poll_for_messages
+from materials.blender_materials import print_materials_in_scene, get_o3de_materials
 
 dir = os.path.dirname(bpy.data.filepath)
 if not dir in sys.path:
@@ -12,15 +13,6 @@ if not dir in sys.path:
 
 
 from lib_loader import init_lib, MessageReader, MessageWriter
-
-# def callback(id, content, length):
-#     print('callback')
-#     #print("id: %d, content: %s, length: %d)" % (id, content, length))
-#     # buffer = bytes(json.dumps({'message' : 'from callback'}), "UTF-8")
-#     # array = np.frombuffer(buffer, np.byte)
-#     # from lib_loader import GNLibs
-#     # GNLibs.SendMsg(array.ctypes.data_as(c.POINTER(c.c_ubyte)), array.nbytes, 0)
-#     return 0
 
 def init(exePath, id):
     init_lib(exePath, id)
@@ -36,8 +28,10 @@ def run():
     # send message to the gem that script is initialized
     MessageWriter().from_buffer(bytes(json.dumps({'Initialized' : True}), "UTF-8"))
     
-    #print(json.dumps(get_geometry_nodes_objs(), indent=4))
-
+    # TEST
+    #print(json.dumps(get_o3de_materials(), indent=4))
+    #print_materials_in_scene()
+    
     while idle_time < 60:
         from lib_loader import GNLibs
         idle_time = idle_time + update_rate

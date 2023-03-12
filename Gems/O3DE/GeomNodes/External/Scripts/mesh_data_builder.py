@@ -8,6 +8,8 @@ import json
 import datetime
 from utils import get_geomnodes_obj
 from lib_loader import MapWriterSize, MapWriter
+import logging as _logging
+_LOGGER = _logging.getLogger('GeomNodes.External.Scripts.mesh_data_builder')
 
 ################ MESH DATA BUILDER ############################
 def get_mesh_colors_data(mesh):
@@ -57,7 +59,7 @@ def get_mesh_uv_data(mesh):
 
     return uvs, vertex_indexed_uvs
 
-def get_materials(mesh):
+def get_mesh_materials(mesh):
     names = []
     for material in mesh.materials[:]:
         if material is not None:
@@ -68,7 +70,7 @@ def get_materials(mesh):
 
 def get_materials_data(mesh):
     material_indices = get_prop_collection(mesh.loop_triangles, 'material_index', 1, np.int32)
-    material_names = np.frombuffer(bytes(json.dumps({'materials' : get_materials(mesh)}), "UTF-8"), np.byte)
+    material_names = np.frombuffer(bytes(json.dumps({'Materials' : get_mesh_materials(mesh)}), "UTF-8"), np.byte)
 
     return material_indices, material_names
 
@@ -105,7 +107,7 @@ def build_mesh_data(obj_name):
     if geomnodes_obj.hide_get():
         geomnodes_obj.hide_set(False, view_layer=bpy.context.view_layer)
 
-    print('Started building Mesh Data')
+    #_LOGGER.debug('Started building Mesh Data')
     start = datetime.datetime.now()
     depsgraph = bpy.context.evaluated_depsgraph_get()        
     eval_geomnodes_data = geomnodes_obj.evaluated_get(depsgraph).data
@@ -157,7 +159,7 @@ def build_mesh_data(obj_name):
 
     from lib_loader import GNLibs
     map_id = GNLibs.RequestSHM(total_bytes)
-    print('map_id = ' + str(map_id) + ' total_bytes = ' + str(total_bytes), flush=True)
+    #_LOGGER.debug('map_id = ' + str(map_id) + ' total_bytes = ' + str(total_bytes))
     MapWriter(map_id, np.int32).from_value(len(mesh_arr))
     MapWriter(map_id, np.int32).from_value(len(instance_arr))
     
@@ -172,6 +174,6 @@ def build_mesh_data(obj_name):
             MapWriter(map_id).from_array(array)
 
     end = datetime.datetime.now()
-    print('Built Mesh Data and sent in ' + str((end-start).seconds + (end-start).microseconds/1000000) + 's', flush=True)
+    #_LOGGER.debug('Built Mesh Data and sent in ' + str((end-start).seconds + (end-start).microseconds/1000000) + 's')
     return map_id
 ###############################################################

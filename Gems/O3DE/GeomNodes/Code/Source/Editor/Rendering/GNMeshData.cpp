@@ -246,14 +246,20 @@ namespace GeomNodes
         m_materialNames.clear();
     }
 
-    void GNMeshData::SetMaterial(AZStd::string materialName)
+    void GNMeshData::SetMaterial(const AZStd::string& materialName, const AZStd::string& materialPath)
     {
         m_materialName = materialName;
+        m_materialPath = materialPath;
     }
 
-    AZStd::string GNMeshData::GetMaterial()
+    AZStd::string GNMeshData::GetMaterial() const
     {
         return m_materialName;
+    }
+
+    AZStd::string GNMeshData::GetMaterialPath() const
+    {
+        return m_materialPath;
     }
 
     void GNMeshData::AddInstance(const AZ::Matrix4x4& mat4)
@@ -293,6 +299,7 @@ namespace GeomNodes
     GNMeshData& GNMeshData::operator+=(const GNMeshData& rhs)
     {
         m_materialName = rhs.m_materialName;
+        m_materialPath = rhs.m_materialPath;
 
         AZ::u32 count = m_positions.max_size() + rhs.m_positions.size() * rhs.m_instances.size();
         m_indices.reserve(count * 3);

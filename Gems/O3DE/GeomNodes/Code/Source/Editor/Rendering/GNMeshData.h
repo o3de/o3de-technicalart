@@ -40,8 +40,9 @@ namespace GeomNodes
         const Mat4Vector& GetInstances() const;
         const MaterialList& GetMaterials() const;
         void ClearMaterialList();
-        void SetMaterial(AZStd::string materialName);
-        AZStd::string GetMaterial();
+        void SetMaterial(const AZStd::string& materialName, const AZStd::string& materialPath);
+        AZStd::string GetMaterial() const;
+        AZStd::string GetMaterialPath() const;
         void AddInstance(const AZ::Matrix4x4& mat4);
 		
         U32Vector GetIndicesByMaterialIndex(int materialIndex);
@@ -68,6 +69,7 @@ namespace GeomNodes
         MaterialList m_materialNames;
 
         AZStd::string m_materialName;
+        AZStd::string m_materialPath;
         
         AZ::Aabb m_aabb = AZ::Aabb::CreateNull();
         AZ::s64 m_hash = 0;

@@ -21,7 +21,7 @@ namespace GeomNodes
         static constexpr char MapId[] = "MapId";
 
         static constexpr char Params[] = "Params";
-        static constexpr char Materials[] = "materials";
+        static constexpr char Materials[] = "Materials";
         static constexpr char Id[] = "Id";
         static constexpr char Name[] = "Name";
         static constexpr char Type[] = "Type";

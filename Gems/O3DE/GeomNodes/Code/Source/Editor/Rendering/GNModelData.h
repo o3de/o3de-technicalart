@@ -23,6 +23,7 @@ namespace GeomNodes
         GNMeshData GetMeshData(AZ::u64 entityId);
         void AssignMeshData(AZ::u64 entityId);
 
+        void SetMaterialPathFormat(const AZStd::string& materialPathFormat);
     private:
         template<typename T>
         AZStd::vector<T> ReadArray(AZ::u64 mapId);
@@ -32,5 +33,7 @@ namespace GeomNodes
 
         MeshDataList m_meshes;
         AssignedMeshMap m_assignedMeshmap;
+
+        AZStd::string m_materialPathFormat;
     };
 }

@@ -7,9 +7,11 @@ from lib_loader import MessageReader, MessageWriter
 from params import get_geometry_nodes_objs
 from mesh_data_builder import build_mesh_data
 from utils import get_geomnodes_obj
+import logging as _logging
+_LOGGER = _logging.getLogger('GeomNodes.External.Scripts.messages')
 
 def import_texture(Id, x, y):
-    print(str(x) + ' ' + str(y), flush=True)
+    #_LOGGER.debug(str(x) + ' ' + str(y))
     image = bpy.data.images.new(Id + "_Image", width=x, height=y)
     return image
 
@@ -50,13 +52,13 @@ def update_gn_in_blender(msg_dict):
     if geometry_nodes_obj == None:
         geometry_nodes_obj = get_geomnodes_obj()
 
-    print('Updating Geometry Node')
+    #_LOGGER.debug('Updating Geometry Node')
     
     start = datetime.datetime.now()
     update_geometry_node_params(geometry_nodes_obj, msg_dict)
     end = datetime.datetime.now()
     
-    print('Updated in ' + str((end-start).seconds + (end-start).microseconds/1000000) + 's')
+    #_LOGGER.debug('Updated in ' + str((end-start).seconds + (end-start).microseconds/1000000) + 's')
 
     return object_name
 
@@ -68,11 +70,11 @@ def poll_for_messages():
     msg_str = MessageReader().as_string()
     if len(msg_str) > 0:
         try:
-            print(msg_str)
+            #_LOGGER.debug(msg_str)
             msg_dict = json.loads(msg_str)
         except json.decoder.JSONDecodeError:
             if msg_str != "":
-                print('couldnt parse json: ' + msg_str)
+                _LOGGER.debug('couldnt parse json: ' + msg_str)
         else:
             if msg_dict is not None:
                 if 'FetchObjectParams' in msg_dict:

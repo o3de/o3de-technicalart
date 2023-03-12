@@ -1,18 +1,31 @@
 import sys
 import os
 import bpy
-import json
+import logging as _logging
 
-sys.stdout = open("f:/output.txt", "w")
+FRMT_LOG_LONG = "[%(name)s][%(levelname)s] >> %(message)s (%(asctime)s; %(filename)s:%(lineno)d)"
+
+_PACKAGENAME = __name__
+if _PACKAGENAME == '__main__':
+    _PACKAGENAME = 'GeomNodes.External.Scripts'
+
+# set up module logging
+for handler in _logging.root.handlers[:]:
+    _logging.root.removeHandler(handler)
+_LOGGER = _logging.getLogger(_PACKAGENAME)
+#_logging.basicConfig(format=FRMT_LOG_LONG, level=_logging.DEBUG)
+_logging.basicConfig(level=_logging.DEBUG)
+_LOGGER.debug('Initializing: {0}.'.format({_PACKAGENAME}))
+#sys.stdout = open("f:/output.txt", "w")
 
 dir = os.path.dirname(__file__)
 if not dir in sys.path:
     sys.path.append(dir)
 
 params = sys.argv[sys.argv.index("--") + 1:]
-print('exe path: ' + params[0])
-print('uuid: ' + params[1])
-print('pid: ' + str(os.getpid()))
+_LOGGER.debug('exe path: ' + params[0])
+_LOGGER.debug('uuid: ' + params[1])
+_LOGGER.debug('pid: ' + str(os.getpid()))
 
 if __name__ == "__main__":
     from GeomNodes import init, run
@@ -26,5 +39,7 @@ if __name__ == "__main__":
         run()
 
 # Close the file
-sys.stdout.close()
-sys.stdout = sys.__stdout__
+#sys.stdout.close()
+#sys.stdout = sys.__stdout__
+
+del _LOGGER

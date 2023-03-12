@@ -1,6 +1,7 @@
 import ctypes
-import os
 import numpy as np
+import logging as _logging
+_LOGGER = _logging.getLogger('GeomNodes.External.Scripts.lib_loader')
 
 GNLibs = None
 
@@ -8,9 +9,8 @@ callback_type = ctypes.CFUNCTYPE(ctypes.c_long, ctypes.c_ulonglong, ctypes.POINT
 
 def init_lib(exePath, id):
     lib_path = exePath + '\\Bridge.dll'
-    print('lib path: ' + lib_path)
-    print(type(int(id)))
-
+    _LOGGER.info('lib path: ' + lib_path)
+    
     global GNLibs
     
     GNLibs = ctypes.cdll.LoadLibrary(lib_path)

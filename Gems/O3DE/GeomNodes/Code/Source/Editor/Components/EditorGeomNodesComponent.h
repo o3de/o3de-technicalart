@@ -4,6 +4,7 @@
 #include <AzCore/Serialization/EditContext.h>
 #include "Editor/Systems/GNInstance.h"
 #include "Editor/Systems/GNParamContext.h"
+#include "Editor/Rendering/GNModelData.h"
 #include <Editor/EBus/IpcHandlerBus.h>
 #include <Editor/EBus/EditorGeomNodesComponentBus.h>
 #include <AzCore/Component/TickBus.h>
@@ -51,6 +52,11 @@ namespace GeomNodes
             float m_sortOrder;                  // Sort order of the property as defined by using the "order" attribute, by default the order is FLT_MAX
                                                 // which means alphabetical sort will be used
         };
+        
+		//! constants
+		static constexpr AZStd::string_view MaterialFilePathFormat = "assets/geomNodes/%s/materials/";
+		static constexpr AZStd::string_view MaterialExtension = ".material";
+		static constexpr AZStd::string_view AzMaterialExtension = ".azmaterial";
 
         typedef AZStd::vector<AZStd::string> StringVector;
         
@@ -67,6 +73,7 @@ namespace GeomNodes
         void CreateParam(const AZStd::string& objectName, GNPropertyGroup& group);
         bool LoadProperties(const rapidjson::Value& paramVal, GNPropertyGroup& group);
         void LoadAttribute(ParamType type, AZ::Edit::ElementData& ed, GNProperty* prop);
+        void LoadMaterials(const rapidjson::Value& materialArray);
 
         void ClearDataElements();
 
@@ -93,6 +100,7 @@ namespace GeomNodes
 
         AZStd::string m_blenderFile;
         AZStd::string m_currentObject;
+        AZStd::string m_currentBlenderFileName;
 
         GNInstance* m_instance = nullptr;
         AzToolsFramework::EntityIdList m_entityIdList;

@@ -3,6 +3,7 @@
 #include <Editor/EBus/EditorGeomNodesMeshComponentBus.h>
 #include "Editor/UI/UI_common.h"
 #include "Editor/UI/Validators.h"
+#include "Editor/UI/Utils.h"
 
 #include <AzToolsFramework/API/ToolsApplicationAPI.h>
 #include <AzToolsFramework/API/EntityCompositionRequestBus.h>
@@ -143,6 +144,8 @@ namespace GeomNodes
                     auto entityId = GetEntityId();
                     Ipc::IpcHandlerNotificationBus::Handler::BusConnect(entityId);
                 }
+
+                AzFramework::StringFunc::Path::GetFileName(path.c_str(), m_currentBlenderFileName);
             }
         }
     }
@@ -213,7 +216,7 @@ namespace GeomNodes
                 }
                 m_instance->SendIPCMsg(msg);
             }
-            else if (jsonDocument.HasMember(Field::ObjectNames) && jsonDocument.HasMember(Field::Objects))
+            else if (jsonDocument.HasMember(Field::ObjectNames) && jsonDocument.HasMember(Field::Objects) && jsonDocument.HasMember(Field::Materials))
             {
                 LoadObjects(jsonDocument[Field::ObjectNames], jsonDocument[Field::Objects]);
                 CreateDataElements(m_paramContext.m_group);
@@ -221,6 +224,9 @@ namespace GeomNodes
                 // Send message for fetching the 3D data
                 // Will just call OnParamChange since it's basically the same request
                 OnParamChange();
+
+                // Handle the materials as well
+                LoadMaterials(jsonDocument[Field::Materials]);
             }
             else if (jsonDocument.HasMember(Field::SHMOpen) && jsonDocument.HasMember(Field::MapId))
             {
@@ -423,6 +429,28 @@ namespace GeomNodes
         }
     }
 
+    void EditorGeomNodesComponent::LoadMaterials(const rapidjson::Value& materialArray)
+    {
+        m_modelData.SetMaterialPathFormat(""); // reset the material path format
+        // iterate through the material arrays and write them into files.
+		for (rapidjson::Value::ConstValueIterator  itr = materialArray.Begin(); itr != materialArray.End(); ++itr)
+		{
+            const auto matItr = itr->MemberBegin();
+            AZStd::string materialName = matItr->name.GetString();
+            AZStd::string materialContent = matItr->value.GetString();
+			
+            AZStd::string fullFilePath = GetProjectRoot() + "/";
+            AZStd::string materialFilePath = AZStd::string::format(MaterialFilePathFormat.data(), m_currentBlenderFileName.c_str());
+            
+            fullFilePath += materialFilePath + materialName + MaterialExtension.data();
+
+            AZ::Utils::WriteFile(materialContent, fullFilePath.c_str());
+
+            // re-use materialFilePath and just append the azmaterial extension
+            m_modelData.SetMaterialPathFormat(materialFilePath + "%s" + AzMaterialExtension.data());
+		}
+    }
+
 	void EditorGeomNodesComponent::GetRequiredServices([[maybe_unused]] AZ::ComponentDescriptor::DependencyArrayType& required)
 	{
 		//required.push_back(AZ_CRC("TransformService", 0x8ee22c50));
@@ -537,7 +565,7 @@ namespace GeomNodes
 			}
 
 			AzToolsFramework::EntityCompositionRequests::AddComponentsOutcome addedComponentsResult = AZ::Failure(AZStd::string("Failed to call AddComponentsToEntities on EntityCompositionRequestBus"));
-			AzToolsFramework::EntityCompositionRequestBus::BroadcastResult(addedComponentsResult, &AzToolsFramework::EntityCompositionRequests::AddComponentsToEntities, entityIdList, AZ::ComponentTypeList{ AZ::Render::EditorMaterialComponentTypeId, azrtti_typeid<EditorGeomNodesMeshComponent>() });
+			AzToolsFramework::EntityCompositionRequestBus::BroadcastResult(addedComponentsResult, &AzToolsFramework::EntityCompositionRequests::AddComponentsToEntities, entityIdList, AZ::ComponentTypeList{ /*AZ::Render::EditorMaterialComponentTypeId, */azrtti_typeid<EditorGeomNodesMeshComponent>() });
 
 			if (addedComponentsResult.IsSuccess())
 			{

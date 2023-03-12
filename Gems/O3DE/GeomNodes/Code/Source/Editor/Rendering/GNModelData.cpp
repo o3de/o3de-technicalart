@@ -20,6 +20,8 @@ namespace GeomNodes
 		m_meshes.clear();
 		m_assignedMeshmap.clear();
 
+		AZ_Assert(!m_materialPathFormat.empty(), "You need to call SetMaterialPathFormat first before calling ReadData!");
+
 		if (OpenSHM(mapId))
 		{
 			AZ::s32 meshCount = Read<AZ::s32>(mapId);
@@ -83,7 +85,7 @@ namespace GeomNodes
 					if (indices.size() > 0) {
 						auto& meshInstance = meshMap[materialName].emplace_back(mesh);
 						meshInstance.SetIndices(indices);
-						meshInstance.SetMaterial(materialName);
+						meshInstance.SetMaterial(materialName, AZStd::string::format(m_materialPathFormat.c_str(), materialName.c_str()));
 						meshInstance.CalculateTangents();
 						meshInstance.ClearMaterialList();
 					}
@@ -154,6 +156,11 @@ namespace GeomNodes
 	void GNModelData::AssignMeshData(AZ::u64 entityId)
 	{
 		m_assignedMeshmap.emplace(AZStd::make_pair(entityId, aznumeric_cast<AZ::u32>(m_assignedMeshmap.size())));
+	}
+
+	void GNModelData::SetMaterialPathFormat(const AZStd::string& materialPathFormat)
+	{
+		m_materialPathFormat = materialPathFormat;
 	}
 
     template<typename T>

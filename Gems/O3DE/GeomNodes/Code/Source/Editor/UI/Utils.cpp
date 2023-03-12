@@ -74,6 +74,20 @@ namespace GeomNodes
         return reinterpret_cast<void*>(func);
     }
 
+	AZStd::string GetEngineRoot()
+	{
+		return GetAbsoluteEngineRoot<AZStd::string>();
+	}
+	AZStd::string GetProjectRoot()
+	{
+		return GetAbsoluteProjectRoot<AZStd::string>();
+	}
+
+	AZStd::string GetProjectName()
+	{
+		return ::GetProjectName<AZStd::string>();
+	}
+
     QString SelectBlendFromFileDialog(const QString& currentFile)
     {
         // The selected file must be relative to this path

@@ -1,5 +1,8 @@
 import bpy
 import sys
+from materials.blender_materials import get_o3de_materials
+import logging as _logging
+_LOGGER = _logging.getLogger('GeomNodes.External.Scripts.params')
 
 def get_geometry_nodes_params(obj):
     '''Get exposed geometry nodes params, defaults from OBJECT instead of node group, so user gets exactly whats in the blend file'''
@@ -34,12 +37,6 @@ def get_geometry_nodes_params(obj):
                     params += [new_param]
     return params
 
-def get_materials():
-    names = []
-    for material in bpy.data.materials[:]:
-        names += [material.name]
-    return names
-
 def get_geometry_nodes_objs():
     geometry_nodes_objs = []
     for obj in bpy.data.objects:
@@ -48,12 +45,12 @@ def get_geometry_nodes_objs():
                 geometry_nodes_objs += [obj]
     
     if len(geometry_nodes_objs) < 1:
-        print("No geometry nodes object found", file=sys.stderr)
+        _LOGGER.error("No geometry nodes object found")
 
     obj_arr = []
     obj_names = []
     for obj in geometry_nodes_objs:
         obj_names += [obj.name]   
-        obj_arr += [{'Object': obj.name, 'Params': get_geometry_nodes_params(obj), 'Materials' : get_materials()}]
+        obj_arr += [{'Object': obj.name, 'Params': get_geometry_nodes_params(obj)}]
 
-    return {'ObjectNames': obj_names, 'Objects': obj_arr}
+    return {'ObjectNames': obj_names, 'Objects': obj_arr, 'Materials' : get_o3de_materials()}

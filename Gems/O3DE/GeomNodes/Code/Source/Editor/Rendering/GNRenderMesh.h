@@ -8,6 +8,7 @@
 
 #include <Atom/Feature/Mesh/MeshFeatureProcessorInterface.h>
 #include <AtomLyIntegration/CommonFeatures/Mesh/MeshHandleStateBus.h>
+#include <AtomLyIntegration/CommonFeatures/Material/MaterialComponentBus.h>
 #include <AzCore/Component/TransformBus.h>
 #include <AzCore/Name/Name.h>
 
@@ -24,6 +25,9 @@ namespace GeomNodes
     //! This is very similar tho how WhiteBox's AtomRenderMesh implementation. Would be nice if some classes can be extensible or reusable.
     class GNRenderMesh
         : private AZ::Render::MeshHandleStateRequestBus::Handler
+        , public AZ::Render::MaterialConsumerRequestBus::Handler
+        , public AZ::Render::MaterialComponentNotificationBus::Handler
+        , public AZ::Data::AssetBus::MultiHandler
         , private AZ::TickBus::Handler
     {
     public:
@@ -41,6 +45,16 @@ namespace GeomNodes
 
         // AZ::TickBus overrides ...
         void OnTick(float deltaTime, AZ::ScriptTimePoint time) override;
+
+		// MaterialConsumerRequestBus::Handler overrides...
+		AZ::Render::MaterialAssignmentId FindMaterialAssignmentId(
+			const AZ::Render::MaterialAssignmentLodIndex lod, const AZStd::string& label) const override;
+        AZ::Render::MaterialAssignmentLabelMap GetMaterialLabels() const override;
+        AZ::Render::MaterialAssignmentMap GetDefautMaterialMap() const override;
+		AZStd::unordered_set<AZ::Name> GetModelUvNames() const override;
+
+		// MaterialComponentNotificationBus::Handler overrides...
+		void OnMaterialsUpdated(const AZ::Render::MaterialAssignmentMap& materials) override;
 
         AZ::Data::Instance<AZ::RPI::Model> GetModel() const;
 
@@ -65,6 +79,10 @@ namespace GeomNodes
         // MeshHandleStateRequestBus overrides ...
         const AZ::Render::MeshFeatureProcessorInterface::MeshHandle* GetMeshHandle() const override;
 
+		// AZ::Data::AssetBus::Handler overrides...
+		void OnAssetReady(AZ::Data::Asset<AZ::Data::AssetData> asset) override;
+		void OnAssetError(AZ::Data::Asset<AZ::Data::AssetData> asset) override;
+
         bool CreateMeshBuffers(const GNMeshData& meshData);
         bool UpdateMeshBuffers(const GNMeshData& meshData);
         bool MeshRequiresFullRebuild(const GNMeshData& meshData) const;
@@ -77,10 +95,14 @@ namespace GeomNodes
         bool AreAttributesValid() const;
         bool DoesMeshRequireFullRebuild(const GNMeshData& meshData) const;
 
+        void SetMaterial(const AZStd::string& materialAssetPath);
+
         AZ::EntityId m_entityId;
         AZ::Data::Asset<AZ::RPI::ModelLodAsset> m_lodAsset;
         AZ::Data::Asset<AZ::RPI::ModelAsset> m_modelAsset;
         AZ::Data::Instance<AZ::RPI::Model> m_model;
+		AZ::Data::Asset<AZ::RPI::MaterialAsset> m_materialAsset;
+        AZ::Data::Instance<AZ::RPI::Material> m_material;
         AZ::Render::MeshFeatureProcessorInterface* m_meshFeatureProcessor = nullptr;
         AZ::Render::MeshFeatureProcessorInterface::MeshHandle m_meshHandle;
         AZ::Render::MaterialAssignmentMap m_materialMap;
