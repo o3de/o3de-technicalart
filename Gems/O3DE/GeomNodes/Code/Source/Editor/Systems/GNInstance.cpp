@@ -1,5 +1,6 @@
 #include "GNInstance.h"
 #include "Bridge.h"
+#include <Editor/Systems/GeomNodesSystem.h>
 
 namespace GeomNodes
 {
@@ -62,8 +63,12 @@ namespace GeomNodes
     bool GNInstance::RestartProcess()
     {
         AzFramework::ProcessLauncher::ProcessLaunchInfo processLaunchInfo;
-        //TODO: don't hard code this. Add a way for the user to set this up or the gem detects it automatically.
-        AZStd::string blenderPath = "C:\\Program Files\\Blender Foundation\\Blender 3.3\\blender.exe";
+        AZStd::string blenderPath = GetGNSystem()->GetBlenderPath();
+        if (blenderPath.empty()) // TODO: do some validation so we are sure the blender.exe path is good if not bail out.
+        {
+
+        }
+
         processLaunchInfo.m_commandlineParameters = AZStd::string::format(
             R"(%s --factory-startup -b "%s" -P "%s" -- "%s" %llu)",
             blenderPath.c_str(),

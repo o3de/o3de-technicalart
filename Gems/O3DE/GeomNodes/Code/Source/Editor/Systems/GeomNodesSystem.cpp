@@ -16,8 +16,9 @@ namespace GeomNodes
         return 0;
     }
 
-    GeomNodesSystem::GeomNodesSystem()
-        : m_propertyHandlers()
+    GeomNodesSystem::GeomNodesSystem(AZStd::unique_ptr<GNSettingsRegistryManager> registryManager)
+        : m_registryManager(AZStd::move(registryManager))
+        , m_propertyHandlers()
         , m_validator(AZStd::make_unique<Validator>())
         , m_validationHandler(AZStd::make_unique<ValidationHandler>())
         {
@@ -25,19 +26,67 @@ namespace GeomNodes
 
     GeomNodesSystem::~GeomNodesSystem()
     {
+        Shutdown();
     }
 
-    void GeomNodesSystem::OnActivate()
+    void GeomNodesSystem::Initialize(const GNConfiguration* config)
     {
-        Init(SERVER_ID, IpcHandlerCB); 
+		if (m_state == State::Initialized)
+		{
+			AZ_Warning("GeomNodesSystem", false, "GeomNodes system already initialized, Shutdown must be called first");
+			return;
+		}
 
-        RegisterHandlersAndBuses();
+		m_systemConfig = *config;
+		
+		Init(SERVER_ID, IpcHandlerCB);
+
+		RegisterHandlersAndBuses();
+
+		m_state = State::Initialized;
+		m_initializeEvent.Signal(&m_systemConfig);
     }
 
-    void GeomNodesSystem::OnDeactivate()
+    void GeomNodesSystem::Shutdown()
     {
-        UnregisterHandlersAndBuses();
-        Uninitialize();
+		if (m_state != State::Initialized)
+		{
+			return;
+		}
+
+		UnregisterHandlersAndBuses();
+		Uninitialize();
+
+		m_state = State::Shutdown;
+    }
+
+    AZStd::string_view GeomNodesSystem::GetBlenderPath()
+    {
+        return m_systemConfig.m_blenderPath;
+    }
+
+    const GNConfiguration* GeomNodesSystem::GetConfiguration() const
+    {
+        return &m_systemConfig;
+    }
+
+	const GNConfiguration& GeomNodesSystem::GetSystemConfiguration() const
+	{
+		return m_systemConfig;
+	}
+
+    void GeomNodesSystem::UpdateConfiguration(const GNConfiguration* newConfig)
+    {
+		if(m_systemConfig != *newConfig)
+		{
+			m_systemConfig = (*newConfig);
+			m_configChangeEvent.Signal(newConfig);
+		}
+    }
+
+    const GNSettingsRegistryManager& GeomNodesSystem::GetSettingsRegistryManager() const
+    {
+        return *m_registryManager;
     }
 
     FunctorValidator* GeomNodesSystem::GetValidator(FunctorValidator::FunctorType functor)
@@ -73,5 +122,10 @@ namespace GeomNodes
                 handler);
             delete handler;
         }
+    }
+
+    GeomNodesSystem* GetGNSystem()
+    {
+        return azdynamic_cast<GeomNodesSystem*>(AZ::Interface<GeomNodes::GNSystemInterface>::Get());
     }
 }

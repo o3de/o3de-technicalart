@@ -3,17 +3,29 @@ set(FILES
     Source/Editor/Commons.h
     Source/Editor/Math/MathHelper.cpp
     Source/Editor/Math/MathHelper.h
+    Source/Editor/Common/GNEvents.h
     Source/Editor/Components/EditorGeomNodesSystemComponent.cpp
     Source/Editor/Components/EditorGeomNodesSystemComponent.h
     Source/Editor/Components/EditorGeomNodesComponent.cpp
     Source/Editor/Components/EditorGeomNodesComponent.h
     Source/Editor/Components/EditorGeomNodesMeshComponent.cpp
     Source/Editor/Components/EditorGeomNodesMeshComponent.h
+    Source/Editor/Configuration/GNConfiguration.cpp
+    Source/Editor/Configuration/GNConfiguration.h
+    Source/Editor/Configuration/GNEditorSettingsRegistryManager.cpp
+    Source/Editor/Configuration/GNEditorSettingsRegistryManager.h
+    Source/Editor/Configuration/GNSettingsRegistryManager.cpp
+    Source/Editor/Configuration/GNSettingsRegistryManager.h
     Source/Editor/EBus/EditorGeomNodesComponentBus.h
     Source/Editor/EBus/EditorGeomNodesMeshComponentBus.h
     Source/Editor/EBus/GeomNodesBus.h
     Source/Editor/EBus/ValidatorBus.h
     Source/Editor/EBus/IpcHandlerBus.h
+    Source/Editor/UI/ConfigurationWidget.cpp
+    Source/Editor/UI/ConfigurationWidget.h
+    Source/Editor/UI/EditorWindow.cpp
+    Source/Editor/UI/EditorWindow.h
+    Source/Editor/UI/EditorWindow.ui
     Source/Editor/UI/Utils.cpp
     Source/Editor/UI/Utils.h
     Source/Editor/UI/UI_common.h
@@ -29,6 +41,8 @@ set(FILES
     Source/Editor/UI/PropertyFileSelect.h
     Source/Editor/UI/PropertyFuncValBrowseEdit.cpp
     Source/Editor/UI/PropertyFuncValBrowseEdit.h
+    Source/Editor/UI/SettingsWidget.cpp
+    Source/Editor/UI/SettingsWidget.h
     Source/Editor/Rendering/Atom/GNAttributeBuffer.h
     Source/Editor/Rendering/Atom/GNBuffer.h
     Source/Editor/Rendering/GNMeshData.cpp

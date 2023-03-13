@@ -119,6 +119,8 @@ namespace GeomNodes
     {
         if (!path.empty())
         {
+            //TODO: we can maybe do a blender path check here so we are sure we can use blender.exe properly.
+
             bool bClearParams = (m_instance && !m_instance->IsSamePath(path));
             if (bClearParams)
             {

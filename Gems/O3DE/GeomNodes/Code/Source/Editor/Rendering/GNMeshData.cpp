@@ -301,7 +301,7 @@ namespace GeomNodes
         m_materialName = rhs.m_materialName;
         m_materialPath = rhs.m_materialPath;
 
-        AZ::u32 count = m_positions.max_size() + rhs.m_positions.size() * rhs.m_instances.size();
+        AZ::u32 count = aznumeric_cast<AZ::u32>(m_positions.max_size() + rhs.m_positions.size() * rhs.m_instances.size());
         m_indices.reserve(count * 3);
         m_positions.reserve(count);
         m_normals.reserve(count);
@@ -312,7 +312,7 @@ namespace GeomNodes
 
         for (const auto& instance : rhs.m_instances)
         {
-            AZ::s32 indexOffsset = m_positions.size();
+            AZ::s32 indexOffsset = aznumeric_cast<AZ::u32>(m_positions.size());
             U32Vector rhsIndices = rhs.m_indices;
 
             for (AZ::u32& index : rhsIndices)

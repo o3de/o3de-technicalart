@@ -3,6 +3,8 @@
 #include "Editor/Components/EditorGeomNodesSystemComponent.h"
 #include "Editor/Components/EditorGeomNodesComponent.h"
 #include "Editor/Components/EditorGeomNodesMeshComponent.h"
+#include "Editor/Systems/GeomNodesSystem.h"
+#include <Editor/Configuration/GNEditorSettingsRegistryManager.h>
 
 namespace GeomNodes
 {
@@ -14,7 +16,9 @@ namespace GeomNodes
         AZ_CLASS_ALLOCATOR(GeomNodesEditorModule, AZ::SystemAllocator, 0);
 
         GeomNodesEditorModule()
+            : m_gnSystem(AZStd::make_unique<GNEditorSettingsRegistryManager>())
         {
+
             // Push results of [MyComponent]::CreateDescriptor() into m_descriptors here.
             // Add ALL components descriptors associated with this gem to m_descriptors.
             // This will associate the AzTypeInfo information for the components with the the SerializeContext, BehaviorContext and EditContext.
@@ -24,6 +28,11 @@ namespace GeomNodes
                     EditorGeomNodesComponent::CreateDescriptor(),
                     EditorGeomNodesMeshComponent::CreateDescriptor(),
             });
+        }
+
+        virtual ~GeomNodesEditorModule()
+        {
+            m_gnSystem.Shutdown();
         }
 
         /**
@@ -38,6 +47,8 @@ namespace GeomNodes
                 azrtti_typeid<EditorGeomNodesMeshComponent>(),
             };
         }
+    private:
+        GeomNodesSystem m_gnSystem;
     };
 }// namespace GeomNodes
 

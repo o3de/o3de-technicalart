@@ -100,6 +100,7 @@ if(PAL_TRAIT_BUILD_HOST_TOOLS)
         NAME GeomNodes.Editor.Private.Object STATIC
         NAMESPACE Gem
         AUTOMOC
+        AUTOUIC
         FILES_CMAKE
             geomnodes_editor_private_files.cmake
         TARGET_PROPERTIES
