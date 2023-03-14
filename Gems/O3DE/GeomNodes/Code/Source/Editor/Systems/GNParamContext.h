@@ -13,6 +13,7 @@ namespace GeomNodes
     namespace Field
     {
         static constexpr char Initialized[] = "Initialized";
+        static constexpr char Heartbeat[] = "Heartbeat";
         static constexpr char ObjectNames[] = "ObjectNames";
         static constexpr char Objects[] = "Objects";
         static constexpr char Object[] = "Object";

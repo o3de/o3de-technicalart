@@ -199,8 +199,17 @@ namespace GeomNodes
         jsonDocument.Parse((const char*)content, length);
         if (!jsonDocument.HasParseError())
         {
-            //TODO: need to put these hard coded text into one place
-            if (jsonDocument.HasMember(Field::Initialized))
+            // send back an "Alive" message to the client when it asks for a heartbeat. 
+            if (jsonDocument.HasMember(Field::Heartbeat))
+            {
+				AZStd::string msg = R"JSON(
+                                        {
+                                            "Alive": true 
+                                        }
+                                    )JSON";
+				m_instance->SendIPCMsg(msg);
+            }
+            else if (jsonDocument.HasMember(Field::Initialized))
             {
                 AZStd::string msg;
                 if (!m_initialized)

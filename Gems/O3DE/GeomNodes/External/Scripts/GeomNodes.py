@@ -32,14 +32,17 @@ def run():
     #print(json.dumps(get_o3de_materials(), indent=4))
     #print_materials_in_scene()
     
+    heartbeat_sent = False 
     while idle_time < 60:
         from lib_loader import GNLibs
         idle_time = idle_time + update_rate
 
         start = datetime.datetime.now()
-        if poll_for_messages():
+        reset, heartbeat_sent = poll_for_messages(idle_time, heartbeat_sent)
+        if reset:
             idle_time = 0
-
+        if heartbeat_sent and idle_time >= 5: # if we haven't received a reply back after some time(~5 secs) we bail out
+            break
         end = datetime.datetime.now()
         # print('Export time: ' + str((end-start).seconds + (end-start).microseconds/1000000) + 's', flush=True)
         if bpy.app.background:
