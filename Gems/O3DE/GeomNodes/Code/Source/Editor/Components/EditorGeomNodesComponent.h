@@ -9,6 +9,7 @@
 #include <Editor/EBus/EditorGeomNodesComponentBus.h>
 #include <AzCore/Component/TickBus.h>
 #include <AzToolsFramework/Entity/EntityTypes.h>
+#include <AzFramework/Asset/AssetCatalogBus.h>
 
 namespace GeomNodes
 {
@@ -17,6 +18,7 @@ namespace GeomNodes
         , private Ipc::IpcHandlerNotificationBus::Handler
         , private AZ::TickBus::Handler
         , private EditorGeomNodesComponentRequestBus::Handler
+        , private AzFramework::AssetCatalogEventBus::Handler
     {
     public:
         AZ_EDITOR_COMPONENT(EditorGeomNodesComponent, "{E59507EF-9EBB-4F6C-8D89-92DCA57722E5}", EditorComponentBase);
@@ -40,6 +42,11 @@ namespace GeomNodes
 
         // EditorGeomNodesComponentRequestBus overrides ...
         GNMeshData GetMeshData(AZ::u64 entityId) override;
+    
+    private:
+		// AssetCatalogEventBus::Handler ...
+        void OnCatalogAssetAdded(const AZ::Data::AssetId& assetId) override;
+        void OnCatalogAssetChanged(const AZ::Data::AssetId& assetId) override;
 
     protected:
         //got this from ScriptEditorComponent

@@ -71,7 +71,6 @@ namespace GeomNodes
 	{
 		AzToolsFramework::Components::EditorComponentBase::Activate();
 		AZ::TransformNotificationBus::Handler::BusConnect(m_entityId);
-		AzToolsFramework::EditorComponentSelectionRequestsBus::Handler::BusConnect(m_entityId);
 		EditorGeomNodesMeshComponentEventBus::Handler::BusConnect(m_entityId);
 
 		AZ::TransformBus::EventResult(m_parentId, m_entityId, &AZ::TransformBus::Events::GetParentId);
@@ -83,8 +82,9 @@ namespace GeomNodes
 
 	void EditorGeomNodesMeshComponent::Deactivate()
 	{
-		EditorGeomNodesMeshComponentEventBus::Handler::BusDisconnect();
 		AzToolsFramework::EditorComponentSelectionRequestsBus::Handler::BusDisconnect();
+		AzFramework::BoundsRequestBus::Handler::BusDisconnect();
+		EditorGeomNodesMeshComponentEventBus::Handler::BusDisconnect();
 		AZ::TransformNotificationBus::Handler::BusDisconnect();
 		AzToolsFramework::Components::EditorComponentBase::Deactivate();
 		m_renderMesh.reset();
@@ -186,8 +186,11 @@ namespace GeomNodes
 	void EditorGeomNodesMeshComponent::OnMeshDataAssigned(const GNMeshData& meshData)
 	{
 		m_meshData = meshData;
+		AzToolsFramework::EditorComponentSelectionRequestsBus::Handler::BusDisconnect();
 		AzFramework::BoundsRequestBus::Handler::BusDisconnect();
 		RebuildRenderMesh();
 		AzFramework::BoundsRequestBus::Handler::BusConnect(m_entityId);
+		AzToolsFramework::EditorComponentSelectionRequestsBus::Handler::BusConnect(m_entityId);
+
 	}
 } // namespace GeomNodes

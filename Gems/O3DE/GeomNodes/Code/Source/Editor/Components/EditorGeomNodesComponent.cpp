@@ -482,6 +482,7 @@ namespace GeomNodes
     {
         AzToolsFramework::Components::EditorComponentBase::Activate();
         EditorGeomNodesComponentRequestBus::Handler::BusConnect(GetEntityId());
+        AzFramework::AssetCatalogEventBus::Handler::BusConnect();
 		AZ::TickBus::Handler::BusConnect();
     }
 
@@ -490,6 +491,7 @@ namespace GeomNodes
         // BUG: this gets called when a component is added so deal with it properly as it destroys any current instance we have.
         Clear();
         AZ::TickBus::Handler::BusDisconnect();
+        AzFramework::AssetCatalogEventBus::Handler::BusDisconnect();
         AzToolsFramework::Components::EditorComponentBase::Deactivate();
 
         if (m_instance)
@@ -511,6 +513,37 @@ namespace GeomNodes
     GNMeshData EditorGeomNodesComponent::GetMeshData(AZ::u64 entityId)
     {
         return m_modelData.GetMeshData(entityId);
+    }
+
+    void EditorGeomNodesComponent::OnCatalogAssetAdded(const AZ::Data::AssetId& assetId)
+    {
+		AZ::Data::AssetInfo assetInfo;
+		EBUS_EVENT_RESULT(assetInfo, AZ::Data::AssetCatalogRequestBus, GetAssetInfoById, assetId);
+
+		// note that this will get called twice, once with the real assetId and once with legacy assetId.
+		// we only want to add the real asset to the list, in which the assetId passed in is equal to the final assetId returned
+		// otherwise, you look up assetId (and its a legacy assetId) and the actual asset will be different.
+        if ((assetInfo.m_assetId.IsValid()) && (assetInfo.m_assetId == assetId))
+        {
+			for (auto entityId : m_entityIdList)
+            {
+				AZStd::string materialName;
+				AzFramework::StringFunc::Path::GetFileName(assetInfo.m_relativePath.c_str(), materialName);
+
+                auto meshData = m_modelData.GetMeshData((AZ::u64)entityId);
+                if (meshData.GetMaterial() == materialName)
+                {
+                    AZ_Printf("GeomNodes", "added %s", materialName.c_str());
+					EditorGeomNodesMeshComponentEventBus::Event(entityId, &EditorGeomNodesMeshComponentEvents::OnMeshDataAssigned, meshData);
+                    break;
+                }
+            }
+        }
+    }
+
+    void EditorGeomNodesComponent::OnCatalogAssetChanged(const AZ::Data::AssetId& assetId)
+    {
+        OnCatalogAssetAdded(assetId);
     }
 
     void EditorGeomNodesComponent::Clear()
@@ -592,7 +625,23 @@ namespace GeomNodes
 		for (auto entityId : m_entityIdList)
 		{
 			m_modelData.AssignMeshData((AZ::u64)entityId);
-			EditorGeomNodesMeshComponentEventBus::Event(entityId, &EditorGeomNodesMeshComponentEvents::OnMeshDataAssigned, m_modelData.GetMeshData((AZ::u64)entityId));
+            auto meshData = m_modelData.GetMeshData((AZ::u64)entityId);
+
+            auto materialPath = meshData.GetMaterialPath();
+            AZ_Printf("GeomNodes", "assigned mesh data %s", materialPath.c_str());
+            
+            if (AZ::IO::FileIOBase::GetInstance()->Exists(materialPath.c_str()))
+            {
+				AZ::Data::AssetId materialAssetId;
+				EBUS_EVENT_RESULT(materialAssetId, AZ::Data::AssetCatalogRequestBus, GetAssetIdByPath, materialPath.c_str(), AZ::Data::s_invalidAssetType, false);
+
+				// If found, notify mesh that the mesh data is assigned and material is ready.
+				if (materialAssetId.IsValid())
+				{
+					AZ_Printf("GeomNodes", "    OnMeshDataAssigned called %s", meshData.GetMaterialPath().c_str());
+					EditorGeomNodesMeshComponentEventBus::Event(entityId, &EditorGeomNodesMeshComponentEvents::OnMeshDataAssigned, meshData);
+				}
+            }
 		}
 
         
