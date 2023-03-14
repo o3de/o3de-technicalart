@@ -163,32 +163,31 @@ namespace GeomNodes
 
             // TODO: send a message to blender since we need to update the object rendered
         }
-        else
+        
+        if(m_instance && !m_instance->IsValid())
         {
-            if(m_instance && !m_instance->IsValid())
-            {
-                m_instance->RestartProcess();
-            }
-
-            auto msg = AZStd::string::format(
-                R"JSON(
-                    {
-                        "%s": [ %s ],
-                        "%s": "%s",
-                        "Frame": 0,
-                        "ParamUpdate": true
-                    }
-                )JSON"
-                , Field::Params
-                , m_paramContext.m_group
-                    .GetGroup(m_currentObject.c_str())
-                    ->GetProperties().c_str()
-                , Field::Object
-                , m_currentObject.c_str()
-            );
-
-            m_instance->SendIPCMsg(msg);
+            m_instance->RestartProcess();
         }
+
+        auto msg = AZStd::string::format(
+            R"JSON(
+                {
+                    "%s": [ %s ],
+                    "%s": "%s",
+                    "Frame": 0,
+                    "ParamUpdate": true
+                }
+            )JSON"
+            , Field::Params
+            , m_paramContext.m_group
+                .GetGroup(m_currentObject.c_str())
+                ->GetProperties().c_str()
+            , Field::Object
+            , m_currentObject.c_str()
+        );
+
+        m_instance->SendIPCMsg(msg);
+        
 
         AZ_Printf("EditorGeomNodesComponent", "Parameter has changed");
     }
