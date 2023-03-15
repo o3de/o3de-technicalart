@@ -4,15 +4,14 @@ import os
 import time
 import datetime
 import json
-from messages import poll_for_messages
-from materials.blender_materials import print_materials_in_scene, get_o3de_materials
+from messages import poll_for_messages, PollReturn
+#from materials.blender_materials import print_materials_in_scene, get_o3de_materials
 
 dir = os.path.dirname(bpy.data.filepath)
 if not dir in sys.path:
     sys.path.append(dir)
 
-
-from lib_loader import init_lib, MessageReader, MessageWriter
+from lib_loader import init_lib, MessageWriter
 
 def init(exePath, id):
     init_lib(exePath, id)
@@ -32,17 +31,32 @@ def run():
     #print(json.dumps(get_o3de_materials(), indent=4))
     #print_materials_in_scene()
     
-    heartbeat_sent = False 
+    heartbeat_sent = False
+    heartbeat_wait_time = 0
+    heartbeat_time = 0
     while idle_time < 60:
         from lib_loader import GNLibs
         idle_time = idle_time + update_rate
+        heartbeat_time = heartbeat_time + update_rate
 
         start = datetime.datetime.now()
-        reset, heartbeat_sent = poll_for_messages(idle_time, heartbeat_sent)
-        if reset:
+        poll_return = poll_for_messages()
+        if poll_return == PollReturn.MESSAGE:
             idle_time = 0
-        if heartbeat_sent and idle_time >= 5: # if we haven't received a reply back after some time(~5 secs) we bail out
+        elif poll_return == PollReturn.HEARTBEAT:
+            heartbeat_time = 0
+            heartbeat_wait_time = 0
+            heartbeat_sent = False
+        
+        if heartbeat_sent == True:
+            heartbeat_wait_time = heartbeat_wait_time + update_rate
+        elif heartbeat_time >= 1: # send heartbeat every 2 secs
+            MessageWriter().from_buffer(bytes(json.dumps({'Heartbeat' : True }), "UTF-8")) # send a heartbeat message to the server
+            heartbeat_sent = True
+        
+        if heartbeat_sent and heartbeat_wait_time >= 1.5: # if we haven't received a reply back after some time(~5 secs) we bail out
             break
+
         end = datetime.datetime.now()
         # print('Export time: ' + str((end-start).seconds + (end-start).microseconds/1000000) + 's', flush=True)
         if bpy.app.background:

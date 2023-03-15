@@ -160,8 +160,6 @@ namespace GeomNodes
             m_currentObject = gnParam->m_value;
             m_paramContext.m_group.Clear(); // clear the group/properties
             CreateDataElements(m_paramContext.m_group);
-
-            // TODO: send a message to blender since we need to update the object rendered
         }
         
         if(m_instance && !m_instance->IsValid())

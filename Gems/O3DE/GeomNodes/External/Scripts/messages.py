@@ -1,6 +1,7 @@
 import bpy
 import sys
 import os
+from enum import Enum
 import datetime
 import json
 from lib_loader import MessageReader, MessageWriter
@@ -9,6 +10,11 @@ from mesh_data_builder import build_mesh_data
 from utils import get_geomnodes_obj
 import logging as _logging
 _LOGGER = _logging.getLogger('GeomNodes.External.Scripts.messages')
+
+class PollReturn(Enum):
+    NONE = 0
+    MESSAGE = 1
+    HEARTBEAT = 2
 
 def import_texture(Id, x, y):
     #_LOGGER.debug(str(x) + ' ' + str(y))
@@ -62,7 +68,7 @@ def update_gn_in_blender(msg_dict):
 
     return object_name
 
-def poll_for_messages(idle_time: int, heartbeat_sent: bool):
+def poll_for_messages():
     # poll if there are messages until we exhaust them.
     msg_str = MessageReader().as_string()
     if len(msg_str) > 0:
@@ -71,7 +77,7 @@ def poll_for_messages(idle_time: int, heartbeat_sent: bool):
             msg_dict = json.loads(msg_str)
         except json.decoder.JSONDecodeError:
             if msg_str != "":
-                _LOGGER.debug('couldnt parse json: ' + msg_str)
+                print('couldnt parse json: ' + msg_str)
         else:
             if msg_dict is not None:
                 if 'FetchObjectParams' in msg_dict:
@@ -88,11 +94,7 @@ def poll_for_messages(idle_time: int, heartbeat_sent: bool):
                     map_id = msg_dict['MapId']
                     from lib_loader import GNLibs
                     GNLibs.ClearSHM(map_id)
-        heartbeat_sent = False
-        return True, heartbeat_sent # reset idle_time as we got a message from the server
-    else:
-        if idle_time > 2 and heartbeat_sent == False:
-            MessageWriter().from_buffer(bytes(json.dumps({'Heartbeat' : True }), "UTF-8")) # send a heartbeat message to the server
-            heartbeat_sent = True
-    
-    return False, heartbeat_sent
+                elif 'Alive' in msg_dict:
+                    return PollReturn.HEARTBEAT
+        return PollReturn.MESSAGE # reset idle_time as we got a message from the server
+    return PollReturn.NONE

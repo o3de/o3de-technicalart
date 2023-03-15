@@ -1169,7 +1169,7 @@ namespace Ipc
 
                 if (m_uMsgAddIdx == initialIdx)
                 {
-                    AZ_Warning("App", false, "GNIPC: Unable to find room for new message; defaulting to overflow!");
+                    //AZ_Warning("App", false, "GNIPC: Unable to find room for new message; defaulting to overflow!");
                     break;
                 }
             }
