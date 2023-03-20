@@ -19,7 +19,7 @@ namespace GeomNodes
 
         static GNConfiguration CreateDefault();
 
-        AZStd::string m_blenderPath = "C:/Program Files/Blender Foundation/Blender 3.3/blender.exe"; //!< Currently set blender path in user's machine.
+        AZStd::string m_blenderPath = "C:/Program Files/Blender Foundation/Blender 3.4/blender.exe"; //!< Currently set blender path in user's machine.
 
         AZStd::string m_lastFilePath; //!< Last file path used when selecting a blender file.
 

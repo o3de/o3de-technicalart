@@ -61,9 +61,12 @@ namespace GeomNodes
         };
         
 		//! constants
-		static constexpr AZStd::string_view MaterialFilePathFormat = "assets/geomNodes/%s/materials/";
+		static constexpr AZStd::string_view AssetsFolderPath = "assets/geomNodes/";
+        static constexpr AZStd::string_view MaterialsFolder = "materials";
 		static constexpr AZStd::string_view MaterialExtension = ".material";
 		static constexpr AZStd::string_view AzMaterialExtension = ".azmaterial";
+        static constexpr AZStd::string_view FbxExtension = ".fbx";
+        static constexpr AZStd::string_view AzModelExtension = ".azmodel";
 
         typedef AZStd::vector<AZStd::string> StringVector;
         
@@ -71,6 +74,9 @@ namespace GeomNodes
         void OnPathChange(const AZStd::string& path);
         void OnParamChange();
         void OnMessageReceived(const AZ::u8* content, const AZ::u64 length) override;
+
+        void ExportToStaticMesh();
+        bool IsBlenderFileLoaded();
 
         void LoadObjects(const rapidjson::Value& objectNameArray, const rapidjson::Value& objectArray);
         void LoadObjectNames(const rapidjson::Value& objectNames);
@@ -92,7 +98,9 @@ namespace GeomNodes
         void AddDataElement(GNProperty* gnParam, ElementInfo& ei);
 
         const char* CacheString(const char* str);
-
+        AZStd::string GenerateFBXPath();
+        AZStd::string GenerateModelAssetName();
+        AZStd::string GenerateAZModelFilename();
         void ManageChildEntities();
         AZStd::atomic_bool m_manageChildEntities{ false };
 
@@ -113,5 +121,6 @@ namespace GeomNodes
         AzToolsFramework::EntityIdList m_entityIdList;
 
         bool m_initialized = false;
+        bool m_exportRequested = false;
     };
 }

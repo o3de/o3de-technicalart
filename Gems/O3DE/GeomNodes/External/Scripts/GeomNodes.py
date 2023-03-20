@@ -4,8 +4,9 @@ import os
 import time
 import datetime
 import json
-from messages import poll_for_messages, PollReturn
+from messages import poll_for_messages, PollReturn, update_gn_in_blender
 #from materials.blender_materials import print_materials_in_scene, get_o3de_materials
+from exporter import fbx_exporter
 
 dir = os.path.dirname(bpy.data.filepath)
 if not dir in sys.path:
@@ -27,10 +28,8 @@ def run():
     # send message to the gem that script is initialized
     MessageWriter().from_buffer(bytes(json.dumps({'Initialized' : True}), "UTF-8"))
     
-    # TEST
-    #print(json.dumps(get_o3de_materials(), indent=4))
-    #print_materials_in_scene()
-    
+    #run_tests()
+
     heartbeat_sent = False
     heartbeat_wait_time = 0
     heartbeat_time = 0
@@ -68,3 +67,54 @@ def run():
         GNLibs.Uninitialize()
     else:
         return update_rate
+    
+
+def run_tests():
+    msg_dict = {
+                    "Params": [
+                    {
+                        "Id": "Input_5",
+                        "Value": True,
+                        "Type": "BOOLEAN"
+                    }
+                ,
+                    {
+                        "Id": "Input_8",
+                        "Value": True,
+                        "Type": "BOOLEAN"
+                    }
+                ,
+                    {
+                        "Id": "Input_6",
+                        "Value": 3,
+                        "Type": "INT"
+                    }
+                ,
+                    {
+                        "Id": "Input_7",
+                        "Value": 12,
+                        "Type": "INT"
+                    }
+                ,
+                    {
+                        "Id": "Input_3",
+                        "Value": 3.00000000000000000,
+                        "Type": "VALUE"
+                    }
+                ,
+                    {
+                        "Id": "Input_9",
+                        "Value": 3.00000000000000000,
+                        "Type": "VALUE"
+                    }
+                ],
+                    "Object": "building_base",
+                    "Frame": 0,
+                    "ParamUpdate": True
+                }
+    obj_name = update_gn_in_blender(msg_dict)
+    fbx_exporter.fbx_file_exporter(obj_name, "F:/o3de_proj/TestProject/assets/geomNodes/buildify_1_0/buildify_1_0.fbx", False)
+    
+    # TEST
+    #print(json.dumps(get_o3de_materials(), indent=4))
+    #print_materials_in_scene()

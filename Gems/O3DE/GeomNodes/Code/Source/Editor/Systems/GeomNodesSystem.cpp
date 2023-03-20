@@ -9,7 +9,9 @@ namespace GeomNodes
 {
     long IpcHandlerCB(AZ::u64 id, const char* data, AZ::u64 length)
     {
-        AZ_Printf("GeomNodesSystem", "id: %llu data: %s length: %llu", id, data, length);
+        AZStd::string msg;
+        msg.assign(data, length);
+        AZ_Printf("GeomNodesSystem", "id: %llu data: %s length: %llu", id, msg.c_str(), length);
         Ipc::IpcHandlerNotificationBus::Event(
             AZ::EntityId(id), &Ipc::IpcHandlerNotificationBus::Events::OnMessageReceived, reinterpret_cast<const AZ::u8*>(data), length);
 

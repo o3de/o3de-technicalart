@@ -28,7 +28,7 @@ _LOGGER.debug('uuid: ' + params[1])
 _LOGGER.debug('pid: ' + str(os.getpid()))
 
 if __name__ == "__main__":
-    from GeomNodes import init, run
+    from geomnodes import init, run
     init(params[0], params[1])
 
     # run our loop to watch for updates

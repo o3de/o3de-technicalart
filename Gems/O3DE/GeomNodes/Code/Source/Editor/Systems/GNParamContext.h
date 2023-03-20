@@ -20,6 +20,8 @@ namespace GeomNodes
         static constexpr char SHMOpen[] = "SHMOpen";
         static constexpr char SHMClose[] = "SHMClose";
         static constexpr char MapId[] = "MapId";
+        static constexpr char Export[] = "Export";
+        static constexpr char Error[] = "Error";
 
         static constexpr char Params[] = "Params";
         static constexpr char Materials[] = "Materials";
@@ -30,6 +32,8 @@ namespace GeomNodes
         static constexpr char Value[] = "Value";
         static constexpr char MinValue[] = "MinValue";
         static constexpr char MaxValue[] = "MaxValue";
+
+        static constexpr char FBXPath[] = "FBXPath";
     }
 
     enum class ParamType : AZ::u8

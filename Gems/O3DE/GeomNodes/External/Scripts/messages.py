@@ -8,6 +8,8 @@ from lib_loader import MessageReader, MessageWriter
 from params import get_geometry_nodes_objs
 from mesh_data_builder import build_mesh_data
 from utils import get_geomnodes_obj
+from exporter import fbx_exporter
+
 import logging as _logging
 _LOGGER = _logging.getLogger('GeomNodes.External.Scripts.messages')
 
@@ -94,6 +96,10 @@ def poll_for_messages():
                     map_id = msg_dict['MapId']
                     from lib_loader import GNLibs
                     GNLibs.ClearSHM(map_id)
+                elif 'Export' in msg_dict:
+                    fbx_exporter.fbx_file_exporter(msg_dict['Object'], msg_dict['FBXPath'], True)
+                    #TODO: do some error checks. Inform the gem if there's an error.
+                    MessageWriter().from_buffer(bytes(json.dumps({'Export' : True, 'Error' : "" }), "UTF-8"))
                 elif 'Alive' in msg_dict:
                     return PollReturn.HEARTBEAT
         return PollReturn.MESSAGE # reset idle_time as we got a message from the server

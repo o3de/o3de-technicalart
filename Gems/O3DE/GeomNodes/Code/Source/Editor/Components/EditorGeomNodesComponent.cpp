@@ -7,7 +7,10 @@
 
 #include <AzToolsFramework/API/ToolsApplicationAPI.h>
 #include <AzToolsFramework/API/EntityCompositionRequestBus.h>
+#include <AzToolsFramework/ToolsComponents/TransformComponent.h>
+#include <AtomLyIntegration/CommonFeatures/Mesh/MeshComponentConstants.h>
 #include <AtomLyIntegration/CommonFeatures/Material/MaterialComponentConstants.h>
+#include <AtomLyIntegration/CommonFeatures/Mesh/MeshComponentBus.h>
 #include <AzCore/Utils/Utils.h>
 #include <Editor/Systems/GNProperty.h>
 #include <AzCore/JSON/prettywriter.h>
@@ -15,6 +18,7 @@
 #include <Atom/Feature/Mesh/MeshFeatureProcessorInterface.h>
 #include <Atom/RPI.Public/Scene.h>
 #include <AzCore/Component/NonUniformScaleBus.h>
+#include <AzCore/std/string/regex.h>
 
 namespace GeomNodes
 {
@@ -61,9 +65,13 @@ namespace GeomNodes
                     ->Attribute(Attributes::FuncValidator, ConvertFunctorToVoid(&Validators::ValidBlenderOrEmpty))
                     ->Attribute(Attributes::SelectFunction, blendFunctor)
                     ->Attribute(Attributes::ValidationChange, &EditorGeomNodesComponent::OnPathChange)
-                    ->DataElement(nullptr, &EditorGeomNodesComponent::m_paramContext, "Geom Nodes Parameters", "Parameter template")
+					->DataElement(nullptr, &EditorGeomNodesComponent::m_paramContext, "Geom Nodes Parameters", "Parameter template")
                     ->SetDynamicEditDataProvider(&EditorGeomNodesComponent::GetParamsEditData)
                         ->Attribute(AZ::Edit::Attributes::Visibility, AZ::Edit::PropertyVisibility::ShowChildrenOnly)
+					->UIElement(AZ::Edit::UIHandlers::Button, "", "Export to static mesh")
+					->Attribute(AZ::Edit::Attributes::ChangeNotify, &EditorGeomNodesComponent::ExportToStaticMesh)
+					->Attribute(AZ::Edit::Attributes::ButtonText, "Export")
+                    ->Attribute(AZ::Edit::Attributes::Visibility, &EditorGeomNodesComponent::IsBlenderFileLoaded)
                     ;
 
                 ec->Class<GNParamContext>("Geom Nodes Parameter Context", "Adding exposed Geometry Nodes parameters to the entity!")
@@ -148,6 +156,9 @@ namespace GeomNodes
                 }
 
                 AzFramework::StringFunc::Path::GetFileName(path.c_str(), m_currentBlenderFileName);
+
+                AZStd::regex reg("[^\\w\\s]+");
+                m_currentBlenderFileName = AZStd::regex_replace(m_currentBlenderFileName, reg, "_");
             }
         }
     }
@@ -255,11 +266,50 @@ namespace GeomNodes
 
                 m_manageChildEntities = true; // tell OnTick that we want to manage the child entities
             }
+            else if (jsonDocument.HasMember(Field::Export) && jsonDocument.HasMember(Field::Error))
+            {
+                AZStd::string errorMsg = jsonDocument[Field::Error].GetString();
+                if (errorMsg.empty())
+                {
+                    
+                }
+                else {
+                    // TODO: error message
+                    m_exportRequested = false;
+                }
+            }
         }
         else
         {
             AZ_Warning("EditorGeomNodesComponent", false, "Message is not in JSON format!");
         }
+    }
+
+    void EditorGeomNodesComponent::ExportToStaticMesh()
+    {
+        if (!m_exportRequested)
+        {
+            auto msg = AZStd::string::format(
+				R"JSON(
+                    {
+                        "%s": true,
+                        "%s": "%s",
+                        "%s": "%s"
+                    }
+                    )JSON",
+				Field::Export,
+				Field::Object,
+                m_currentObject.c_str(),
+                Field::FBXPath,
+                GenerateFBXPath().c_str());
+			m_instance->SendIPCMsg(msg);
+            m_exportRequested = true;
+        }
+    }
+
+    bool EditorGeomNodesComponent::IsBlenderFileLoaded()
+    {
+        return m_initialized;
     }
 
     void EditorGeomNodesComponent::LoadObjects(const rapidjson::Value& objectNameArray, const rapidjson::Value& objectArray)
@@ -448,7 +498,7 @@ namespace GeomNodes
             AZStd::string materialContent = matItr->value.GetString();
 			
             AZStd::string fullFilePath = GetProjectRoot() + "/";
-            AZStd::string materialFilePath = AZStd::string::format(MaterialFilePathFormat.data(), m_currentBlenderFileName.c_str());
+            AZStd::string materialFilePath = AZStd::string(AssetsFolderPath) + m_currentBlenderFileName + "/" + MaterialsFolder.data() + "/";
             
             fullFilePath += materialFilePath + materialName + MaterialExtension.data();
 
@@ -531,18 +581,49 @@ namespace GeomNodes
 		// otherwise, you look up assetId (and its a legacy assetId) and the actual asset will be different.
         if ((assetInfo.m_assetId.IsValid()) && (assetInfo.m_assetId == assetId))
         {
-			for (auto entityId : m_entityIdList)
-            {
-				AZStd::string materialName;
-				AzFramework::StringFunc::Path::GetFileName(assetInfo.m_relativePath.c_str(), materialName);
+			AZStd::string assetName;
+			AzFramework::StringFunc::Path::GetFileName(assetInfo.m_relativePath.c_str(), assetName);
 
-                auto meshData = m_modelData.GetMeshData((AZ::u64)entityId);
-                if (meshData.GetMaterial() == materialName)
-                {
-                    AZ_Printf("GeomNodes", "added %s", materialName.c_str());
-					EditorGeomNodesMeshComponentEventBus::Event(entityId, &EditorGeomNodesMeshComponentEvents::OnMeshDataAssigned, meshData);
-                    break;
-                }
+            if (m_exportRequested && (assetName == GenerateModelAssetName()))
+            {
+                auto transformComponent = GetEntity()->FindComponent<AzToolsFramework::Components::TransformComponent>();
+				AZ::EntityId parentId = transformComponent->GetParentId();
+                auto worldTransform = transformComponent->GetWorldTM();
+
+				AZ::EntityId entityId;
+				EBUS_EVENT_RESULT(entityId, AzToolsFramework::EditorRequests::Bus, CreateNewEntity, parentId);
+
+                AzToolsFramework::EntityIdList entityIdList = {entityId};
+
+				AzToolsFramework::EntityCompositionRequests::AddComponentsOutcome addedComponentsResult = AZ::Failure(AZStd::string("Failed to call AddComponentsToEntities on EntityCompositionRequestBus"));
+				AzToolsFramework::EntityCompositionRequestBus::BroadcastResult(addedComponentsResult, &AzToolsFramework::EntityCompositionRequests::AddComponentsToEntities, entityIdList, AZ::ComponentTypeList{ AZ::Render::EditorMeshComponentTypeId });
+
+				if (addedComponentsResult.IsSuccess())
+				{
+					AZ::TransformBus::Event(
+                        entityId, &AZ::TransformBus::Events::SetWorldTM, worldTransform);
+
+                    AZ::Render::MeshComponentRequestBus::Event(
+                        entityId, &AZ::Render::MeshComponentRequestBus::Events::SetModelAssetPath, assetInfo.m_relativePath);
+
+					
+                    //TODO: delete this entity
+				}
+
+                m_exportRequested = false;
+            }
+            else
+            {
+				for (auto entityId : m_entityIdList)
+				{
+					auto meshData = m_modelData.GetMeshData((AZ::u64)entityId);
+					if (meshData.GetMaterial() == assetName)
+					{
+						AZ_Printf("GeomNodes", "added %s", assetName.c_str());
+						EditorGeomNodesMeshComponentEventBus::Event(entityId, &EditorGeomNodesMeshComponentEvents::OnMeshDataAssigned, meshData);
+						break;
+					}
+				}
             }
         }
     }
@@ -588,6 +669,24 @@ namespace GeomNodes
         }
 
         return m_cachedStrings.insert(AZStd::make_pair(str, AZStd::string(str))).first->second.c_str();
+    }
+
+    AZStd::string EditorGeomNodesComponent::GenerateFBXPath()
+    {
+		AZStd::string fullFilePath = GetProjectRoot() + "/";
+        AZStd::string filePath = AZStd::string(AssetsFolderPath) + m_currentBlenderFileName + "/";
+        fullFilePath += filePath + GenerateModelAssetName() + FbxExtension.data();
+        return fullFilePath;
+    }
+
+    AZStd::string EditorGeomNodesComponent::GenerateModelAssetName()
+    {
+        return m_currentBlenderFileName + "_" + AZStd::string::format("%llu", (AZ::u64)GetEntityId());
+    }
+
+    AZStd::string EditorGeomNodesComponent::GenerateAZModelFilename()
+    {
+		return GenerateModelAssetName() + AzModelExtension.data();
     }
 
     void EditorGeomNodesComponent::ManageChildEntities()
