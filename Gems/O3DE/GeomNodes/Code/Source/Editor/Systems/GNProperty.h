@@ -81,14 +81,14 @@ namespace GeomNodes
 
         virtual bool IsReadOnly()
         {
-            return *m_pReadOnly;
+            return m_pReadOnly == nullptr ? false : *m_pReadOnly;
         }
 
         AZ::u64         m_id;
         AZStd::string   m_gnId;                     // Geometry Node Param Id
         AZStd::string   m_name;                     // Geometry Node Param Name
         AZStd::string   m_type = "UNKNOWN";         // Geometry Node Param Type
-        bool*           m_pReadOnly;
+        bool*           m_pReadOnly = nullptr;
         bool            m_isMaxSet = false;
         bool            m_isMinSet = false;
     protected:

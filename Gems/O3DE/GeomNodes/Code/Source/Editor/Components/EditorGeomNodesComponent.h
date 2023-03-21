@@ -77,7 +77,9 @@ namespace GeomNodes
 
         void ExportToStaticMesh();
         bool IsBlenderFileLoaded();
-        bool ExportInProgress();
+        bool IsWorkInProgress();
+        void SetWorkInProgress(bool flag);
+
         AZStd::string ExportButtonText();
 
         void LoadObjects(const rapidjson::Value& objectNameArray, const rapidjson::Value& objectArray);
@@ -123,6 +125,6 @@ namespace GeomNodes
         AzToolsFramework::EntityIdList m_entityIdList;
 
         bool m_initialized = false;
-        bool m_exportInProgress = false;
+        bool m_workInProgress = false;
     };
 }

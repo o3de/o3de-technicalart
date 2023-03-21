@@ -65,7 +65,7 @@ namespace GeomNodes
                         ->Attribute(Attributes::FuncValidator, ConvertFunctorToVoid(&Validators::ValidBlenderOrEmpty))
                         ->Attribute(Attributes::SelectFunction, blendFunctor)
                         ->Attribute(Attributes::ValidationChange, &EditorGeomNodesComponent::OnPathChange)
-                        ->Attribute(AZ::Edit::Attributes::ReadOnly, &EditorGeomNodesComponent::ExportInProgress)
+                        ->Attribute(AZ::Edit::Attributes::ReadOnly, &EditorGeomNodesComponent::IsWorkInProgress)
 					->DataElement(nullptr, &EditorGeomNodesComponent::m_paramContext, "Geom Nodes Parameters", "Parameter template")
                     ->SetDynamicEditDataProvider(&EditorGeomNodesComponent::GetParamsEditData)
                         ->Attribute(AZ::Edit::Attributes::Visibility, AZ::Edit::PropertyVisibility::ShowChildrenOnly)
@@ -74,7 +74,7 @@ namespace GeomNodes
 					->Attribute(AZ::Edit::Attributes::ButtonText, &EditorGeomNodesComponent::ExportButtonText)
                     ->Attribute(AZ::Edit::Attributes::Visibility, &EditorGeomNodesComponent::IsBlenderFileLoaded)
                     ->Attribute(AZ::Edit::Attributes::ChangeNotify, AZ::Edit::PropertyRefreshLevels::EntireTree)
-                    ->Attribute(AZ::Edit::Attributes::ReadOnly, &EditorGeomNodesComponent::ExportInProgress)
+                    ->Attribute(AZ::Edit::Attributes::ReadOnly, &EditorGeomNodesComponent::IsWorkInProgress)
                     ;
 
                 ec->Class<GNParamContext>("Geom Nodes Parameter Context", "Adding exposed Geometry Nodes parameters to the entity!")
@@ -146,6 +146,8 @@ namespace GeomNodes
 
             if (!m_instance || bClearParams || (m_instance && !m_instance->IsValid()))
             {
+				SetWorkInProgress(true);
+
                 if (m_instance)
                     delete m_instance;
 
@@ -172,6 +174,8 @@ namespace GeomNodes
 
     void EditorGeomNodesComponent::OnParamChange()
     {
+        SetWorkInProgress(true);
+        
         auto gnParam = reinterpret_cast<GNParamString*>(m_paramContext.m_group.GetProperty(Field::Objects));
         if (gnParam->m_value != m_currentObject)
         {
@@ -239,6 +243,7 @@ namespace GeomNodes
                 else
                 {
                     // send messages that are queued.
+                    SetWorkInProgress(false);
                 }
                 m_instance->SendIPCMsg(msg);
             }
@@ -253,6 +258,7 @@ namespace GeomNodes
 
                 // Handle the materials as well
                 LoadMaterials(jsonDocument[Field::Materials]);
+                SetWorkInProgress(false);
             }
             else if (jsonDocument.HasMember(Field::SHMOpen) && jsonDocument.HasMember(Field::MapId))
             {
@@ -272,17 +278,17 @@ namespace GeomNodes
                 m_instance->SendIPCMsg(msg);
 
                 m_manageChildEntities = true; // tell OnTick that we want to manage the child entities
+                SetWorkInProgress(false);
             }
             else if (jsonDocument.HasMember(Field::Export) && jsonDocument.HasMember(Field::Error))
             {
                 AZStd::string errorMsg = jsonDocument[Field::Error].GetString();
                 if (errorMsg.empty())
                 {
-                    
                 }
                 else {
                     // TODO: error message
-                    m_exportInProgress = false;
+                    SetWorkInProgress(false);
                 }
             }
         }
@@ -294,7 +300,7 @@ namespace GeomNodes
 
     void EditorGeomNodesComponent::ExportToStaticMesh()
     {
-        if (!m_exportInProgress)
+        if (!m_workInProgress)
         {
             auto msg = AZStd::string::format(
 				R"JSON(
@@ -310,7 +316,8 @@ namespace GeomNodes
                 Field::FBXPath,
                 GenerateFBXPath().c_str());
 			m_instance->SendIPCMsg(msg);
-            m_exportInProgress = true;
+            AZ_TracePrintf("EditorGeomNodesComponent", "[ExportToStaticMesh] m_workInProgress has changed")
+            SetWorkInProgress(true);
         }
     }
 
@@ -319,14 +326,23 @@ namespace GeomNodes
         return m_initialized;
     }
 
-    bool EditorGeomNodesComponent::ExportInProgress()
+    bool EditorGeomNodesComponent::IsWorkInProgress()
     {
-        return m_exportInProgress;
+        return m_workInProgress;
+    }
+
+    void EditorGeomNodesComponent::SetWorkInProgress(bool flag)
+    {
+        if (m_workInProgress != flag)
+        {
+			m_workInProgress = flag;
+			EBUS_EVENT(AzToolsFramework::ToolsApplicationEvents::Bus, InvalidatePropertyDisplay, AzToolsFramework::Refresh_EntireTree);
+        }
     }
 
     AZStd::string EditorGeomNodesComponent::ExportButtonText()
     {
-        return m_exportInProgress ? "Exporting" : "Export";
+        return m_workInProgress ? "Working on your request" : "Export";
     }
 
     void EditorGeomNodesComponent::LoadObjects(const rapidjson::Value& objectNameArray, const rapidjson::Value& objectArray)
@@ -393,7 +409,7 @@ namespace GeomNodes
         ei.m_editData.m_elementId = AZ::Edit::UIHandlers::ComboBox;
         ei.m_sortOrder = FLT_MAX;
 
-        auto gnParam = aznew GNParamString(Field::Objects, "", &m_exportInProgress);
+        auto gnParam = aznew GNParamString(Field::Objects, "", &m_workInProgress);
         gnParam->m_value = m_currentObject;
         
         ei.m_editData.m_attributes.push_back(
@@ -433,7 +449,7 @@ namespace GeomNodes
             //set this up so the context can do it's own parsing of the current GN param JSON object.
             GNParamDataContext gndc;
             gndc.SetParamObject(itr);
-            gndc.SetReadOnlyPointer(&m_exportInProgress);
+            gndc.SetReadOnlyPointer(&m_workInProgress);
             auto propertyName = gndc.GetParamName();
             auto paramType = gndc.GetParamType();
                 
@@ -601,7 +617,7 @@ namespace GeomNodes
 			AZStd::string assetName;
 			AzFramework::StringFunc::Path::GetFileName(assetInfo.m_relativePath.c_str(), assetName);
 
-            if (m_exportInProgress && (assetName == GenerateModelAssetName()))
+            if (m_workInProgress && (assetName == GenerateModelAssetName()))
             {
                 auto transformComponent = GetEntity()->FindComponent<AzToolsFramework::Components::TransformComponent>();
 				AZ::EntityId parentId = transformComponent->GetParentId();
@@ -627,7 +643,7 @@ namespace GeomNodes
                     //TODO: delete this entity
 				}
 
-                m_exportInProgress = false;
+                SetWorkInProgress(false);
             }
             else
             {
