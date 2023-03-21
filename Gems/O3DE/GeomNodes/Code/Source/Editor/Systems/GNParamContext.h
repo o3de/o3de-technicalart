@@ -143,11 +143,22 @@ namespace GeomNodes
             m_curParamObj = nullptr;
         }
 
+        void SetReadOnlyPointer(bool* pReadOnly)
+        {
+            m_pReadOnly = pReadOnly;
+        }
+
+        bool* GetReadOnlyPointer()
+        {
+            return m_pReadOnly;
+        }
+
         const char* GetParamName();
         ParamType GetParamType();
 
     protected:
         const rapidjson::Value* m_curParamObj;
+        bool* m_pReadOnly;
     };
 
     template<class T>

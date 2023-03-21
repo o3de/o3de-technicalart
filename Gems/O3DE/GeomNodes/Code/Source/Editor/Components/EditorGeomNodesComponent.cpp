@@ -62,16 +62,19 @@ namespace GeomNodes
                         &EditorGeomNodesComponent::m_blenderFile,
                         "Blender File",
                         "Blender file with Geometry Nodes")
-                    ->Attribute(Attributes::FuncValidator, ConvertFunctorToVoid(&Validators::ValidBlenderOrEmpty))
-                    ->Attribute(Attributes::SelectFunction, blendFunctor)
-                    ->Attribute(Attributes::ValidationChange, &EditorGeomNodesComponent::OnPathChange)
+                        ->Attribute(Attributes::FuncValidator, ConvertFunctorToVoid(&Validators::ValidBlenderOrEmpty))
+                        ->Attribute(Attributes::SelectFunction, blendFunctor)
+                        ->Attribute(Attributes::ValidationChange, &EditorGeomNodesComponent::OnPathChange)
+                        ->Attribute(AZ::Edit::Attributes::ReadOnly, &EditorGeomNodesComponent::ExportInProgress)
 					->DataElement(nullptr, &EditorGeomNodesComponent::m_paramContext, "Geom Nodes Parameters", "Parameter template")
                     ->SetDynamicEditDataProvider(&EditorGeomNodesComponent::GetParamsEditData)
                         ->Attribute(AZ::Edit::Attributes::Visibility, AZ::Edit::PropertyVisibility::ShowChildrenOnly)
 					->UIElement(AZ::Edit::UIHandlers::Button, "", "Export to static mesh")
 					->Attribute(AZ::Edit::Attributes::ChangeNotify, &EditorGeomNodesComponent::ExportToStaticMesh)
-					->Attribute(AZ::Edit::Attributes::ButtonText, "Export")
+					->Attribute(AZ::Edit::Attributes::ButtonText, &EditorGeomNodesComponent::ExportButtonText)
                     ->Attribute(AZ::Edit::Attributes::Visibility, &EditorGeomNodesComponent::IsBlenderFileLoaded)
+                    ->Attribute(AZ::Edit::Attributes::ChangeNotify, AZ::Edit::PropertyRefreshLevels::EntireTree)
+                    ->Attribute(AZ::Edit::Attributes::ReadOnly, &EditorGeomNodesComponent::ExportInProgress)
                     ;
 
                 ec->Class<GNParamContext>("Geom Nodes Parameter Context", "Adding exposed Geometry Nodes parameters to the entity!")
@@ -95,28 +98,32 @@ namespace GeomNodes
                 ec->Class<GNParamBoolean>("Geom Nodes Property (bool)", "A Geom Nodes boolean property")
                     ->ClassElement(AZ::Edit::ClassElements::EditorData, "GNPropertyGroup's class attributes.")
                         ->Attribute(AZ::Edit::Attributes::Visibility, AZ::Edit::PropertyVisibility::ShowChildrenOnly)
-                    ->DataElement(nullptr, &GNParamBoolean::m_value, "m_value", "A boolean")
+                    ->DataElement(AZ::Edit::UIHandlers::Default, &GNParamBoolean::m_value, "m_value", "A boolean")
+                    ->Attribute(AZ::Edit::Attributes::ReadOnly, &GNProperty::IsReadOnly)
                     ->Attribute(AZ::Edit::Attributes::ChangeNotify, &EditorGeomNodesComponent::OnParamChange)
                     ->Attribute(AZ::Edit::Attributes::NameLabelOverride, &GNParamBoolean::m_name);
 
                 ec->Class<GNParamInt>("Geom Nodes Property (int)", "A Geom Nodes int property")
                     ->ClassElement(AZ::Edit::ClassElements::EditorData, "GNPropertyGroup's class attributes.")
                         ->Attribute(AZ::Edit::Attributes::Visibility, AZ::Edit::PropertyVisibility::ShowChildrenOnly)
-                    ->DataElement(nullptr, &GNParamInt::m_value, "m_value", "An int")
+                    ->DataElement(AZ::Edit::UIHandlers::Default, &GNParamInt::m_value, "m_value", "An int")
+                    ->Attribute(AZ::Edit::Attributes::ReadOnly, &GNProperty::IsReadOnly)
                     ->Attribute(AZ::Edit::Attributes::ChangeNotify, &EditorGeomNodesComponent::OnParamChange)
                     ->Attribute(AZ::Edit::Attributes::NameLabelOverride, &GNParamInt::m_name);
 
                 ec->Class<GNParamValue>("Geom Nodes Property (double)", "A Geom Nodes double property")
                     ->ClassElement(AZ::Edit::ClassElements::EditorData, "GNPropertyGroup's class attributes.")
                         ->Attribute(AZ::Edit::Attributes::Visibility, AZ::Edit::PropertyVisibility::ShowChildrenOnly)
-                    ->DataElement(nullptr, &GNParamValue::m_value, "m_value", "A double/value")
+                    ->DataElement(AZ::Edit::UIHandlers::Default, &GNParamValue::m_value, "m_value", "A double/value")
+                    ->Attribute(AZ::Edit::Attributes::ReadOnly, &GNProperty::IsReadOnly)
                         ->Attribute(AZ::Edit::Attributes::ChangeNotify, &EditorGeomNodesComponent::OnParamChange)
                         ->Attribute(AZ::Edit::Attributes::NameLabelOverride, &GNParamValue::m_name);
 
                 ec->Class<GNParamString>("Geom Nodes Property (string)", "A Geom Nodes string property")
                     ->ClassElement(AZ::Edit::ClassElements::EditorData, "GNPropertyGroup's class attributes.")
                         ->Attribute(AZ::Edit::Attributes::Visibility, AZ::Edit::PropertyVisibility::ShowChildrenOnly)
-                    ->DataElement(nullptr, &GNParamString::m_value, "m_value", "A string")
+                    ->DataElement(AZ::Edit::UIHandlers::Default, &GNParamString::m_value, "m_value", "A string")
+                    ->Attribute(AZ::Edit::Attributes::ReadOnly, &GNProperty::IsReadOnly)
                         ->Attribute(AZ::Edit::Attributes::ChangeNotify, &EditorGeomNodesComponent::OnParamChange)
                         ->Attribute(AZ::Edit::Attributes::NameLabelOverride, &GNParamString::m_name);
             }
@@ -275,7 +282,7 @@ namespace GeomNodes
                 }
                 else {
                     // TODO: error message
-                    m_exportRequested = false;
+                    m_exportInProgress = false;
                 }
             }
         }
@@ -287,7 +294,7 @@ namespace GeomNodes
 
     void EditorGeomNodesComponent::ExportToStaticMesh()
     {
-        if (!m_exportRequested)
+        if (!m_exportInProgress)
         {
             auto msg = AZStd::string::format(
 				R"JSON(
@@ -303,13 +310,23 @@ namespace GeomNodes
                 Field::FBXPath,
                 GenerateFBXPath().c_str());
 			m_instance->SendIPCMsg(msg);
-            m_exportRequested = true;
+            m_exportInProgress = true;
         }
     }
 
     bool EditorGeomNodesComponent::IsBlenderFileLoaded()
     {
         return m_initialized;
+    }
+
+    bool EditorGeomNodesComponent::ExportInProgress()
+    {
+        return m_exportInProgress;
+    }
+
+    AZStd::string EditorGeomNodesComponent::ExportButtonText()
+    {
+        return m_exportInProgress ? "Exporting" : "Export";
     }
 
     void EditorGeomNodesComponent::LoadObjects(const rapidjson::Value& objectNameArray, const rapidjson::Value& objectArray)
@@ -376,7 +393,7 @@ namespace GeomNodes
         ei.m_editData.m_elementId = AZ::Edit::UIHandlers::ComboBox;
         ei.m_sortOrder = FLT_MAX;
 
-        auto gnParam = aznew GNParamString(Field::Objects, "");
+        auto gnParam = aznew GNParamString(Field::Objects, "", &m_exportInProgress);
         gnParam->m_value = m_currentObject;
         
         ei.m_editData.m_attributes.push_back(
@@ -416,7 +433,7 @@ namespace GeomNodes
             //set this up so the context can do it's own parsing of the current GN param JSON object.
             GNParamDataContext gndc;
             gndc.SetParamObject(itr);
-
+            gndc.SetReadOnlyPointer(&m_exportInProgress);
             auto propertyName = gndc.GetParamName();
             auto paramType = gndc.GetParamType();
                 
@@ -584,7 +601,7 @@ namespace GeomNodes
 			AZStd::string assetName;
 			AzFramework::StringFunc::Path::GetFileName(assetInfo.m_relativePath.c_str(), assetName);
 
-            if (m_exportRequested && (assetName == GenerateModelAssetName()))
+            if (m_exportInProgress && (assetName == GenerateModelAssetName()))
             {
                 auto transformComponent = GetEntity()->FindComponent<AzToolsFramework::Components::TransformComponent>();
 				AZ::EntityId parentId = transformComponent->GetParentId();
@@ -610,7 +627,7 @@ namespace GeomNodes
                     //TODO: delete this entity
 				}
 
-                m_exportRequested = false;
+                m_exportInProgress = false;
             }
             else
             {

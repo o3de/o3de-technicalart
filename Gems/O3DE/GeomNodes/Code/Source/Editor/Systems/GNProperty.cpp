@@ -82,7 +82,7 @@ namespace GeomNodes
         GNProperty* retVal = nullptr;
         if (context.IsNil(valueIndex))
         {
-            retVal = aznew GNParamNil(name);
+            retVal = aznew GNParamNil(name, context.GetReadOnlyPointer());
         }
 
         return retVal;
@@ -102,27 +102,6 @@ namespace GeomNodes
     {
         return AZStd::string();
     }
-
-    GNParamNil* GNParamNil::Clone(const char* name) const
-    {
-        return aznew GNParamNil(name ? name : m_name.c_str());
-    }
-
-    /*bool GNParamNil::Write(AZ::ScriptContext& context)
-    {
-        lua_pushnil(context.NativeContext());
-        return true;
-    }
-
-    bool GNParamNil::TryRead(GNParamDataContext& context, int valueIndex)
-    {
-        if (context.IsNil(valueIndex))
-        {
-            return true;
-        }
-
-        return false;
-    }*/
 
     void GNParamNil::CloneDataFrom(const GNProperty* gnProperty)
     {
@@ -151,7 +130,7 @@ namespace GeomNodes
             bool value;
             if (context.ReadValue(value, Field::DefaultValue))
             {
-                retVal = aznew GNParamBoolean(name, value);
+                retVal = aznew GNParamBoolean(name, value, context.GetReadOnlyPointer());
                 retVal->ReadSetGNId(context);
             }
         }
@@ -164,27 +143,6 @@ namespace GeomNodes
     {
         return context.IsBoolean(valueIndex);
     }
-
-    GNParamBoolean* GNParamBoolean::Clone(const char* name) const
-    {
-        return aznew GNParamBoolean(name ? name : m_name.c_str(), m_value);
-    }
-
-    /*bool GNParamBoolean::Write(AZ::ScriptContext& context)
-    {
-        AZ::ScriptValue<bool>::StackPush(context.NativeContext(), m_value);
-        return true;
-    }
-
-    bool GNParamBoolean::TryRead(GNParamDataContext& context, int valueIndex)
-    {
-        if (context.IsBoolean(valueIndex))
-        {
-            context.ReadValue(m_value);
-        }
-
-        return false;
-    }*/
 
     AZStd::string GNParamBoolean::ToJSONString() const
     {
@@ -244,7 +202,7 @@ namespace GeomNodes
             int value;
             if (context.ReadValue(value, Field::DefaultValue))
             {
-                auto paramInt = aznew GNParamInt(name, value);
+                auto paramInt = aznew GNParamInt(name, value, context.GetReadOnlyPointer());
 
                 int min, max;
                 if (context.ReadValue(min, Field::MinValue))
@@ -270,27 +228,7 @@ namespace GeomNodes
         return context.IsInt(valueIndex);
     }
 
-    GNParamInt* GNParamInt::Clone(const char* name) const
-    {
-        return aznew GNParamInt(name ? name : m_name.c_str(), m_value);
-    }
-
-    /*bool GNParamInt::Write(AZ::ScriptContext& context)
-    {
-        AZ::ScriptValue<double>::StackPush(context.NativeContext(), m_value);
-        return true;
-    }
-
-    bool GNParamInt::TryRead(GNParamDataContext& sdc, int index)
-    {
-        if (sdc.IsNumber(index))
-        {
-            sdc.ReadValue(m_value);
-            return true;
-        }
-
-        return false;
-    }*/
+ 
 
     AZ::TypeId GNParamInt::GetDataTypeUuid() const
     {
@@ -351,7 +289,7 @@ namespace GeomNodes
             double value;
             if (context.ReadValue(value, Field::DefaultValue))
             {
-                auto paramValue = aznew GNParamValue(name, value);
+                auto paramValue = aznew GNParamValue(name, value, context.GetReadOnlyPointer());
                 double min, max;
                 if (context.ReadValue(min, Field::MinValue))
                 {
@@ -375,28 +313,6 @@ namespace GeomNodes
     {
         return context.IsValue(valueIndex);
     }
-
-    GNParamValue* GNParamValue::Clone(const char* name) const
-    {
-        return aznew GNParamValue(name ? name : m_name.c_str(), m_value);
-    }
-
-    /*bool GNParamValue::Write(AZ::ScriptContext& context)
-    {
-        AZ::ScriptValue<double>::StackPush(context.NativeContext(), m_value);
-        return true;
-    }
-
-    bool GNParamValue::TryRead(GNParamDataContext& sdc, int index)
-    {
-        if (sdc.IsNumber(index))
-        {
-            sdc.ReadValue(m_value);
-            return true;
-        }
-
-        return false;
-    }*/
 
     AZ::TypeId GNParamValue::GetDataTypeUuid() const
     {
@@ -456,7 +372,7 @@ namespace GeomNodes
             const char* value = nullptr;
             if (context.ReadValue(value, Field::DefaultValue))
             {
-                retVal = aznew GNParamString(name, value);
+                retVal = aznew GNParamString(name, value, context.GetReadOnlyPointer());
                 retVal->ReadSetGNId(context);
             }
         }
@@ -468,34 +384,6 @@ namespace GeomNodes
     {
         return context.IsString(valueIndex);
     }
-
-    GNParamString* GNParamString::Clone(const char* name) const
-    {
-        return aznew GNParamString(name ? name : m_name.c_str(), m_value.c_str());
-    }
-
-    /*bool GNParamString::Write(AZ::ScriptContext& context)
-    {
-        AZ::ScriptValue<const char*>::StackPush(context.NativeContext(), m_value.c_str());
-        return true;
-    }
-
-    bool GNParamString::TryRead(GNParamDataContext& context, int valueIndex)
-    {
-        bool readValue = false;
-
-        if (context.IsString(valueIndex))
-        {
-            const char* value = nullptr;
-            if (context.ReadValue(value))
-            {
-                readValue = true;
-                m_value = value;
-            }
-        }
-
-        return readValue;
-    }*/
 
     AZ::TypeId GNParamString::GetDataTypeUuid() const
     {
