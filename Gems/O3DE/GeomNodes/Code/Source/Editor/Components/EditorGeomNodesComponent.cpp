@@ -288,6 +288,7 @@ namespace GeomNodes
                 }
                 else {
                     // TODO: error message
+                    AZ_Warning("EditorGeomNodesComponent", false, errorMsg.c_str());
                     SetWorkInProgress(false);
                 }
             }
@@ -641,6 +642,10 @@ namespace GeomNodes
 
 					
                     //TODO: delete this entity
+                    // AZ::Interface<GNSystemInterface>::Get()
+                    // then call delete entities and descendants.
+
+                    EBUS_EVENT(AzToolsFramework::ToolsApplicationRequests::Bus, DeleteEntitiesAndAllDescendants, AzToolsFramework::EntityIdList{GetEntityId()});
 				}
 
                 SetWorkInProgress(false);

@@ -5,6 +5,42 @@ from materials import mat_helper
 # import logging as _logging
 # _LOGGER = _logging.getLogger('GeomNodes.External.Scripts.exporter.fbx_exporter')
 
+def get_geomnodes_objects(geomnodes_obj, collection):
+    depsgraph = bpy.context.evaluated_depsgraph_get()        
+    eval_geomnodes_data = geomnodes_obj.evaluated_get(depsgraph).data
+
+    scene_scale_len = bpy.context.scene.unit_settings.scale_length
+
+    geomnodes_objects = []
+    if geomnodes_obj.type == 'MESH':
+        new_obj = bpy.data.objects.new(name=utils.remove_special_chars(eval_geomnodes_data.name), object_data=eval_geomnodes_data.copy())
+        new_obj.matrix_world = geomnodes_obj.matrix_world.copy() * scene_scale_len
+        new_obj.instance_type = geomnodes_obj.instance_type
+        geomnodes_objects.append(new_obj)
+        collection.objects.link(new_obj)
+
+    for instance in depsgraph.object_instances:
+        if instance.instance_object and instance.parent and instance.parent.original == geomnodes_obj:
+            if instance.object.type == 'MESH':
+                new_obj = bpy.data.objects.new(name=utils.remove_special_chars(instance.object.name), object_data=instance.object.data.copy())
+                new_obj.matrix_world = instance.matrix_world.copy() * scene_scale_len
+                new_obj.instance_type = instance.object.instance_type
+                geomnodes_objects.append(new_obj)
+                collection.objects.link(new_obj)
+
+    return geomnodes_objects
+
+def group_objects_by_name(objects):
+    groups = {}
+    for obj in objects:
+        name_parts = obj.name.split('.')
+        if len(name_parts) > 1:
+            name_prefix = '.'.join(name_parts[:-1])
+            if name_prefix not in groups:
+                groups[name_prefix] = []
+            groups[name_prefix].append(obj)
+    return groups
+
 def fbx_file_exporter(obj_name, fbx_file_path, mesh_to_triangles):
     """!
     This function will send to selected .FBX to an O3DE Project Path
@@ -30,28 +66,23 @@ def fbx_file_exporter(obj_name, fbx_file_path, mesh_to_triangles):
     if geomnodes_obj.hide_get():
         geomnodes_obj.hide_set(False, view_layer=bpy.context.view_layer)
 
-    depsgraph = bpy.context.evaluated_depsgraph_get()        
-    eval_geomnodes_data = geomnodes_obj.evaluated_get(depsgraph).data
-
     # Create a new collection to hold the duplicated objects
     collection = bpy.data.collections.new(name="Export Collection")
     bpy.context.scene.collection.children.link(collection)
 
-    scene_scale_len = bpy.context.scene.unit_settings.scale_length
+    geomnodes_objects = get_geomnodes_objects(geomnodes_obj, collection)
+    
+    groups = group_objects_by_name(geomnodes_objects)
+    for group_name, objects  in groups.items():
+        if len(objects) > 2: # join 2 or more objects, if the group only has one it will be included in the collection and in turn will be exported
+            # Select all the objects that use this material
+            bpy.ops.object.select_all(action='DESELECT')
+            bpy.context.view_layer.objects.active = objects[0]
+            for obj in objects:
+                obj.select_set(True)
 
-    if geomnodes_obj.type == 'MESH':
-        new_obj = bpy.data.objects.new(name=utils.remove_special_chars(eval_geomnodes_data.name), object_data=eval_geomnodes_data.copy())
-        new_obj.matrix_world = geomnodes_obj.matrix_world.copy() * scene_scale_len
-        new_obj.instance_type = geomnodes_obj.instance_type
-        collection.objects.link(new_obj)
-
-    for instance in depsgraph.object_instances:
-        if instance.instance_object and instance.parent and instance.parent.original == geomnodes_obj:
-            if instance.object.type == 'MESH':
-                new_obj = bpy.data.objects.new(name=utils.remove_special_chars(instance.object.name), object_data=instance.object.data.copy())
-                new_obj.matrix_world = instance.matrix_world.copy() * scene_scale_len
-                new_obj.instance_type = instance.object.instance_type
-                collection.objects.link(new_obj)
+            # Join the objects
+            bpy.ops.object.join()
     
     for obj in collection.objects:
         obj.select_set(True)

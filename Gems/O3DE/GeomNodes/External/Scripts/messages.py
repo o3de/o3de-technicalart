@@ -97,9 +97,15 @@ def poll_for_messages():
                     from lib_loader import GNLibs
                     GNLibs.ClearSHM(map_id)
                 elif 'Export' in msg_dict:
-                    fbx_exporter.fbx_file_exporter(msg_dict['Object'], msg_dict['FBXPath'], False)
-                    #TODO: do some error checks. Inform the gem if there's an error.
-                    MessageWriter().from_buffer(bytes(json.dumps({'Export' : True, 'Error' : "" }), "UTF-8"))
+                    error_msg = ""
+                    try:
+                        fbx_exporter.fbx_file_exporter(msg_dict['Object'], msg_dict['FBXPath'], False)
+                    except Exception as e:
+                        error_msg = str(e)
+                        if hasattr(e, 'message'):
+                            error_msg = str(e.message)
+                        
+                    MessageWriter().from_buffer(bytes(json.dumps({'Export' : True, 'Error' : error_msg }), "UTF-8"))
                 elif 'Alive' in msg_dict:
                     return PollReturn.HEARTBEAT
         return PollReturn.MESSAGE # reset idle_time as we got a message from the server
