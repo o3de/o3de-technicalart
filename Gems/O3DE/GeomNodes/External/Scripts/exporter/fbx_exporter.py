@@ -5,31 +5,6 @@ from materials import mat_helper
 # import logging as _logging
 # _LOGGER = _logging.getLogger('GeomNodes.External.Scripts.exporter.fbx_exporter')
 
-def get_geomnodes_objects(geomnodes_obj, collection):
-    depsgraph = bpy.context.evaluated_depsgraph_get()        
-    eval_geomnodes_data = geomnodes_obj.evaluated_get(depsgraph).data
-
-    scene_scale_len = bpy.context.scene.unit_settings.scale_length
-
-    geomnodes_objects = []
-    if geomnodes_obj.type == 'MESH':
-        new_obj = bpy.data.objects.new(name=utils.remove_special_chars(eval_geomnodes_data.name), object_data=eval_geomnodes_data.copy())
-        new_obj.matrix_world = geomnodes_obj.matrix_world.copy() * scene_scale_len
-        new_obj.instance_type = geomnodes_obj.instance_type
-        geomnodes_objects.append(new_obj)
-        collection.objects.link(new_obj)
-
-    for instance in depsgraph.object_instances:
-        if instance.instance_object and instance.parent and instance.parent.original == geomnodes_obj:
-            if instance.object.type == 'MESH':
-                new_obj = bpy.data.objects.new(name=utils.remove_special_chars(instance.object.name), object_data=instance.object.data.copy())
-                new_obj.matrix_world = instance.matrix_world.copy() * scene_scale_len
-                new_obj.instance_type = instance.object.instance_type
-                geomnodes_objects.append(new_obj)
-                collection.objects.link(new_obj)
-
-    return geomnodes_objects
-
 def group_objects_by_name(objects):
     groups = {}
     for obj in objects:
@@ -49,8 +24,6 @@ def fbx_file_exporter(obj_name, fbx_file_path, mesh_to_triangles):
     @param file_name A custom file name string
     """
 
-    print(fbx_file_path)
-
     # Lets create a dictionary to store all the source paths to place back after export
     stored_image_source_paths = {}
     source_file_path = Path(fbx_file_path) # Covert string to path
@@ -59,33 +32,29 @@ def fbx_file_exporter(obj_name, fbx_file_path, mesh_to_triangles):
     # Deselect all objects
     bpy.ops.object.select_all(action='DESELECT')
 
-    geomnodes_obj = bpy.data.objects.get(obj_name)
-    if geomnodes_obj == None:
-        geomnodes_obj = utils.get_geomnodes_obj()
-    
-    if geomnodes_obj.hide_get():
-        geomnodes_obj.hide_set(False, view_layer=bpy.context.view_layer)
-
     # Create a new collection to hold the duplicated objects
     collection = bpy.data.collections.new(name="Export Collection")
     bpy.context.scene.collection.children.link(collection)
 
-    geomnodes_objects = get_geomnodes_objects(geomnodes_obj, collection)
-    
+    # create copies of objects/meshes produces by geometry nodes modifier
+    geomnodes_objects = utils.create_geomnodes_copies(obj_name)
+
+    # add geomnode objects to the collection. Need this since we will be joining them later and the objects needs to be in the scene
+    for obj in geomnodes_objects:
+        collection.objects.link(obj)
+
     groups = group_objects_by_name(geomnodes_objects)
-    for group_name, objects  in groups.items():
+    for _, objects  in groups.items():
         if len(objects) > 2: # join 2 or more objects, if the group only has one it will be included in the collection and in turn will be exported
             # Select all the objects that use this material
             bpy.ops.object.select_all(action='DESELECT')
             bpy.context.view_layer.objects.active = objects[0]
-            for obj in objects:
-                obj.select_set(True)
-
+            utils.select_set_objects(objects, True)
+            
             # Join the objects
             bpy.ops.object.join()
     
-    for obj in collection.objects:
-        obj.select_set(True)
+    utils.select_set_objects(collection.objects, True)
     
     if mesh_to_triangles:
         utils.add_remove_modifier("TRIANGULATE", True)
