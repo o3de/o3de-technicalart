@@ -332,9 +332,11 @@ namespace GeomNodes
             m_positions.insert(m_positions.end(), rhsPositions.begin(), rhsPositions.end());
 
             Vert3Vector rhsNormals = rhs.m_normals;
+            auto normalMatrix = instance.GetInverseFull();
+            normalMatrix.Transpose();
             for (auto& normal : rhsNormals)
             {
-                auto vec3 = instance * MathHelper::Vec3fToVec3(normal);
+                auto vec3 = normalMatrix * MathHelper::Vec3fToVec3(normal);
                 vec3.Normalize();
                 normal = MathHelper::Vec3ToVec3f(vec3);
             }

@@ -97,13 +97,13 @@ namespace GeomNodes
 			{
 				AZ::s64 hash = Read<AZ::s64>(mapId);
 
-				[[maybe_unused]] AZ::Matrix4x4 LocalMatrix = Read<AZ::Matrix4x4>(mapId);
-				[[maybe_unused]] AZ::Matrix4x4 WorldMatrix = Read<AZ::Matrix4x4>(mapId);
+				[[maybe_unused]] AZ::Matrix4x4 localMatrix = Read<AZ::Matrix4x4>(mapId);
+				[[maybe_unused]] AZ::Matrix4x4 worldMatrix = Read<AZ::Matrix4x4>(mapId);
 				
 				AZ::Matrix3x3 rotateZ = AZ::Matrix3x3::CreateRotationZ(AZ::DegToRad(180.0f));
 				
 				auto rotate4x4 = AZ::Matrix4x4::CreateFromMatrix3x4(AZ::Matrix3x4::CreateFromMatrix3x3(rotateZ));
-				AZ::Matrix4x4 instanceMatrix = rotate4x4 * LocalMatrix;
+				AZ::Matrix4x4 instanceMatrix = rotate4x4 * localMatrix;
 
 				for (auto& meshGroup : meshMap)
 				{
