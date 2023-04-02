@@ -20,8 +20,6 @@ namespace GeomNodes
 		m_meshes.clear();
 		m_assignedMeshmap.clear();
 
-		AZ_Assert(!m_materialPathFormat.empty(), "You need to call SetMaterialPathFormat first before calling ReadData!");
-
 		if (OpenSHM(mapId))
 		{
 			AZ::s32 meshCount = Read<AZ::s32>(mapId);
@@ -78,18 +76,17 @@ namespace GeomNodes
 			// but with a different indices based on the material indices.
 			for (auto& mesh : m_meshes)
 			{
-				int materialIdx = 0;
+				int materialMeshIndex = 0;
 				for (auto& materialName : mesh.GetMaterials())
 				{
-					auto indices = mesh.GetIndicesByMaterialIndex(materialIdx);
+					auto indices = mesh.GetIndicesByMaterialIndex(materialMeshIndex);
 					if (indices.size() > 0) {
 						auto& meshInstance = meshMap[materialName].emplace_back(mesh);
 						meshInstance.SetIndices(indices);
-						meshInstance.SetMaterial(materialName, AZStd::string::format(m_materialPathFormat.c_str(), materialName.c_str()));
 						meshInstance.CalculateTangents();
 						meshInstance.ClearMaterialList();
 					}
-					materialIdx++;
+					materialMeshIndex++;
 				}
 			}
 
@@ -120,6 +117,7 @@ namespace GeomNodes
 			m_meshes.clear();
 
 			// merge all meshes in each mesh group along with their instances
+			AZ::u32 materialIndex = 0;
 			for (auto& meshGroup : meshMap)
 			{
 				GNMeshData meshData;
@@ -128,12 +126,19 @@ namespace GeomNodes
 					meshData += mesh;
 				}
 
-				if (meshData.VertexCount() > 0)
+				if (meshData.GetCount<AttributeType::Position>() > 0)
 				{
+					meshData.SetMaterialIndex(materialIndex);
 					meshData.CalculateAABB();
+					m_aabb.AddAabb(meshData.GetAabb()); // add mesh data's aabb to get the aabb for the whole model
 					m_meshes.push_back(meshData);
 				}
+
+				materialIndex++;
 			}
+
+			// Convert to only one buffers/arrays and keep track of the offsets and element counts
+			MergeMeshBuffers();
 
 			ClearSHM(mapId);
 		}
@@ -162,9 +167,82 @@ namespace GeomNodes
 		m_assignedMeshmap.emplace(AZStd::make_pair(entityId, aznumeric_cast<AZ::u32>(m_assignedMeshmap.size())));
 	}
 
-	void GNModelData::SetMaterialPathFormat(const AZStd::string& materialPathFormat)
+	const U32Vector& GNModelData::GetIndices() const
 	{
-		m_materialPathFormat = materialPathFormat;
+		return m_indices;
+	}
+
+	const Vert3Vector& GNModelData::GetPositions() const
+	{
+		return m_positions;
+	}
+
+	const Vert3Vector& GNModelData::GetNormals() const
+	{
+		return m_normals;
+	}
+
+	const Vert4Vector& GNModelData::GetTangents() const
+	{
+		return m_tangents;
+	}
+
+	const Vert3Vector& GNModelData::GetBitangents() const
+	{
+		return m_bitangents;
+	}
+
+	const Vert2Vector& GNModelData::GetUVs() const
+	{
+		return m_uvs;
+	}
+
+	const Vert4Vector& GNModelData::GetColors() const
+	{
+		return m_colors;
+	}
+
+	AZ::Aabb GNModelData::GetAabb() const
+	{
+		return m_aabb;
+	}
+
+	void GNModelData::MergeMeshBuffers()
+	{
+		m_indices.clear();
+		m_positions.clear();
+		m_normals.clear();
+		m_tangents.clear();
+		m_bitangents.clear();
+		m_uvs.clear();
+		m_colors.clear();
+
+		for (auto& mesh : m_meshes)
+		{
+			mesh.SetIndexOffset(m_indices.size());
+			m_indices.insert(m_indices.end(), mesh.GetIndices().begin(), mesh.GetIndices().end());
+
+			mesh.SetOffset<AttributeType::Position>(m_positions.size());
+			m_positions.insert(m_positions.end(), mesh.GetDataBuffer<AttributeType::Position>().begin(), mesh.GetDataBuffer<AttributeType::Position>().end());
+
+			mesh.SetOffset<AttributeType::Normal>(m_normals.size());
+			m_normals.insert(m_normals.end(), mesh.GetDataBuffer<AttributeType::Normal>().begin(), mesh.GetDataBuffer<AttributeType::Normal>().end());
+
+			mesh.SetOffset<AttributeType::Tangent>(m_tangents.size());
+			m_tangents.insert(m_tangents.end(), mesh.GetDataBuffer<AttributeType::Tangent>().begin(), mesh.GetDataBuffer<AttributeType::Tangent>().end());
+
+			mesh.SetOffset<AttributeType::Bitangent>(m_bitangents.size());
+			m_bitangents.insert(m_bitangents.end(), mesh.GetDataBuffer<AttributeType::Bitangent>().begin(), mesh.GetDataBuffer<AttributeType::Bitangent>().end());
+
+			mesh.SetOffset<AttributeType::UV>(m_uvs.size());
+			m_uvs.insert(m_uvs.end(), mesh.GetDataBuffer<AttributeType::UV>().begin(), mesh.GetDataBuffer<AttributeType::UV>().end());
+
+			mesh.SetOffset<AttributeType::Color>(m_colors.size());
+			m_colors.insert(m_colors.end(), mesh.GetDataBuffer<AttributeType::Color>().begin(), mesh.GetDataBuffer<AttributeType::Color>().end());
+
+			// clear the buffers since we already copied them.
+			mesh.ClearBuffers();
+		}
 	}
 
     template<typename T>

@@ -1,10 +1,5 @@
 #include "GNRenderMesh.h"
 
-//#include <Rendering/Atom/WhiteBoxMeshAtomData.h>
-//#include <Rendering/WhiteBoxRenderData.h>
-//#include <Util/WhiteBoxMathUtil.h>
-//#include <Viewport/WhiteBoxViewportConstants.h>
-
 #include <Atom/RPI.Public/Model/Model.h>
 #include <Atom/RPI.Public/Scene.h>
 #include <Atom/RPI.Reflect/Asset/AssetUtils.h>
@@ -59,30 +54,18 @@ namespace GeomNodes
         return attributesAreValid;
     }
 
-    bool GNRenderMesh::CreateMeshBuffers(const GNMeshData& meshData)
+    bool GNRenderMesh::CreateMeshBuffers(const GNModelData& modelData)
     {
-        m_indexBuffer = AZStd::make_unique<IndexBuffer>(meshData.GetIndices());
+		m_indexBuffer = AZStd::make_unique<IndexBuffer>(modelData.GetIndices());
 
-        CreateAttributeBuffer<AttributeType::Position>(meshData.GetPositions());
-        CreateAttributeBuffer<AttributeType::Normal>(meshData.GetNormals());
-        CreateAttributeBuffer<AttributeType::Tangent>(meshData.GetTangents());
-        CreateAttributeBuffer<AttributeType::Bitangent>(meshData.GetBitangents());
-        CreateAttributeBuffer<AttributeType::UV>(meshData.GetUVs());
-        CreateAttributeBuffer<AttributeType::Color>(meshData.GetColors());
+		CreateAttributeBuffer<AttributeType::Position>(modelData.GetPositions());
+		CreateAttributeBuffer<AttributeType::Normal>(modelData.GetNormals());
+		CreateAttributeBuffer<AttributeType::Tangent>(modelData.GetTangents());
+		CreateAttributeBuffer<AttributeType::Bitangent>(modelData.GetBitangents());
+		CreateAttributeBuffer<AttributeType::UV>(modelData.GetUVs());
+		CreateAttributeBuffer<AttributeType::Color>(modelData.GetColors());
 
-        return AreAttributesValid();
-    }
-
-    bool GNRenderMesh::UpdateMeshBuffers(const GNMeshData& meshData)
-    {
-        UpdateAttributeBuffer<AttributeType::Position>(meshData.GetPositions());
-        UpdateAttributeBuffer<AttributeType::Normal>(meshData.GetNormals());
-        UpdateAttributeBuffer<AttributeType::Tangent>(meshData.GetTangents());
-        UpdateAttributeBuffer<AttributeType::Bitangent>(meshData.GetBitangents());
-        UpdateAttributeBuffer<AttributeType::UV>(meshData.GetUVs());
-        UpdateAttributeBuffer<AttributeType::Color>(meshData.GetColors());
-
-        return AreAttributesValid();
+		return AreAttributesValid();
     }
 
     void GNRenderMesh::AddLodBuffers(AZ::RPI::ModelLodAssetCreator& modelLodCreator)
@@ -100,24 +83,25 @@ namespace GeomNodes
         }
     }
 
-    void GNRenderMesh::AddMeshBuffers(AZ::RPI::ModelLodAssetCreator& modelLodCreator)
+    void GNRenderMesh::AddMeshBuffers(AZ::RPI::ModelLodAssetCreator& modelLodCreator, const GNMeshData& meshData)
     {
-        modelLodCreator.SetMeshIndexBuffer(m_indexBuffer->GetBufferAssetView());
+		modelLodCreator.SetMeshIndexBuffer({ m_indexBuffer->GetBuffer(), 
+            AZ::RHI::BufferViewDescriptor::CreateTyped(meshData.GetIndexOffset(), meshData.GetIndexCount(), GetFormatForVertexStreamDataType<uint32_t>()) });
 
         for (auto& attribute : m_attributes)
         {
             AZStd::visit(
-                [&modelLodCreator](auto&& att)
+                [&modelLodCreator, meshData](auto&& att)
                 {
-                    att->AddMeshStreamBuffer(modelLodCreator);
+                    att->AddMeshStreamBuffer(modelLodCreator, meshData);
                 },
                 attribute);
         }
     }
 
-    bool GNRenderMesh::CreateLodAsset(const GNMeshData& meshData)
+    bool GNRenderMesh::CreateLodAsset(const GNModelData& modelData)
     {
-        if (!CreateMeshBuffers(meshData))
+        if (!CreateMeshBuffers(modelData))
         {
             return false;
         }
@@ -125,13 +109,18 @@ namespace GeomNodes
         AZ::RPI::ModelLodAssetCreator modelLodCreator;
         modelLodCreator.Begin(AZ::Data::AssetId(AZ::Uuid::CreateRandom()));
         AddLodBuffers(modelLodCreator);
-        modelLodCreator.BeginMesh();
-        modelLodCreator.SetMeshAabb(meshData.GetAabb());
 
-        modelLodCreator.SetMeshMaterialSlot(OneMaterialSlotId);
 
-        AddMeshBuffers(modelLodCreator);
-        modelLodCreator.EndMesh();
+        for (auto meshData : modelData.GetMeshes())
+        {
+			modelLodCreator.BeginMesh();
+			modelLodCreator.SetMeshAabb(modelData.GetAabb());
+
+            modelLodCreator.SetMeshMaterialSlot(meshData.GetMaterialIndex());
+
+			AddMeshBuffers(modelLodCreator, meshData);
+			modelLodCreator.EndMesh();
+        }
 
         if (!modelLodCreator.End(m_lodAsset))
         {
@@ -161,23 +150,30 @@ namespace GeomNodes
         modelCreator.SetName(ModelName);
         modelCreator.AddLodAsset(AZStd::move(m_lodAsset));
 
-        /*if (auto materialAsset = AZ::RPI::AssetUtils::LoadAssetByProductPath<AZ::RPI::MaterialAsset>(TexturedMaterialPath.data()))
+        m_materialMap.clear();
+        AZ::RPI::ModelMaterialSlot::StableId slotId = 0;
+        for (auto materialPath : m_materialList)
         {
-            auto materialOverrideInstance = AZ::RPI::Material::FindOrCreate(materialAsset);
-            auto& materialAssignment = m_materialMap[AZ::Render::DefaultMaterialAssignmentId];
-            materialAssignment.m_materialAsset = materialAsset;
-            materialAssignment.m_materialInstance = materialOverrideInstance;
+			if (auto materialAsset = AZ::RPI::AssetUtils::LoadAssetByProductPath<AZ::RPI::MaterialAsset>(materialPath.c_str()))
+			{
+				auto materialOverrideInstance = AZ::RPI::Material::FindOrCreate(materialAsset);
+				auto& materialAssignment = m_materialMap[AZ::Render::MaterialAssignmentId::CreateFromStableIdOnly(slotId)];
+				materialAssignment.m_materialAsset = materialAsset;
+				materialAssignment.m_materialInstance = materialOverrideInstance;
 
-            AZ::RPI::ModelMaterialSlot materialSlot;
-            materialSlot.m_stableId = OneMaterialSlotId;
-            materialSlot.m_defaultMaterialAsset = materialAsset;
-            modelCreator.AddMaterialSlot(materialSlot);
+				AZ::RPI::ModelMaterialSlot materialSlot;
+				materialSlot.m_stableId = slotId;
+				materialSlot.m_defaultMaterialAsset = materialAsset;
+				modelCreator.AddMaterialSlot(materialSlot);
+			}
+			else
+			{
+				AZ_Error("CreateLodAsset", false, "Could not load material.");
+				return;
+			}
+
+            slotId++;
         }
-        else
-        {
-            AZ_Error("CreateLodAsset", false, "Could not load material.");
-            return;
-        }*/
 
         modelCreator.End(m_modelAsset);
     }
@@ -201,14 +197,9 @@ namespace GeomNodes
         return true;
     }
 
-    bool GNRenderMesh::MeshRequiresFullRebuild([[maybe_unused]] const GNMeshData& meshData) const
+    bool GNRenderMesh::CreateMesh(const GNModelData& modelData)
     {
-        return meshData.VertexCount() != m_vertexCount;
-    }
-
-    bool GNRenderMesh::CreateMesh(const GNMeshData& meshData)
-    {
-        if (!CreateLodAsset(meshData))
+        if (!CreateLodAsset(modelData))
         {
             return false;
         }
@@ -220,9 +211,8 @@ namespace GeomNodes
             return false;
         }
 
-        SetMaterial(meshData.GetMaterialPath());
-        m_vertexCount = meshData.VertexCount();
-
+        SetMaterials();
+        
         return true;
     }
 
@@ -236,33 +226,22 @@ namespace GeomNodes
         return true; // meshData.VertexCount() != m_vertexCount;
     }
 
-    void GNRenderMesh::SetMaterial(const AZStd::string& materialAssetPath)
+    void GNRenderMesh::SetMaterials()
     {
-		AZ::RPI::AssetUtils::TraceLevel traceLevel = AZ::RPI::AssetUtils::TraceLevel::Assert;
-		//TODO: we need to wait for this
-        m_materialAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::MaterialAsset>(materialAssetPath.c_str(), traceLevel);
-		m_materialAsset.QueueLoad();
-
-        m_materialAsset = AZ::RPI::AssetUtils::LoadAssetByProductPath<AZ::RPI::MaterialAsset>(materialAssetPath.c_str(), traceLevel);
-        AZ::Data::AssetBus::MultiHandler::BusConnect(m_materialAsset.GetId());
+		if (m_meshFeatureProcessor)
+		{
+			m_meshFeatureProcessor->SetMaterialAssignmentMap(m_meshHandle, m_materialMap);
+		}
     }
 
-    void GNRenderMesh::BuildMesh(const GNMeshData& meshData, const AZ::Transform& /*worldFromLocal*/)
+    void GNRenderMesh::SetMaterialList(const AZStd::vector<AZStd::string> materials)
     {
-        if (DoesMeshRequireFullRebuild(meshData))
-        {
-            if (!CreateMesh(meshData))
-            {
-                return;
-            }
-        }
-        else
-        {
-            if (!UpdateMeshBuffers(meshData))
-            {
-                return;
-            }
-        }
+        m_materialList = materials;
+    }
+
+    void GNRenderMesh::BuildMesh(const GNModelData& modelData, const AZ::Transform& /*worldFromLocal*/)
+    {
+        CreateMesh(modelData);
     }
 
     void GNRenderMesh::UpdateTransform(const AZ::Transform& worldFromLocal, const AZ::Vector3& /*scale*/)
@@ -271,38 +250,8 @@ namespace GeomNodes
         m_meshFeatureProcessor->SetTransform(m_meshHandle, worldFromLocal);
     }
 
-    //void GNRenderMesh::UpdateMaterial(const WhiteBoxMaterial& material)
-    //{
-    //    if (m_meshFeatureProcessor)
-    //    {
-    //        auto& materialAssignment = m_materialMap[AZ::Render::DefaultMaterialAssignmentId];
-    //        materialAssignment.m_propertyOverrides[AZ::Name("baseColor.color")] = AZ::Color(material.m_tint);
-    //        materialAssignment.m_propertyOverrides[AZ::Name("baseColor.useTexture")] = material.m_useTexture;
-    //        // if ApplyProperties fails, defer updating the material assignment map
-    //        // on the next tick, and try applying properties again
-    //        if (materialAssignment.ApplyProperties())
-    //        {
-    //            if (AZ::TickBus::Handler::BusIsConnected())
-    //            {
-    //                AZ::TickBus::Handler::BusDisconnect();
-    //            }
-    //            m_meshFeatureProcessor->SetMaterialAssignmentMap(m_meshHandle, m_materialMap);
-    //        }
-    //        else if (!AZ::TickBus::Handler::BusIsConnected())
-    //        {
-    //            AZ::TickBus::Handler::BusConnect();
-    //        }
-    //    }
-    //}
-
     void GNRenderMesh::OnTick([[maybe_unused]] float deltaTime, [[maybe_unused]] AZ::ScriptTimePoint time)
     {
-        /*auto& materialAssignment = m_materialMap[AZ::Render::DefaultMaterialAssignmentId];
-        if (materialAssignment.ApplyProperties())
-        {
-            m_meshFeatureProcessor->SetMaterialAssignmentMap(m_meshHandle, m_materialMap);
-            AZ::TickBus::Handler::BusDisconnect();
-        }*/
     }
 
     AZ::Render::MaterialAssignmentId GNRenderMesh::FindMaterialAssignmentId(const AZ::Render::MaterialAssignmentLodIndex lod, const AZStd::string& label) const
@@ -353,23 +302,5 @@ namespace GeomNodes
     const AZ::Render::MeshFeatureProcessorInterface::MeshHandle* GNRenderMesh::GetMeshHandle() const
     {
         return &m_meshHandle;
-    }
-    
-    void GNRenderMesh::OnAssetReady(AZ::Data::Asset<AZ::Data::AssetData> asset)
-    {
-		if (m_materialAsset.GetId() == asset.GetId())
-		{
-			m_materialAsset = asset;
-			AZ::Data::AssetBus::MultiHandler::BusDisconnect(asset.GetId());
-
-			m_material = AZ::RPI::Material::FindOrCreate(m_materialAsset);
-			m_meshFeatureProcessor->SetMaterialAssignmentMap(m_meshHandle, m_material);
-		}
-    }
-    
-    void GNRenderMesh::OnAssetError(AZ::Data::Asset<AZ::Data::AssetData> asset)
-    {
-		AZ_Error("GNRenderMesh", false, "Failed to load material asset %s", asset.ToString<AZStd::string>().c_str());
-		AZ::Data::AssetBus::MultiHandler::BusDisconnect(asset.GetId());
     }
 } // namespace WhiteBox

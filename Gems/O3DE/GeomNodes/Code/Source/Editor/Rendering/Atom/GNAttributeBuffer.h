@@ -1,24 +1,14 @@
 #pragma once
 
 #include "GNBuffer.h"
-
+#include <Editor/Common/GNConstants.h>
 #include <Atom/RHI.Reflect/ShaderSemantic.h>
 #include <Atom/RPI.Reflect/Model/ModelLodAssetCreator.h>
+#include <Editor/Rendering/GNMeshData.h>
 
 namespace GeomNodes
 {
-    //! Attributes for mesh vertices.
-    enum class AttributeType
-    {
-        Position,
-        Normal,
-        Tangent,
-        Bitangent,
-        UV,
-        Color
-    };
-
-    //! The number of attributes required by the mesh.
+	//! The number of attributes required by the mesh.
     inline constexpr uint32_t NumAttributes = 6;
 
     //! Trait to describe mesh vertex attribute format.
@@ -33,6 +23,7 @@ namespace GeomNodes
     {
         static constexpr const char* ShaderSemantic = "POSITION";
         using BufferType = Vector3Buffer;
+        static constexpr AZ::RHI::Format RHIFormat = AZ::RHI::Format::R32G32B32_FLOAT;
     };
 
     //! Attribute trait specialization for vertex normal attribute
@@ -41,6 +32,7 @@ namespace GeomNodes
     {
         static constexpr const char* ShaderSemantic = "NORMAL";
         using BufferType = Vector3Buffer;
+        static constexpr AZ::RHI::Format RHIFormat = AZ::RHI::Format::R32G32B32_FLOAT;
     };
 
     //! Attribute trait specialization for vertex tangent attribute.
@@ -49,6 +41,7 @@ namespace GeomNodes
     {
         static constexpr const char* ShaderSemantic = "TANGENT";
         using BufferType = Vector4Buffer;
+        static constexpr AZ::RHI::Format RHIFormat = AZ::RHI::Format::R32G32B32A32_FLOAT;
     };
 
     //! Attribute trait specialization for vertex bitangent attribute.
@@ -57,6 +50,7 @@ namespace GeomNodes
     {
         static constexpr const char* ShaderSemantic = "BITANGENT";
         using BufferType = Vector3Buffer;
+        static constexpr AZ::RHI::Format RHIFormat = AZ::RHI::Format::R32G32B32_FLOAT;
     };
 
     //! Attribute trait specialization for vertex uv attribute.
@@ -65,6 +59,7 @@ namespace GeomNodes
     {
         static constexpr const char* ShaderSemantic = "UV";
         using BufferType = Vector2Buffer;
+        static constexpr AZ::RHI::Format RHIFormat = AZ::RHI::Format::R32G32_FLOAT;
     };
 
     //! Attribute trait specialization for vertex color attribute.
@@ -73,6 +68,7 @@ namespace GeomNodes
     {
         static constexpr const char* ShaderSemantic = "COLOR";
         using BufferType = Vector4Buffer;
+        static constexpr AZ::RHI::Format RHIFormat = AZ::RHI::Format::R32G32B32A32_FLOAT;
     };
 
     //! Buffer to hold mesh vertex attribute data.
@@ -102,7 +98,7 @@ namespace GeomNodes
         void AddLodStreamBuffer(AZ::RPI::ModelLodAssetCreator& modelLodCreator) const;
 
         //! Adds this attribute buffer to the mesh.
-        void AddMeshStreamBuffer(AZ::RPI::ModelLodAssetCreator& modelLodCreator) const;
+        void AddMeshStreamBuffer(AZ::RPI::ModelLodAssetCreator& modelLodCreator, const GNMeshData& meshData) const;
 
         //! Returns true of the attribute buffer is valid, otherwise false.
         bool IsValid() const;
@@ -114,6 +110,7 @@ namespace GeomNodes
     private:
         typename Trait::BufferType m_buffer;
         AZ::RHI::ShaderSemantic m_shaderSemantic;
+        AZ::RHI::Format m_format;
     };
 
     template<AttributeType AttributeTypeT>
@@ -121,6 +118,7 @@ namespace GeomNodes
     AttributeBuffer<AttributeTypeT>::AttributeBuffer(const AZStd::vector<VertexStreamDataType>& data)
         : m_buffer(data)
         , m_shaderSemantic(AZ::Name(Trait::ShaderSemantic))
+        , m_format(Trait::RHIFormat)
     {
         if (!IsValid())
         {
@@ -161,9 +159,12 @@ namespace GeomNodes
     }
 
     template<AttributeType AttributeTypeT>
-    void AttributeBuffer<AttributeTypeT>::AddMeshStreamBuffer(AZ::RPI::ModelLodAssetCreator& modelLodCreator) const
+    void AttributeBuffer<AttributeTypeT>::AddMeshStreamBuffer(AZ::RPI::ModelLodAssetCreator& modelLodCreator, const GNMeshData& meshData) const
     {
-        modelLodCreator.AddMeshStreamBuffer(GetShaderSemantic(), AZ::Name(), GetBufferAssetView());
+        modelLodCreator.AddMeshStreamBuffer(GetShaderSemantic(), AZ::Name(),
+            { m_buffer.GetBuffer(), 
+                AZ::RHI::BufferViewDescriptor::CreateTyped(meshData.GetOffset<AttributeTypeT>(), meshData.GetCount<AttributeTypeT>(), m_format)
+            });
     }
 
     template<AttributeType AttributeTypeT>

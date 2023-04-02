@@ -186,9 +186,139 @@ namespace GeomNodes
         }
     }
 
-    const AZ::u32 GNMeshData::VertexCount() const
+	template<AttributeType AttributeTypeT>
+	AZ::u32 GNMeshData::GetCount() const
     {
-        return aznumeric_cast<AZ::u32>(m_indices.size());
+		if constexpr (AttributeTypeT == AttributeType::Position) {
+			return aznumeric_cast<AZ::u32>(m_positionsRange.count);
+		}
+		else if constexpr (AttributeTypeT == AttributeType::Normal) {
+            return aznumeric_cast<AZ::u32>(m_normalsRange.count);
+		}
+		else if constexpr (AttributeTypeT == AttributeType::Tangent) {
+            return aznumeric_cast<AZ::u32>(m_tangentsRange.count);
+		}
+		else if constexpr (AttributeTypeT == AttributeType::Bitangent) {
+            return aznumeric_cast<AZ::u32>(m_bitangentsRange.count);
+		}
+		else if constexpr (AttributeTypeT == AttributeType::UV) {
+            return aznumeric_cast<AZ::u32>(m_uvsRange.count);
+		}
+		else if constexpr (AttributeTypeT == AttributeType::Color) {
+            return aznumeric_cast<AZ::u32>(m_colorsRange.count);
+		}
+    }
+
+    template<AttributeType AttributeTypeT>
+    AZ::u32 GNMeshData::GetOffset() const
+    {
+		if constexpr (AttributeTypeT == AttributeType::Position) {
+			return m_positionsRange.offset;
+		}
+		else if constexpr (AttributeTypeT == AttributeType::Normal) {
+			return m_normalsRange.offset;
+		}
+		else if constexpr (AttributeTypeT == AttributeType::Tangent) {
+			return m_tangentsRange.offset;
+		}
+		else if constexpr (AttributeTypeT == AttributeType::Bitangent) {
+			return m_bitangentsRange.offset;
+		}
+		else if constexpr (AttributeTypeT == AttributeType::UV) {
+			return m_uvsRange.offset;
+		}
+		else if constexpr (AttributeTypeT == AttributeType::Color) {
+			return m_colorsRange.offset;
+		}
+    }
+
+    template<AttributeType AttributeTypeT>
+    void GNMeshData::SetCount(AZ::u32 count)
+    {
+		if constexpr (AttributeTypeT == AttributeType::Position) {
+			m_positionsRange.count = count;
+		}
+		else if constexpr (AttributeTypeT == AttributeType::Normal) {
+			m_normalsRange.count = count;
+		}
+		else if constexpr (AttributeTypeT == AttributeType::Tangent) {
+			m_tangentsRange.count = count;
+		}
+		else if constexpr (AttributeTypeT == AttributeType::Bitangent) {
+			m_bitangentsRange.count = count;
+		}
+		else if constexpr (AttributeTypeT == AttributeType::UV) {
+			m_uvsRange.count = count;
+		}
+		else if constexpr (AttributeTypeT == AttributeType::Color) {
+			m_colorsRange.count = count;
+		}
+    }
+
+    template<AttributeType AttributeTypeT>
+    void GNMeshData::SetOffset(AZ::u32 offset)
+    {
+		if constexpr (AttributeTypeT == AttributeType::Position) {
+			m_positionsRange.offset = offset;
+		}
+		else if constexpr (AttributeTypeT == AttributeType::Normal) {
+			m_normalsRange.offset = offset;
+		}
+		else if constexpr (AttributeTypeT == AttributeType::Tangent) {
+			m_tangentsRange.offset = offset;
+		}
+		else if constexpr (AttributeTypeT == AttributeType::Bitangent) {
+			m_bitangentsRange.offset = offset;
+		}
+		else if constexpr (AttributeTypeT == AttributeType::UV) {
+			m_uvsRange.offset = offset;
+		}
+		else if constexpr (AttributeTypeT == AttributeType::Color) {
+			m_colorsRange.offset = offset;
+		}
+    }
+
+    template<AttributeType AttributeTypeT>
+    const auto& GNMeshData::GetDataBuffer() const
+    {
+		if constexpr (AttributeTypeT == AttributeType::Position) {
+			return m_positions;
+		}
+		else if constexpr (AttributeTypeT == AttributeType::Normal) {
+			return m_normals;
+		}
+		else if constexpr (AttributeTypeT == AttributeType::Tangent) {
+			return m_tangents;
+		}
+		else if constexpr (AttributeTypeT == AttributeType::Bitangent) {
+			return m_bitangents;
+		}
+		else if constexpr (AttributeTypeT == AttributeType::UV) {
+			return m_uvs;
+		}
+		else if constexpr (AttributeTypeT == AttributeType::Color) {
+			return m_colors;
+		}
+    }
+
+    AZ::u32 GNMeshData::GetIndexCount() const
+    {
+        return m_indicesRange.count;
+    }
+
+    AZ::u32 GNMeshData::GetIndexOffset() const
+    {
+        return m_indicesRange.offset;
+    }
+
+    void GNMeshData::SetIndexOffset(AZ::u32 offset)
+    {
+        m_indicesRange.offset = offset;
+    }
+
+    void GNMeshData::SetIndexCount(AZ::u32 count)
+    {
+        m_indicesRange.count = count;
     }
 
     const U32Vector& GNMeshData::GetIndices() const
@@ -199,36 +329,6 @@ namespace GeomNodes
     void GNMeshData::SetIndices(const U32Vector& indices)
     {
         m_indices = indices;
-    }
-
-    const Vert3Vector& GNMeshData::GetPositions() const
-    {
-        return m_positions;
-    }
-
-    const Vert3Vector& GNMeshData::GetNormals() const
-    {
-        return m_normals;
-    }
-
-    const Vert4Vector& GNMeshData::GetTangents() const
-    {
-        return m_tangents;
-    }
-
-    const Vert3Vector& GNMeshData::GetBitangents() const
-    {
-        return m_bitangents;
-    }
-
-    const Vert2Vector& GNMeshData::GetUVs() const
-    {
-        return m_uvs;
-    }
-
-    const Vert4Vector& GNMeshData::GetColors() const
-    {
-        return m_colors;
     }
 
     const Mat4Vector& GNMeshData::GetInstances() const
@@ -246,21 +346,15 @@ namespace GeomNodes
         m_materialNames.clear();
     }
 
-    void GNMeshData::SetMaterial(const AZStd::string& materialName, const AZStd::string& materialPath)
+    void GNMeshData::SetMaterialIndex(AZ::u32 materialIndex)
     {
-        m_materialName = materialName;
-        m_materialPath = materialPath;
+        m_materialIndex = materialIndex;
     }
 
-    AZStd::string GNMeshData::GetMaterial() const
-    {
-        return m_materialName;
-    }
-
-    AZStd::string GNMeshData::GetMaterialPath() const
-    {
-        return m_materialPath;
-    }
+	AZ::u32 GNMeshData::GetMaterialIndex() const
+	{
+		return m_materialIndex;
+	}
 
     void GNMeshData::AddInstance(const AZ::Matrix4x4& mat4)
     {
@@ -298,9 +392,6 @@ namespace GeomNodes
 
     GNMeshData& GNMeshData::operator+=(const GNMeshData& rhs)
     {
-        m_materialName = rhs.m_materialName;
-        m_materialPath = rhs.m_materialPath;
-
         AZ::u32 count = aznumeric_cast<AZ::u32>(m_positions.max_size() + rhs.m_positions.size() * rhs.m_instances.size());
         m_indices.reserve(count * 3);
         m_positions.reserve(count);
@@ -321,6 +412,7 @@ namespace GeomNodes
             }
 
             m_indices.insert(m_indices.end(), rhsIndices.begin(), rhsIndices.end());
+            SetIndexCount(m_indices.size());
 
             Vert3Vector rhsPositions = rhs.m_positions;
             for (auto& position : rhsPositions)
@@ -330,6 +422,7 @@ namespace GeomNodes
             }
 
             m_positions.insert(m_positions.end(), rhsPositions.begin(), rhsPositions.end());
+            SetCount<AttributeType::Position>(m_positions.size());
 
             Vert3Vector rhsNormals = rhs.m_normals;
             auto normalMatrix = instance.GetInverseFull();
@@ -342,13 +435,35 @@ namespace GeomNodes
             }
 
             m_normals.insert(m_normals.end(), rhsNormals.begin(), rhsNormals.end());
+            SetCount<AttributeType::Normal>(m_normals.size());
 
             m_colors.insert(m_colors.end(), rhs.m_colors.begin(), rhs.m_colors.end());
+            SetCount<AttributeType::Color>(m_colors.size());
+
             m_uvs.insert(m_uvs.end(), rhs.m_uvs.begin(), rhs.m_uvs.end());
+            SetCount<AttributeType::UV>(m_uvs.size());
             m_tangents.insert(m_tangents.end(), rhs.m_tangents.begin(), rhs.m_tangents.end());
+            SetCount<AttributeType::Tangent>(m_tangents.size());
             m_bitangents.insert(m_bitangents.end(), rhs.m_bitangents.begin(), rhs.m_bitangents.end());
+            SetCount<AttributeType::Bitangent>(m_bitangents.size());
         }
 
         return *this;
+    }
+
+    void GNMeshData::ClearBuffers()
+    {
+		m_indices.clear();
+		m_loops.clear();
+		m_materialIndices.clear();
+
+		m_positions.clear();
+		m_normals.clear();
+		m_tangents.clear();
+		m_bitangents.clear();
+		m_uvs.clear();
+		m_colors.clear();
+
+		m_instances.clear();
     }
 } // namespace GeomNodes

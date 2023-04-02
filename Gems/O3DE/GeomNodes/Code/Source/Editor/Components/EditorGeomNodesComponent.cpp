@@ -1,24 +1,18 @@
-#include "Editor/Components/EditorGeomNodesComponent.h"
-#include "Editor/Components/EditorGeomNodesMeshComponent.h"
-#include <Editor/EBus/EditorGeomNodesMeshComponentBus.h>
-#include "Editor/UI/UI_common.h"
-#include "Editor/UI/Validators.h"
-#include "Editor/UI/Utils.h"
-
+#include <Editor/Components/EditorGeomNodesComponent.h>
+#include <Editor/UI/UI_common.h>
+#include <Editor/UI/Validators.h>
+#include <Editor/UI/Utils.h>
+#include <Editor/Systems/GNProperty.h>
+#include <Editor/Rendering/GNMeshController.h>
 #include <AzToolsFramework/API/ToolsApplicationAPI.h>
 #include <AzToolsFramework/API/EntityCompositionRequestBus.h>
-#include <AzToolsFramework/ToolsComponents/TransformComponent.h>
-#include <AtomLyIntegration/CommonFeatures/Mesh/MeshComponentConstants.h>
-#include <AtomLyIntegration/CommonFeatures/Material/MaterialComponentConstants.h>
-#include <AtomLyIntegration/CommonFeatures/Mesh/MeshComponentBus.h>
 #include <AzCore/Utils/Utils.h>
-#include <Editor/Systems/GNProperty.h>
+
 #include <AzCore/JSON/prettywriter.h>
 #include <AzCore/JSON/stringbuffer.h>
 #include <Atom/Feature/Mesh/MeshFeatureProcessorInterface.h>
 #include <Atom/RPI.Public/Scene.h>
 #include <AzCore/Component/NonUniformScaleBus.h>
-#include <AzCore/std/string/regex.h>
 
 namespace GeomNodes
 {
@@ -164,10 +158,7 @@ namespace GeomNodes
                     Ipc::IpcHandlerNotificationBus::Handler::BusConnect(entityId);
                 }
 
-                AzFramework::StringFunc::Path::GetFileName(path.c_str(), m_currentBlenderFileName);
-
-                AZStd::regex reg("[^\\w\\s]+");
-                m_currentBlenderFileName = AZStd::regex_replace(m_currentBlenderFileName, reg, "_");
+                m_controller->SetFileName(path);
             }
         }
     }
@@ -257,14 +248,13 @@ namespace GeomNodes
                 OnParamChange();
 
                 // Handle the materials as well
-                LoadMaterials(jsonDocument[Field::Materials]);
+                m_controller->LoadMaterials(jsonDocument[Field::Materials]);
                 SetWorkInProgress(false);
             }
             else if (jsonDocument.HasMember(Field::SHMOpen) && jsonDocument.HasMember(Field::MapId))
             {
-                
                 AZ::u64 mapId = jsonDocument[Field::MapId].GetInt64();
-                m_modelData.ReadData(mapId);
+                m_controller->ReadData(mapId);
                 auto msg = AZStd::string::format(
                     R"JSON(
                     {
@@ -277,8 +267,9 @@ namespace GeomNodes
                     mapId);
                 m_instance->SendIPCMsg(msg);
 
-                m_manageChildEntities = true; // tell OnTick that we want to manage the child entities
                 SetWorkInProgress(false);
+
+                m_controller->RebuildRenderMesh();
             }
             else if (jsonDocument.HasMember(Field::Export) && jsonDocument.HasMember(Field::Error))
             {
@@ -315,7 +306,7 @@ namespace GeomNodes
 				Field::Object,
                 m_currentObject.c_str(),
                 Field::FBXPath,
-                GenerateFBXPath().c_str());
+                m_controller->GenerateFBXPath().c_str());
 			m_instance->SendIPCMsg(msg);
             AZ_TracePrintf("EditorGeomNodesComponent", "[ExportToStaticMesh] m_workInProgress has changed")
             SetWorkInProgress(true);
@@ -334,11 +325,19 @@ namespace GeomNodes
 
     void EditorGeomNodesComponent::SetWorkInProgress(bool flag)
     {
-        if (m_workInProgress != flag)
-        {
-			m_workInProgress = flag;
-			EBUS_EVENT(AzToolsFramework::ToolsApplicationEvents::Bus, InvalidatePropertyDisplay, AzToolsFramework::Refresh_EntireTree);
-        }
+		AZ::SystemTickBus::QueueFunction(
+            [=]() {
+				if (m_workInProgress != flag)
+				{
+    				m_workInProgress = flag;
+                    EBUS_EVENT(AzToolsFramework::ToolsApplicationEvents::Bus, InvalidatePropertyDisplay, AzToolsFramework::Refresh_EntireTree);
+                }
+            });
+    }
+
+    bool EditorGeomNodesComponent::GetWorkInProgress()
+    {
+        return m_workInProgress;
     }
 
     AZStd::string EditorGeomNodesComponent::ExportButtonText()
@@ -477,14 +476,6 @@ namespace GeomNodes
             }
         }
 
-        //TODO: parse materials
-
-        //// Remove all old properties, every confirmed property will have
-        //// a corresponding Element data
-        // RemovedOldProperties(m_scriptComponent.m_properties);
-
-        // SortProperties(m_scriptComponent.m_properties);
-        
         return true;
     }
 
@@ -521,28 +512,6 @@ namespace GeomNodes
         }
     }
 
-    void EditorGeomNodesComponent::LoadMaterials(const rapidjson::Value& materialArray)
-    {
-        m_modelData.SetMaterialPathFormat(""); // reset the material path format
-        // iterate through the material arrays and write them into files.
-		for (rapidjson::Value::ConstValueIterator  itr = materialArray.Begin(); itr != materialArray.End(); ++itr)
-		{
-            const auto matItr = itr->MemberBegin();
-            AZStd::string materialName = matItr->name.GetString();
-            AZStd::string materialContent = matItr->value.GetString();
-			
-            AZStd::string fullFilePath = GetProjectRoot() + "/";
-            AZStd::string materialFilePath = AZStd::string(AssetsFolderPath) + m_currentBlenderFileName + "/" + MaterialsFolder.data() + "/";
-            
-            fullFilePath += materialFilePath + materialName + MaterialExtension.data();
-
-            AZ::Utils::WriteFile(materialContent, fullFilePath.c_str());
-
-            // re-use materialFilePath and just append the azmaterial extension
-            m_modelData.SetMaterialPathFormat(materialFilePath + "%s" + AzMaterialExtension.data());
-		}
-    }
-
 	void EditorGeomNodesComponent::GetRequiredServices([[maybe_unused]] AZ::ComponentDescriptor::DependencyArrayType& required)
 	{
 		//required.push_back(AZ_CRC("TransformService", 0x8ee22c50));
@@ -572,16 +541,14 @@ namespace GeomNodes
     {
         AzToolsFramework::Components::EditorComponentBase::Activate();
         EditorGeomNodesComponentRequestBus::Handler::BusConnect(GetEntityId());
-        AzFramework::AssetCatalogEventBus::Handler::BusConnect();
-		AZ::TickBus::Handler::BusConnect();
+        
+        m_controller = AZStd::make_unique<GNMeshController>(GetEntityId());
     }
 
     void EditorGeomNodesComponent::Deactivate()
     {
         // BUG: this gets called when a component is added so deal with it properly as it destroys any current instance we have.
         Clear();
-        AZ::TickBus::Handler::BusDisconnect();
-        AzFramework::AssetCatalogEventBus::Handler::BusDisconnect();
         AzToolsFramework::Components::EditorComponentBase::Deactivate();
 
         if (m_instance)
@@ -591,88 +558,14 @@ namespace GeomNodes
         }
     }
 
-    void EditorGeomNodesComponent::OnTick(float /*deltaTime*/, AZ::ScriptTimePoint /*time*/)
-    {
-        if (m_manageChildEntities)
-        {
-            ManageChildEntities();
-            m_manageChildEntities = false;
-        }
-    }
-
     GNMeshData EditorGeomNodesComponent::GetMeshData(AZ::u64 entityId)
     {
         return m_modelData.GetMeshData(entityId);
     }
 
-    void EditorGeomNodesComponent::OnCatalogAssetAdded(const AZ::Data::AssetId& assetId)
-    {
-		AZ::Data::AssetInfo assetInfo;
-		EBUS_EVENT_RESULT(assetInfo, AZ::Data::AssetCatalogRequestBus, GetAssetInfoById, assetId);
-
-		// note that this will get called twice, once with the real assetId and once with legacy assetId.
-		// we only want to add the real asset to the list, in which the assetId passed in is equal to the final assetId returned
-		// otherwise, you look up assetId (and its a legacy assetId) and the actual asset will be different.
-        if ((assetInfo.m_assetId.IsValid()) && (assetInfo.m_assetId == assetId))
-        {
-			AZStd::string assetName;
-			AzFramework::StringFunc::Path::GetFileName(assetInfo.m_relativePath.c_str(), assetName);
-
-            if (m_workInProgress && (assetName == GenerateModelAssetName()))
-            {
-                auto transformComponent = GetEntity()->FindComponent<AzToolsFramework::Components::TransformComponent>();
-				AZ::EntityId parentId = transformComponent->GetParentId();
-                auto worldTransform = transformComponent->GetWorldTM();
-
-				AZ::EntityId entityId;
-				EBUS_EVENT_RESULT(entityId, AzToolsFramework::EditorRequests::Bus, CreateNewEntity, parentId);
-
-                AzToolsFramework::EntityIdList entityIdList = {entityId};
-
-				AzToolsFramework::EntityCompositionRequests::AddComponentsOutcome addedComponentsResult = AZ::Failure(AZStd::string("Failed to call AddComponentsToEntities on EntityCompositionRequestBus"));
-				AzToolsFramework::EntityCompositionRequestBus::BroadcastResult(addedComponentsResult, &AzToolsFramework::EntityCompositionRequests::AddComponentsToEntities, entityIdList, AZ::ComponentTypeList{ AZ::Render::EditorMeshComponentTypeId });
-
-				if (addedComponentsResult.IsSuccess())
-				{
-					AZ::TransformBus::Event(
-                        entityId, &AZ::TransformBus::Events::SetWorldTM, worldTransform);
-
-                    AZ::Render::MeshComponentRequestBus::Event(
-                        entityId, &AZ::Render::MeshComponentRequestBus::Events::SetModelAssetPath, assetInfo.m_relativePath);
-
-					
-                    //TODO: delete this entity
-                    // AZ::Interface<GNSystemInterface>::Get()
-                    // then call delete entities and descendants.
-
-                    EBUS_EVENT(AzToolsFramework::ToolsApplicationRequests::Bus, DeleteEntitiesAndAllDescendants, AzToolsFramework::EntityIdList{GetEntityId()});
-				}
-
-                SetWorkInProgress(false);
-            }
-            else
-            {
-				for (auto entityId : m_entityIdList)
-				{
-					auto meshData = m_modelData.GetMeshData((AZ::u64)entityId);
-					if (meshData.GetMaterial() == assetName)
-					{
-						AZ_Printf("GeomNodes", "added %s", assetName.c_str());
-						EditorGeomNodesMeshComponentEventBus::Event(entityId, &EditorGeomNodesMeshComponentEvents::OnMeshDataAssigned, meshData);
-						break;
-					}
-				}
-            }
-        }
-    }
-
-    void EditorGeomNodesComponent::OnCatalogAssetChanged(const AZ::Data::AssetId& assetId)
-    {
-        OnCatalogAssetAdded(assetId);
-    }
-
     void EditorGeomNodesComponent::Clear()
     {
+        m_controller.reset();
         m_enumValues.clear();
         ClearDataElements();
         EditorGeomNodesComponentRequestBus::Handler::BusDisconnect();
@@ -709,88 +602,70 @@ namespace GeomNodes
         return m_cachedStrings.insert(AZStd::make_pair(str, AZStd::string(str))).first->second.c_str();
     }
 
-    AZStd::string EditorGeomNodesComponent::GenerateFBXPath()
-    {
-		AZStd::string fullFilePath = GetProjectRoot() + "/";
-        AZStd::string filePath = AZStd::string(AssetsFolderPath) + m_currentBlenderFileName + "/";
-        fullFilePath += filePath + GenerateModelAssetName() + FbxExtension.data();
-        return fullFilePath;
-    }
+  //  void EditorGeomNodesComponent::ManageChildEntities()
+  //  {
+		//AzToolsFramework::EntityIdList entityIdList;
 
-    AZStd::string EditorGeomNodesComponent::GenerateModelAssetName()
-    {
-        return m_currentBlenderFileName + "_" + AZStd::string::format("%llu", (AZ::u64)GetEntityId());
-    }
+		//AZ::s32 entityCount = m_modelData.MeshCount() - m_entityIdList.size();
+		//if (entityCount > 0)
+		//{
+		//	for ([[maybe_unused]] AZ::s32 i = 0; i < entityCount; i++)
+		//	{
+		//		AZ::EntityId entityId;
+		//		EBUS_EVENT_RESULT(entityId, AzToolsFramework::EditorRequests::Bus, CreateNewEntity, GetEntityId());
 
-    AZStd::string EditorGeomNodesComponent::GenerateAZModelFilename()
-    {
-		return GenerateModelAssetName() + AzModelExtension.data();
-    }
+		//		entityIdList.push_back(entityId);
+		//	}
 
-    void EditorGeomNodesComponent::ManageChildEntities()
-    {
-		AzToolsFramework::EntityIdList entityIdList;
+		//	AzToolsFramework::EntityCompositionRequests::AddComponentsOutcome addedComponentsResult = AZ::Failure(AZStd::string("Failed to call AddComponentsToEntities on EntityCompositionRequestBus"));
+		//	AzToolsFramework::EntityCompositionRequestBus::BroadcastResult(addedComponentsResult, &AzToolsFramework::EntityCompositionRequests::AddComponentsToEntities, entityIdList, AZ::ComponentTypeList{ /*AZ::Render::EditorMaterialComponentTypeId, */azrtti_typeid<EditorGeomNodesMeshComponent>() });
 
-		AZ::s32 entityCount = m_modelData.MeshCount() - m_entityIdList.size();
-		if (entityCount > 0)
-		{
-			for ([[maybe_unused]] AZ::s32 i = 0; i < entityCount; i++)
-			{
-				AZ::EntityId entityId;
-				EBUS_EVENT_RESULT(entityId, AzToolsFramework::EditorRequests::Bus, CreateNewEntity, GetEntityId());
+		//	if (addedComponentsResult.IsSuccess())
+		//	{
+		//		AzToolsFramework::ToolsApplicationEvents::Bus::Broadcast(&AzToolsFramework::ToolsApplicationEvents::InvalidatePropertyDisplay, AzToolsFramework::Refresh_EntireTree_NewContent);
+		//	}
 
-				entityIdList.push_back(entityId);
-			}
+		//	m_entityIdList.insert(m_entityIdList.begin(), entityIdList.begin(), entityIdList.end());
+		//}
+		//else if (entityCount < 0)
+		//{
+		//	entityCount *= -1; // flipping the sign so we can use it
 
-			AzToolsFramework::EntityCompositionRequests::AddComponentsOutcome addedComponentsResult = AZ::Failure(AZStd::string("Failed to call AddComponentsToEntities on EntityCompositionRequestBus"));
-			AzToolsFramework::EntityCompositionRequestBus::BroadcastResult(addedComponentsResult, &AzToolsFramework::EntityCompositionRequests::AddComponentsToEntities, entityIdList, AZ::ComponentTypeList{ /*AZ::Render::EditorMaterialComponentTypeId, */azrtti_typeid<EditorGeomNodesMeshComponent>() });
+		//	for ([[maybe_unused]] AZ::s32 i = 0; i < entityCount; i++) {
+		//		entityIdList.insert(entityIdList.begin(), m_entityIdList.back());
+		//		m_entityIdList.pop_back();
+		//	}
 
-			if (addedComponentsResult.IsSuccess())
-			{
-				AzToolsFramework::ToolsApplicationEvents::Bus::Broadcast(&AzToolsFramework::ToolsApplicationEvents::InvalidatePropertyDisplay, AzToolsFramework::Refresh_EntireTree_NewContent);
-			}
+		//	AzToolsFramework::ToolsApplicationRequestBus::Broadcast(&AzToolsFramework::ToolsApplicationRequests::DeleteEntities, entityIdList);
+		//}
 
-			m_entityIdList.insert(m_entityIdList.begin(), entityIdList.begin(), entityIdList.end());
-		}
-		else if (entityCount < 0)
-		{
-			entityCount *= -1; // flipping the sign so we can use it
+		//// assign the mesh data to the entityId
+		//for (auto entityId : m_entityIdList)
+		//{
+		//	m_modelData.AssignMeshData((AZ::u64)entityId);
+  //          auto meshData = m_modelData.GetMeshData((AZ::u64)entityId);
 
-			for ([[maybe_unused]] AZ::s32 i = 0; i < entityCount; i++) {
-				entityIdList.insert(entityIdList.begin(), m_entityIdList.back());
-				m_entityIdList.pop_back();
-			}
+  //          auto materialPath = meshData.GetMaterialPath();
+  //          AZ_Printf("GeomNodes", "assigned mesh data %s", materialPath.c_str());
+  //          
+  //          if (AZ::IO::FileIOBase::GetInstance()->Exists(materialPath.c_str()))
+  //          {
+		//		AZ::Data::AssetId materialAssetId;
+		//		EBUS_EVENT_RESULT(materialAssetId, AZ::Data::AssetCatalogRequestBus, GetAssetIdByPath, materialPath.c_str(), AZ::Data::s_invalidAssetType, false);
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+		//		// If found, notify mesh that the mesh data is assigned and material is ready.
+		//		if (materialAssetId.IsValid())
+		//		{
+		//			AZ_Printf("GeomNodes", "    OnMeshDataAssigned called %s", meshData.GetMaterialPath().c_str());
+		//			EditorGeomNodesMeshComponentEventBus::Event(entityId, &EditorGeomNodesMeshComponentEvents::OnMeshDataAssigned, meshData);
+		//		}
+  //          }
+		//}
 
-			AzToolsFramework::ToolsApplicationRequestBus::Broadcast(&AzToolsFramework::ToolsApplicationRequests::DeleteEntities, entityIdList);
-		}
-
-		// assign the mesh data to the entityId
-		for (auto entityId : m_entityIdList)
-		{
-			m_modelData.AssignMeshData((AZ::u64)entityId);
-            auto meshData = m_modelData.GetMeshData((AZ::u64)entityId);
-
-            auto materialPath = meshData.GetMaterialPath();
-            AZ_Printf("GeomNodes", "assigned mesh data %s", materialPath.c_str());
-            
-            if (AZ::IO::FileIOBase::GetInstance()->Exists(materialPath.c_str()))
-            {
-				AZ::Data::AssetId materialAssetId;
-				EBUS_EVENT_RESULT(materialAssetId, AZ::Data::AssetCatalogRequestBus, GetAssetIdByPath, materialPath.c_str(), AZ::Data::s_invalidAssetType, false);
-
-				// If found, notify mesh that the mesh data is assigned and material is ready.
-				if (materialAssetId.IsValid())
-				{
-					AZ_Printf("GeomNodes", "    OnMeshDataAssigned called %s", meshData.GetMaterialPath().c_str());
-					EditorGeomNodesMeshComponentEventBus::Event(entityId, &EditorGeomNodesMeshComponentEvents::OnMeshDataAssigned, meshData);
-				}
-            }
-		}
-
-        
-        AzToolsFramework::ToolsApplicationRequestBus::Broadcast(&AzToolsFramework::ToolsApplicationRequests::MarkEntitiesDeselected, m_entityIdList);
-        AzToolsFramework::ToolsApplicationRequestBus::Broadcast(&AzToolsFramework::ToolsApplicationRequests::MarkEntitySelected, GetEntityId());
-    }
+  //      
+  //      AzToolsFramework::ToolsApplicationRequestBus::Broadcast(&AzToolsFramework::ToolsApplicationRequests::MarkEntitiesDeselected, m_entityIdList);
+  //      AzToolsFramework::ToolsApplicationRequestBus::Broadcast(&AzToolsFramework::ToolsApplicationRequests::MarkEntitySelected, GetEntityId());
+  //  }
 
     void EditorGeomNodesComponent::ClearDataElements()
     {

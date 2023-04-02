@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Editor/Common/GNConstants.h>
 #include <Editor/Math/MathHelper.h>
 #include <AzCore/Math/Aabb.h>
 #include <AZCore/std/string/string.h>
@@ -11,6 +12,12 @@ namespace GeomNodes
     class GNMeshData
     {
     public:
+        struct DataRange
+        {
+            AZ::u32 offset = 0; 
+            AZ::u32 count = 0;
+        };
+
         GNMeshData();
         explicit GNMeshData(
             const Vert3Vector& positions
@@ -28,21 +35,31 @@ namespace GeomNodes
 
         ~GNMeshData() = default;
 
-        const AZ::u32 VertexCount() const;
+        AZ::u32 GetIndexCount() const;
+        AZ::u32 GetIndexOffset() const;
+        void SetIndexOffset(AZ::u32 offset);
+        void SetIndexCount(AZ::u32 count);
+
+		template<AttributeType AttributeTypeT>
+		AZ::u32 GetCount() const;
+		template<AttributeType AttributeTypeT>
+		AZ::u32 GetOffset() const;
+		template<AttributeType AttributeTypeT>
+		void SetCount(AZ::u32 count);
+		template<AttributeType AttributeTypeT>
+		void SetOffset(AZ::u32 offset);
+
         const U32Vector& GetIndices() const;
         void SetIndices(const U32Vector& indices);
-        const Vert3Vector& GetPositions() const;
-        const Vert3Vector& GetNormals() const;
-        const Vert4Vector& GetTangents() const;
-        const Vert3Vector& GetBitangents() const;
-        const Vert2Vector& GetUVs() const;
-        const Vert4Vector& GetColors() const;
+
+        template<AttributeType AttributeTypeT>
+        const auto& GetDataBuffer() const;
+        
         const Mat4Vector& GetInstances() const;
         const MaterialList& GetMaterials() const;
         void ClearMaterialList();
-        void SetMaterial(const AZStd::string& materialName, const AZStd::string& materialPath);
-        AZStd::string GetMaterial() const;
-        AZStd::string GetMaterialPath() const;
+        void SetMaterialIndex(AZ::u32 materialIndex);
+        AZ::u32 GetMaterialIndex() const;
         void AddInstance(const AZ::Matrix4x4& mat4);
 		
         U32Vector GetIndicesByMaterialIndex(int materialIndex);
@@ -53,6 +70,8 @@ namespace GeomNodes
         void CalculateAABB();
 
         GNMeshData& operator+=(const GNMeshData& rhs);
+
+        void ClearBuffers();
 
     private:
         U32Vector m_indices;
@@ -66,11 +85,18 @@ namespace GeomNodes
         Vert2Vector m_uvs;
         Vert4Vector m_colors;
         
+        DataRange m_indicesRange;
+        DataRange m_positionsRange;
+        DataRange m_normalsRange;
+        DataRange m_tangentsRange;
+        DataRange m_bitangentsRange;
+        DataRange m_uvsRange;
+        DataRange m_colorsRange;
+
         MaterialList m_materialNames;
 
-        AZStd::string m_materialName;
-        AZStd::string m_materialPath;
-        
+        AZ::u32 m_materialIndex = 0;
+
         AZ::Aabb m_aabb = AZ::Aabb::CreateNull();
         AZ::s64 m_hash = 0;
 

@@ -2,7 +2,6 @@
 #include <GeomNodesModuleInterface.h>
 #include "Editor/Components/EditorGeomNodesSystemComponent.h"
 #include "Editor/Components/EditorGeomNodesComponent.h"
-#include "Editor/Components/EditorGeomNodesMeshComponent.h"
 #include "Editor/Systems/GeomNodesSystem.h"
 #include <Editor/Configuration/GNEditorSettingsRegistryManager.h>
 
@@ -26,7 +25,6 @@ namespace GeomNodes
             m_descriptors.insert(m_descriptors.end(), {
                     EditorGeomNodesSystemComponent::CreateDescriptor(),
                     EditorGeomNodesComponent::CreateDescriptor(),
-                    EditorGeomNodesMeshComponent::CreateDescriptor(),
             });
         }
 
@@ -44,7 +42,6 @@ namespace GeomNodes
             return AZ::ComponentTypeList {
                 azrtti_typeid<EditorGeomNodesSystemComponent>(),
                 azrtti_typeid<EditorGeomNodesComponent>(),
-                azrtti_typeid<EditorGeomNodesMeshComponent>(),
             };
         }
     private:

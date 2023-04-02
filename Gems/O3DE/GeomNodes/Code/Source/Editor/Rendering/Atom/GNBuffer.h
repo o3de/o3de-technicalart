@@ -6,10 +6,6 @@
 #include <Atom/RPI.Reflect/Buffer/BufferAsset.h>
 #include <Atom/RPI.Reflect/Buffer/BufferAssetCreator.h>
 #include <Atom/RPI.Reflect/Buffer/BufferAssetView.h>
-//#include <AzCore/Math/PackedVector3.h>
-//#include <AzCore/Math/Vector2.h>
-//#include <AzCore/Math/Vector3.h>
-//#include <AzCore/Math/Vector4.h>
 
 namespace GeomNodes
 {

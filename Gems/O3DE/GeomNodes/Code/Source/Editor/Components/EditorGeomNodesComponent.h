@@ -7,18 +7,16 @@
 #include "Editor/Rendering/GNModelData.h"
 #include <Editor/EBus/IpcHandlerBus.h>
 #include <Editor/EBus/EditorGeomNodesComponentBus.h>
-#include <AzCore/Component/TickBus.h>
+#include <Editor/Common/GNConstants.h>
 #include <AzToolsFramework/Entity/EntityTypes.h>
-#include <AzFramework/Asset/AssetCatalogBus.h>
 
 namespace GeomNodes
 {
+    class GNMeshController;
     class EditorGeomNodesComponent
         : public AzToolsFramework::Components::EditorComponentBase
         , private Ipc::IpcHandlerNotificationBus::Handler
-        , private AZ::TickBus::Handler
         , private EditorGeomNodesComponentRequestBus::Handler
-        , private AzFramework::AssetCatalogEventBus::Handler
     {
     public:
         AZ_EDITOR_COMPONENT(EditorGeomNodesComponent, "{E59507EF-9EBB-4F6C-8D89-92DCA57722E5}", EditorComponentBase);
@@ -37,17 +35,13 @@ namespace GeomNodes
         void Activate() override;
         void Deactivate() override;
 
-		// AZ::TickBus overrides ...
-		void OnTick(float deltaTime, AZ::ScriptTimePoint time) override;
-
-        // EditorGeomNodesComponentRequestBus overrides ...
+		// EditorGeomNodesComponentRequestBus overrides ...
         GNMeshData GetMeshData(AZ::u64 entityId) override;
-    
-    private:
-		// AssetCatalogEventBus::Handler ...
-        void OnCatalogAssetAdded(const AZ::Data::AssetId& assetId) override;
-        void OnCatalogAssetChanged(const AZ::Data::AssetId& assetId) override;
+        void SetWorkInProgress(bool flag) override;
+        bool GetWorkInProgress() override;
 
+    private:
+		
     protected:
         //got this from ScriptEditorComponent
         struct ElementInfo
@@ -60,26 +54,16 @@ namespace GeomNodes
                                                 // which means alphabetical sort will be used
         };
         
-		//! constants
-		static constexpr AZStd::string_view AssetsFolderPath = "assets/geomNodes/";
-        static constexpr AZStd::string_view MaterialsFolder = "materials";
-		static constexpr AZStd::string_view MaterialExtension = ".material";
-		static constexpr AZStd::string_view AzMaterialExtension = ".azmaterial";
-        static constexpr AZStd::string_view FbxExtension = ".fbx";
-        static constexpr AZStd::string_view AzModelExtension = ".azmodel";
-
-        typedef AZStd::vector<AZStd::string> StringVector;
-        
-        void Clear();
+		void Clear();
         void OnPathChange(const AZStd::string& path);
         void OnParamChange();
+        // IpcHandlerNotificationBus overrides...
         void OnMessageReceived(const AZ::u8* content, const AZ::u64 length) override;
 
         void ExportToStaticMesh();
         bool IsBlenderFileLoaded();
         bool IsWorkInProgress();
-        void SetWorkInProgress(bool flag);
-
+        
         AZStd::string ExportButtonText();
 
         void LoadObjects(const rapidjson::Value& objectNameArray, const rapidjson::Value& objectArray);
@@ -90,8 +74,7 @@ namespace GeomNodes
         void CreateParam(const AZStd::string& objectName, GNPropertyGroup& group);
         bool LoadProperties(const rapidjson::Value& paramVal, GNPropertyGroup& group);
         void LoadAttribute(ParamType type, AZ::Edit::ElementData& ed, GNProperty* prop);
-        void LoadMaterials(const rapidjson::Value& materialArray);
-
+        
         void ClearDataElements();
 
         const AZ::Edit::ElementData* GetDataElement(const void* element, const AZ::Uuid& typeUuid) const;
@@ -102,12 +85,6 @@ namespace GeomNodes
         void AddDataElement(GNProperty* gnParam, ElementInfo& ei);
 
         const char* CacheString(const char* str);
-        AZStd::string GenerateFBXPath();
-        AZStd::string GenerateModelAssetName();
-        AZStd::string GenerateAZModelFilename();
-        void ManageChildEntities();
-        AZStd::atomic_bool m_manageChildEntities{ false };
-
         AZStd::unordered_map<const void*, AZStd::string> m_cachedStrings;
         AZStd::unordered_map<const void*, ElementInfo> m_dataElements;
         AZStd::unordered_map<AZStd::string, AZStd::string> m_objectInfos;
@@ -116,6 +93,7 @@ namespace GeomNodes
 
         GNParamContext m_paramContext;
         GNModelData m_modelData;
+        AZStd::unique_ptr<GNMeshController> m_controller;
 
         AZStd::string m_blenderFile;
         AZStd::string m_currentObject;

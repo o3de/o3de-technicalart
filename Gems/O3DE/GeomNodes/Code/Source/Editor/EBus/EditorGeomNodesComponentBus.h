@@ -10,6 +10,8 @@ namespace GeomNodes
     {
     public:
         virtual GNMeshData GetMeshData(AZ::u64 entityId) = 0;
+        virtual void SetWorkInProgress(bool flag) = 0;
+        virtual bool GetWorkInProgress() = 0;
 
 	protected:
 		~EditorGeomNodesComponentRequests() = default;
