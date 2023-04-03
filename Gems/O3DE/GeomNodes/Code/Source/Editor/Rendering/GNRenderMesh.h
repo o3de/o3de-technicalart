@@ -56,7 +56,7 @@ namespace GeomNodes
 
         AZ::Data::Instance<AZ::RPI::Model> GetModel() const;
 
-        void SetMaterialList(const AZStd::vector<AZStd::string> materials);
+        void SetMaterialList(const AZStd::vector<AZStd::string>& materials);
     private:
         //! Creates an attribute buffer in the slot dictated by AttributeTypeT.
         template<AttributeType AttributeTypeT, typename VertexStreamDataType>

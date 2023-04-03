@@ -1,7 +1,6 @@
 #pragma once
 
 #include <AzCore/Component/ComponentBus.h>
-#include <Editor/Rendering/GNMeshData.h>
 
 namespace GeomNodes
 {
@@ -9,9 +8,9 @@ namespace GeomNodes
     class EditorGeomNodesComponentRequests : public AZ::ComponentBus
     {
     public:
-        virtual GNMeshData GetMeshData(AZ::u64 entityId) = 0;
         virtual void SetWorkInProgress(bool flag) = 0;
         virtual bool GetWorkInProgress() = 0;
+        virtual void SendIPCMsg(const AZStd::string& msg) = 0;
 
 	protected:
 		~EditorGeomNodesComponentRequests() = default;

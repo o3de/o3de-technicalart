@@ -59,7 +59,7 @@ namespace GeomNodes
                         ->Attribute(Attributes::FuncValidator, ConvertFunctorToVoid(&Validators::ValidBlenderOrEmpty))
                         ->Attribute(Attributes::SelectFunction, blendFunctor)
                         ->Attribute(Attributes::ValidationChange, &EditorGeomNodesComponent::OnPathChange)
-                        ->Attribute(AZ::Edit::Attributes::ReadOnly, &EditorGeomNodesComponent::IsWorkInProgress)
+                        ->Attribute(AZ::Edit::Attributes::ReadOnly, &EditorGeomNodesComponent::GetWorkInProgress)
 					->DataElement(nullptr, &EditorGeomNodesComponent::m_paramContext, "Geom Nodes Parameters", "Parameter template")
                     ->SetDynamicEditDataProvider(&EditorGeomNodesComponent::GetParamsEditData)
                         ->Attribute(AZ::Edit::Attributes::Visibility, AZ::Edit::PropertyVisibility::ShowChildrenOnly)
@@ -68,7 +68,7 @@ namespace GeomNodes
 					->Attribute(AZ::Edit::Attributes::ButtonText, &EditorGeomNodesComponent::ExportButtonText)
                     ->Attribute(AZ::Edit::Attributes::Visibility, &EditorGeomNodesComponent::IsBlenderFileLoaded)
                     ->Attribute(AZ::Edit::Attributes::ChangeNotify, AZ::Edit::PropertyRefreshLevels::EntireTree)
-                    ->Attribute(AZ::Edit::Attributes::ReadOnly, &EditorGeomNodesComponent::IsWorkInProgress)
+                    ->Attribute(AZ::Edit::Attributes::ReadOnly, &EditorGeomNodesComponent::GetWorkInProgress)
                     ;
 
                 ec->Class<GNParamContext>("Geom Nodes Parameter Context", "Adding exposed Geometry Nodes parameters to the entity!")
@@ -180,26 +180,10 @@ namespace GeomNodes
             m_instance->RestartProcess();
         }
 
-        auto msg = AZStd::string::format(
-            R"JSON(
-                {
-                    "%s": [ %s ],
-                    "%s": "%s",
-                    "Frame": 0,
-                    "ParamUpdate": true
-                }
-            )JSON"
-            , Field::Params
-            , m_paramContext.m_group
-                .GetGroup(m_currentObject.c_str())
-                ->GetProperties().c_str()
-            , Field::Object
-            , m_currentObject.c_str()
-        );
-
-        m_instance->SendIPCMsg(msg);
+        m_instance->SendParamUpdates(m_paramContext.m_group
+            .GetGroup(m_currentObject.c_str())->GetProperties()
+            , m_currentObject);
         
-
         AZ_Printf("EditorGeomNodesComponent", "Parameter has changed");
     }
 
@@ -212,31 +196,21 @@ namespace GeomNodes
             // send back an "Alive" message to the client when it asks for a heartbeat. 
             if (jsonDocument.HasMember(Field::Heartbeat))
             {
-				AZStd::string msg = R"JSON(
-                                        {
-                                            "Alive": true 
-                                        }
-                                    )JSON";
-				m_instance->SendIPCMsg(msg);
+                m_instance->SendHeartbeat();
             }
             else if (jsonDocument.HasMember(Field::Initialized))
             {
-                AZStd::string msg;
                 if (!m_initialized)
                 {
-                    msg = R"JSON(
-                        {
-                            "FetchObjectParams": true 
-                        }
-                    )JSON";
+                    m_instance->RequestObjectParams();
                     m_initialized = true;
                 }
                 else
                 {
                     // send messages that are queued.
-                    SetWorkInProgress(false);
+                    //SetWorkInProgress(false);
                 }
-                m_instance->SendIPCMsg(msg);
+                
             }
             else if (jsonDocument.HasMember(Field::ObjectNames) && jsonDocument.HasMember(Field::Objects) && jsonDocument.HasMember(Field::Materials))
             {
@@ -255,20 +229,8 @@ namespace GeomNodes
             {
                 AZ::u64 mapId = jsonDocument[Field::MapId].GetInt64();
                 m_controller->ReadData(mapId);
-                auto msg = AZStd::string::format(
-                    R"JSON(
-                    {
-                        "%s": true,
-                        "%s": %llu
-                    }
-                    )JSON",
-                    Field::SHMClose,
-                    Field::MapId,
-                    mapId);
-                m_instance->SendIPCMsg(msg);
-
+                m_instance->CloseMap(mapId);
                 SetWorkInProgress(false);
-
                 m_controller->RebuildRenderMesh();
             }
             else if (jsonDocument.HasMember(Field::Export) && jsonDocument.HasMember(Field::Error))
@@ -294,21 +256,7 @@ namespace GeomNodes
     {
         if (!m_workInProgress)
         {
-            auto msg = AZStd::string::format(
-				R"JSON(
-                    {
-                        "%s": true,
-                        "%s": "%s",
-                        "%s": "%s"
-                    }
-                    )JSON",
-				Field::Export,
-				Field::Object,
-                m_currentObject.c_str(),
-                Field::FBXPath,
-                m_controller->GenerateFBXPath().c_str());
-			m_instance->SendIPCMsg(msg);
-            AZ_TracePrintf("EditorGeomNodesComponent", "[ExportToStaticMesh] m_workInProgress has changed")
+            m_instance->RequestExport(m_controller->GenerateFBXPath(), m_currentObject);
             SetWorkInProgress(true);
         }
     }
@@ -316,11 +264,6 @@ namespace GeomNodes
     bool EditorGeomNodesComponent::IsBlenderFileLoaded()
     {
         return m_initialized;
-    }
-
-    bool EditorGeomNodesComponent::IsWorkInProgress()
-    {
-        return m_workInProgress;
     }
 
     void EditorGeomNodesComponent::SetWorkInProgress(bool flag)
@@ -338,6 +281,14 @@ namespace GeomNodes
     bool EditorGeomNodesComponent::GetWorkInProgress()
     {
         return m_workInProgress;
+    }
+
+    void EditorGeomNodesComponent::SendIPCMsg(const AZStd::string& msg)
+    {
+        if (m_instance != nullptr)
+        {
+            m_instance->SendIPCMsg(msg);
+        }
     }
 
     AZStd::string EditorGeomNodesComponent::ExportButtonText()
@@ -558,11 +509,6 @@ namespace GeomNodes
         }
     }
 
-    GNMeshData EditorGeomNodesComponent::GetMeshData(AZ::u64 entityId)
-    {
-        return m_modelData.GetMeshData(entityId);
-    }
-
     void EditorGeomNodesComponent::Clear()
     {
         m_controller.reset();
@@ -601,71 +547,6 @@ namespace GeomNodes
 
         return m_cachedStrings.insert(AZStd::make_pair(str, AZStd::string(str))).first->second.c_str();
     }
-
-  //  void EditorGeomNodesComponent::ManageChildEntities()
-  //  {
-		//AzToolsFramework::EntityIdList entityIdList;
-
-		//AZ::s32 entityCount = m_modelData.MeshCount() - m_entityIdList.size();
-		//if (entityCount > 0)
-		//{
-		//	for ([[maybe_unused]] AZ::s32 i = 0; i < entityCount; i++)
-		//	{
-		//		AZ::EntityId entityId;
-		//		EBUS_EVENT_RESULT(entityId, AzToolsFramework::EditorRequests::Bus, CreateNewEntity, GetEntityId());
-
-		//		entityIdList.push_back(entityId);
-		//	}
-
-		//	AzToolsFramework::EntityCompositionRequests::AddComponentsOutcome addedComponentsResult = AZ::Failure(AZStd::string("Failed to call AddComponentsToEntities on EntityCompositionRequestBus"));
-		//	AzToolsFramework::EntityCompositionRequestBus::BroadcastResult(addedComponentsResult, &AzToolsFramework::EntityCompositionRequests::AddComponentsToEntities, entityIdList, AZ::ComponentTypeList{ /*AZ::Render::EditorMaterialComponentTypeId, */azrtti_typeid<EditorGeomNodesMeshComponent>() });
-
-		//	if (addedComponentsResult.IsSuccess())
-		//	{
-		//		AzToolsFramework::ToolsApplicationEvents::Bus::Broadcast(&AzToolsFramework::ToolsApplicationEvents::InvalidatePropertyDisplay, AzToolsFramework::Refresh_EntireTree_NewContent);
-		//	}
-
-		//	m_entityIdList.insert(m_entityIdList.begin(), entityIdList.begin(), entityIdList.end());
-		//}
-		//else if (entityCount < 0)
-		//{
-		//	entityCount *= -1; // flipping the sign so we can use it
-
-		//	for ([[maybe_unused]] AZ::s32 i = 0; i < entityCount; i++) {
-		//		entityIdList.insert(entityIdList.begin(), m_entityIdList.back());
-		//		m_entityIdList.pop_back();
-		//	}
-
-		//	AzToolsFramework::ToolsApplicationRequestBus::Broadcast(&AzToolsFramework::ToolsApplicationRequests::DeleteEntities, entityIdList);
-		//}
-
-		//// assign the mesh data to the entityId
-		//for (auto entityId : m_entityIdList)
-		//{
-		//	m_modelData.AssignMeshData((AZ::u64)entityId);
-  //          auto meshData = m_modelData.GetMeshData((AZ::u64)entityId);
-
-  //          auto materialPath = meshData.GetMaterialPath();
-  //          AZ_Printf("GeomNodes", "assigned mesh data %s", materialPath.c_str());
-  //          
-  //          if (AZ::IO::FileIOBase::GetInstance()->Exists(materialPath.c_str()))
-  //          {
-		//		AZ::Data::AssetId materialAssetId;
-		//		EBUS_EVENT_RESULT(materialAssetId, AZ::Data::AssetCatalogRequestBus, GetAssetIdByPath, materialPath.c_str(), AZ::Data::s_invalidAssetType, false);
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
-		//		// If found, notify mesh that the mesh data is assigned and material is ready.
-		//		if (materialAssetId.IsValid())
-		//		{
-		//			AZ_Printf("GeomNodes", "    OnMeshDataAssigned called %s", meshData.GetMaterialPath().c_str());
-		//			EditorGeomNodesMeshComponentEventBus::Event(entityId, &EditorGeomNodesMeshComponentEvents::OnMeshDataAssigned, meshData);
-		//		}
-  //          }
-		//}
-
-  //      
-  //      AzToolsFramework::ToolsApplicationRequestBus::Broadcast(&AzToolsFramework::ToolsApplicationRequests::MarkEntitiesDeselected, m_entityIdList);
-  //      AzToolsFramework::ToolsApplicationRequestBus::Broadcast(&AzToolsFramework::ToolsApplicationRequests::MarkEntitySelected, GetEntityId());
-  //  }
 
     void EditorGeomNodesComponent::ClearDataElements()
     {

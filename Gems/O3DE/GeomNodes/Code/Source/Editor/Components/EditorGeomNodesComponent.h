@@ -36,9 +36,9 @@ namespace GeomNodes
         void Deactivate() override;
 
 		// EditorGeomNodesComponentRequestBus overrides ...
-        GNMeshData GetMeshData(AZ::u64 entityId) override;
         void SetWorkInProgress(bool flag) override;
         bool GetWorkInProgress() override;
+        void SendIPCMsg(const AZStd::string& msg) override;
 
     private:
 		
@@ -62,7 +62,6 @@ namespace GeomNodes
 
         void ExportToStaticMesh();
         bool IsBlenderFileLoaded();
-        bool IsWorkInProgress();
         
         AZStd::string ExportButtonText();
 
@@ -97,8 +96,7 @@ namespace GeomNodes
 
         AZStd::string m_blenderFile;
         AZStd::string m_currentObject;
-        AZStd::string m_currentBlenderFileName;
-
+        
         GNInstance* m_instance = nullptr;
         AzToolsFramework::EntityIdList m_entityIdList;
 

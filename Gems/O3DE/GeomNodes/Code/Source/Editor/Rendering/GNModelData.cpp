@@ -18,8 +18,7 @@ namespace GeomNodes
     void GNModelData::ReadData(AZ::u64 mapId)
     {
 		m_meshes.clear();
-		m_assignedMeshmap.clear();
-
+		
 		if (OpenSHM(mapId))
 		{
 			AZ::s32 meshCount = Read<AZ::s32>(mapId);
@@ -115,6 +114,7 @@ namespace GeomNodes
 			}
 
 			m_meshes.clear();
+			m_materials.clear();
 
 			// merge all meshes in each mesh group along with their instances
 			AZ::u32 materialIndex = 0;
@@ -132,9 +132,9 @@ namespace GeomNodes
 					meshData.CalculateAABB();
 					m_aabb.AddAabb(meshData.GetAabb()); // add mesh data's aabb to get the aabb for the whole model
 					m_meshes.push_back(meshData);
+					m_materials.push_back(meshGroup.first);
+					materialIndex++;
 				}
-
-				materialIndex++;
 			}
 
 			// Convert to only one buffers/arrays and keep track of the offsets and element counts
@@ -154,17 +154,9 @@ namespace GeomNodes
         return m_meshes;
     }
 
-	GNMeshData GNModelData::GetMeshData(AZ::u64 entityId)
+	MaterialList GNModelData::GetMaterials()
 	{
-		auto iter = m_assignedMeshmap.find(entityId);
-		AZ_Assert(iter != m_assignedMeshmap.end(), "Mesh data is not assigned yet. Check the entity id.");
-		
-		return m_meshes[iter->second];
-	}
-
-	void GNModelData::AssignMeshData(AZ::u64 entityId)
-	{
-		m_assignedMeshmap.emplace(AZStd::make_pair(entityId, aznumeric_cast<AZ::u32>(m_assignedMeshmap.size())));
+		return m_materials;
 	}
 
 	const U32Vector& GNModelData::GetIndices() const

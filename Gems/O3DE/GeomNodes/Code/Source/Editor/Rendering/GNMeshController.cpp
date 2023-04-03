@@ -122,28 +122,36 @@ namespace GeomNodes
 	void GNMeshController::ReadData(AZ::u64 mapId)
 	{
 		m_modelData.ReadData(mapId);
+
+		// set the render mesh's material list here so it only get the materials for the current object and not the whole scene.
+		MaterialList materialList;
+		AZStd::string materialFilePath = AZStd::string(AssetsFolderPath) + m_blenderFilename + "/" + MaterialsFolder.data() + "/";
+		for (auto materialName : m_modelData.GetMaterials())
+		{
+			AZStd::string azMaterialPath = materialFilePath + materialName + AzMaterialExtension.data();
+			materialList.push_back(azMaterialPath);
+		}
+
+		m_renderMesh->SetMaterialList(materialList);
 	}
 
 	void GNMeshController::LoadMaterials(const rapidjson::Value& materialArray)
 	{
 		m_materialWaitList.clear();
-		AZStd::vector<AZStd::string> materialList;
 		// iterate through the material arrays and write them into files.
+		AZStd::string projectRootPath = GetProjectRoot() + "/";
+		AZStd::string materialFilePath = AZStd::string(AssetsFolderPath) + m_blenderFilename + "/" + MaterialsFolder.data() + "/";
 		for (rapidjson::Value::ConstValueIterator itr = materialArray.Begin(); itr != materialArray.End(); ++itr)
 		{
 			const auto matItr = itr->MemberBegin();
 			AZStd::string materialName = matItr->name.GetString();
 			AZStd::string materialContent = matItr->value.GetString();
 
-			AZStd::string fullFilePath = GetProjectRoot() + "/";
-			AZStd::string materialFilePath = AZStd::string(AssetsFolderPath) + m_blenderFilename + "/" + MaterialsFolder.data() + "/";
-
-			fullFilePath += materialFilePath + materialName + MaterialExtension.data();
+			AZStd::string fullFilePath = projectRootPath + materialFilePath + materialName + MaterialExtension.data();
 
 			AZ::Utils::WriteFile(materialContent, fullFilePath.c_str());
 
 			AZStd::string azMaterialPath = materialFilePath + materialName + AzMaterialExtension.data();
-			materialList.push_back(azMaterialPath);
 			if (AZ::IO::FileIOBase::GetInstance()->Exists(azMaterialPath.c_str()))
 			{
 				AZ::Data::AssetId materialAssetId;
@@ -155,11 +163,6 @@ namespace GeomNodes
 					m_materialWaitList.push_back(azMaterialPath);
 				}
 			}
-		}
-
-		if (!materialList.empty())
-		{
-			m_renderMesh->SetMaterialList(materialList);
 		}
 	}
 

@@ -234,7 +234,7 @@ namespace GeomNodes
 		}
     }
 
-    void GNRenderMesh::SetMaterialList(const AZStd::vector<AZStd::string> materials)
+    void GNRenderMesh::SetMaterialList(const AZStd::vector<AZStd::string>& materials)
     {
         m_materialList = materials;
     }

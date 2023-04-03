@@ -1,6 +1,7 @@
 #include "GNInstance.h"
 #include "Bridge.h"
 #include <Editor/Systems/GeomNodesSystem.h>
+#include <Editor/Common/GNConstants.h>
 
 namespace GeomNodes
 {
@@ -100,5 +101,76 @@ namespace GeomNodes
 
         return true;
     }
-    
+
+    void GNInstance::SendParamUpdates(const AZStd::string& params, const AZStd::string& objectName)
+    {
+		auto msg = AZStd::string::format(
+			R"JSON(
+                {
+                    "%s": [ %s ],
+                    "%s": "%s",
+                    "Frame": 0,
+                    "ParamUpdate": true
+                }
+            )JSON"
+			, Field::Params
+			, params.c_str()
+			, Field::Object
+			, objectName.c_str()
+		);
+
+		SendIPCMsg(msg);
+    }
+
+    void GNInstance::SendHeartbeat()
+    {
+		SendIPCMsg(R"JSON(
+                        {
+                            "Alive": true 
+                        }
+                    )JSON");
+    }
+
+    void GNInstance::RequestObjectParams()
+    {
+		SendIPCMsg(R"JSON(
+                        {
+                            "FetchObjectParams": true 
+                        }
+                    )JSON");
+    }
+
+    void GNInstance::CloseMap(AZ::u64 mapId)
+    {
+		auto msg = AZStd::string::format(
+			R"JSON(
+                    {
+                        "%s": true,
+                        "%s": %llu
+                    }
+                    )JSON",
+			Field::SHMClose,
+			Field::MapId,
+			mapId);
+		SendIPCMsg(msg);
+    }
+
+    void GNInstance::RequestExport(const AZStd::string& fbxPath, const AZStd::string& objectName)
+    {
+		auto msg = AZStd::string::format(
+			R"JSON(
+                    {
+                        "%s": true,
+                        "%s": "%s",
+                        "%s": "%s"
+                    }
+                    )JSON",
+			Field::Export,
+			Field::Object,
+			objectName.c_str(),
+			Field::FBXPath,
+			fbxPath.c_str());
+		SendIPCMsg(msg);
+    }
+
 } // namespace GeomNodes

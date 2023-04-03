@@ -9,8 +9,7 @@ namespace GeomNodes
     {
     public:
         using MeshDataList = AZStd::vector<GNMeshData>;
-        using AssignedMeshMap = AZStd::map<AZ::u64, AZ::u32>;
-
+        
         GNModelData();
         GNModelData(AZ::u64 mapId);
         ~GNModelData() = default;
@@ -19,9 +18,7 @@ namespace GeomNodes
 
         const AZ::u32 MeshCount() const;
         const MeshDataList GetMeshes() const;
-
-        GNMeshData GetMeshData(AZ::u64 entityId);
-        void AssignMeshData(AZ::u64 entityId);
+        MaterialList GetMaterials();
 
         // These functions are the combination of all mesh buffers in order based on their position in MeshDataList
 		const U32Vector& GetIndices() const;
@@ -44,7 +41,7 @@ namespace GeomNodes
         T Read(AZ::u64 mapId);
 
         MeshDataList m_meshes;
-        AssignedMeshMap m_assignedMeshmap;
+        MaterialList m_materials;
 
         // These are all data combined from the meshes in single arrays
 		U32Vector m_indices;
