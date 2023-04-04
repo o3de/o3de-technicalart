@@ -109,7 +109,6 @@ namespace GeomNodes
                 {
                     "%s": [ %s ],
                     "%s": "%s",
-                    "Frame": 0,
                     "ParamUpdate": true
                 }
             )JSON"
@@ -155,21 +154,25 @@ namespace GeomNodes
 		SendIPCMsg(msg);
     }
 
-    void GNInstance::RequestExport(const AZStd::string& fbxPath, const AZStd::string& objectName)
+    void GNInstance::RequestExport(const AZStd::string& params, const AZStd::string& objectName, const AZStd::string& fbxPath)
     {
 		auto msg = AZStd::string::format(
 			R"JSON(
                     {
                         "%s": true,
+                        "%s": [ %s ],
                         "%s": "%s",
                         "%s": "%s"
                     }
-                    )JSON",
-			Field::Export,
-			Field::Object,
-			objectName.c_str(),
-			Field::FBXPath,
-			fbxPath.c_str());
+                    )JSON"
+			, Field::Export
+			, Field::Params
+			, params.c_str()
+            , Field::Object
+            , objectName.c_str()
+            , Field::FBXPath
+            , fbxPath.c_str()
+			);
 		SendIPCMsg(msg);
     }
 

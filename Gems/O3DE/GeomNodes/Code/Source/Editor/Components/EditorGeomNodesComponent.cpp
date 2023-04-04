@@ -256,7 +256,9 @@ namespace GeomNodes
     {
         if (!m_workInProgress)
         {
-            m_instance->RequestExport(m_controller->GenerateFBXPath(), m_currentObject);
+			m_instance->RequestExport(m_paramContext.m_group
+				.GetGroup(m_currentObject.c_str())->GetProperties()
+                , m_currentObject, m_controller->GenerateFBXPath());
             SetWorkInProgress(true);
         }
     }

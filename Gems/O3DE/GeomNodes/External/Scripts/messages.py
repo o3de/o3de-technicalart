@@ -38,17 +38,8 @@ def update_geometry_node_params(geometry_nodes_obj, new_params: dict):
             GN[params['Id']] = float(params['Value'])
         elif params['Type'] == 'BOOLEAN':
             GN[params['Id']] = bool(params['Value'])
-        # elif params['Type'] == 'MESH':
-        #     GN[params['Id']] = params['Object']
-        # elif params['Type'] == 'COLLECTION':
-        #     GN[params['Id']] = params['Collection']            
         elif params['Type'] == 'STRING':
             GN[params['Id']] = str(params['Value'])
-        # elif params['Type'] == 'IMAGE' or params['Type'] == 'TEXTURE':
-        #     GN[params['Id']] = params['Tex']
-        # elif params['Type'] == 'RGBA':
-        #     vect = params['Value'][0]
-        #     GN[params['Id']][:] = [vect['R'], vect['G'], vect['B'], vect['A']]
 
     for obj in bpy.data.objects:
         if obj.data and obj.type == "MESH":
@@ -99,7 +90,9 @@ def poll_for_messages():
                 elif 'Export' in msg_dict:
                     error_msg = ""
                     try:
-                        fbx_exporter.fbx_file_exporter(msg_dict['Object'], msg_dict['FBXPath'], False)
+                        # update the geometry nodes first. The request might happened when there's no running blender instance.
+                        object_name = update_gn_in_blender(msg_dict)
+                        fbx_exporter.fbx_file_exporter(object_name, msg_dict['FBXPath'], False)
                     except Exception as e:
                         error_msg = str(e)
                         if hasattr(e, 'message'):

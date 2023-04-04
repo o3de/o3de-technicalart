@@ -27,7 +27,7 @@ namespace GeomNodes
         void SendHeartbeat();
         void RequestObjectParams();
         void CloseMap(AZ::u64 mapId);
-        void RequestExport(const AZStd::string& fbxPath, const AZStd::string& objectName);
+        void RequestExport(const AZStd::string& params, const AZStd::string& objectName, const AZStd::string& fbxPath);
 
     private:
         AZStd::unique_ptr<AzFramework::ProcessWatcher> m_blenderProcessWatcher = nullptr;
