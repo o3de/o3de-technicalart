@@ -82,7 +82,7 @@ namespace GeomNodes
         GNProperty* retVal = nullptr;
         if (context.IsNil(valueIndex))
         {
-            retVal = aznew GNParamNil(name, context.GetReadOnlyPointer());
+            retVal = aznew GNParamNil(name, context.GetReadOnlyPointer(), context.GetEntityId());
         }
 
         return retVal;
@@ -130,7 +130,7 @@ namespace GeomNodes
             bool value;
             if (context.ReadValue(value, Field::DefaultValue))
             {
-                retVal = aznew GNParamBoolean(name, value, context.GetReadOnlyPointer());
+                retVal = aznew GNParamBoolean(name, value, context.GetReadOnlyPointer(), context.GetEntityId());
                 retVal->ReadSetGNId(context);
             }
         }
@@ -202,7 +202,7 @@ namespace GeomNodes
             int value;
             if (context.ReadValue(value, Field::DefaultValue))
             {
-                auto paramInt = aznew GNParamInt(name, value, context.GetReadOnlyPointer());
+                auto paramInt = aznew GNParamInt(name, value, context.GetReadOnlyPointer(), context.GetEntityId());
 
                 int min, max;
                 if (context.ReadValue(min, Field::MinValue))
@@ -289,7 +289,7 @@ namespace GeomNodes
             double value;
             if (context.ReadValue(value, Field::DefaultValue))
             {
-                auto paramValue = aznew GNParamValue(name, value, context.GetReadOnlyPointer());
+                auto paramValue = aznew GNParamValue(name, value, context.GetReadOnlyPointer(), context.GetEntityId());
                 double min, max;
                 if (context.ReadValue(min, Field::MinValue))
                 {
@@ -372,7 +372,7 @@ namespace GeomNodes
             const char* value = nullptr;
             if (context.ReadValue(value, Field::DefaultValue))
             {
-                retVal = aznew GNParamString(name, value, context.GetReadOnlyPointer());
+                retVal = aznew GNParamString(name, value, context.GetReadOnlyPointer(), context.GetEntityId());
                 retVal->ReadSetGNId(context);
             }
         }

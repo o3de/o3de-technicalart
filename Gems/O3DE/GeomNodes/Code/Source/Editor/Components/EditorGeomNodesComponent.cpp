@@ -94,7 +94,7 @@ namespace GeomNodes
                         ->Attribute(AZ::Edit::Attributes::Visibility, AZ::Edit::PropertyVisibility::ShowChildrenOnly)
                     ->DataElement(AZ::Edit::UIHandlers::Default, &GNParamBoolean::m_value, "m_value", "A boolean")
                     ->Attribute(AZ::Edit::Attributes::ReadOnly, &GNProperty::IsReadOnly)
-                    ->Attribute(AZ::Edit::Attributes::ChangeNotify, &EditorGeomNodesComponent::OnParamChange)
+                    ->Attribute(AZ::Edit::Attributes::ChangeNotify, &GNProperty::OnParamChange)
                     ->Attribute(AZ::Edit::Attributes::NameLabelOverride, &GNParamBoolean::m_name);
 
                 ec->Class<GNParamInt>("Geom Nodes Property (int)", "A Geom Nodes int property")
@@ -102,7 +102,7 @@ namespace GeomNodes
                         ->Attribute(AZ::Edit::Attributes::Visibility, AZ::Edit::PropertyVisibility::ShowChildrenOnly)
                     ->DataElement(AZ::Edit::UIHandlers::Default, &GNParamInt::m_value, "m_value", "An int")
                     ->Attribute(AZ::Edit::Attributes::ReadOnly, &GNProperty::IsReadOnly)
-                    ->Attribute(AZ::Edit::Attributes::ChangeNotify, &EditorGeomNodesComponent::OnParamChange)
+                    ->Attribute(AZ::Edit::Attributes::ChangeNotify, &GNProperty::OnParamChange)
                     ->Attribute(AZ::Edit::Attributes::NameLabelOverride, &GNParamInt::m_name);
 
                 ec->Class<GNParamValue>("Geom Nodes Property (double)", "A Geom Nodes double property")
@@ -110,7 +110,7 @@ namespace GeomNodes
                         ->Attribute(AZ::Edit::Attributes::Visibility, AZ::Edit::PropertyVisibility::ShowChildrenOnly)
                     ->DataElement(AZ::Edit::UIHandlers::Default, &GNParamValue::m_value, "m_value", "A double/value")
                     ->Attribute(AZ::Edit::Attributes::ReadOnly, &GNProperty::IsReadOnly)
-                        ->Attribute(AZ::Edit::Attributes::ChangeNotify, &EditorGeomNodesComponent::OnParamChange)
+                        ->Attribute(AZ::Edit::Attributes::ChangeNotify, &GNProperty::OnParamChange)
                         ->Attribute(AZ::Edit::Attributes::NameLabelOverride, &GNParamValue::m_name);
 
                 ec->Class<GNParamString>("Geom Nodes Property (string)", "A Geom Nodes string property")
@@ -118,7 +118,7 @@ namespace GeomNodes
                         ->Attribute(AZ::Edit::Attributes::Visibility, AZ::Edit::PropertyVisibility::ShowChildrenOnly)
                     ->DataElement(AZ::Edit::UIHandlers::Default, &GNParamString::m_value, "m_value", "A string")
                     ->Attribute(AZ::Edit::Attributes::ReadOnly, &GNProperty::IsReadOnly)
-                        ->Attribute(AZ::Edit::Attributes::ChangeNotify, &EditorGeomNodesComponent::OnParamChange)
+                        ->Attribute(AZ::Edit::Attributes::ChangeNotify, &GNProperty::OnParamChange)
                         ->Attribute(AZ::Edit::Attributes::NameLabelOverride, &GNParamString::m_name);
             }
         }
@@ -362,7 +362,7 @@ namespace GeomNodes
         ei.m_editData.m_elementId = AZ::Edit::UIHandlers::ComboBox;
         ei.m_sortOrder = FLT_MAX;
 
-        auto gnParam = aznew GNParamString(Field::Objects, "", &m_workInProgress);
+        auto gnParam = aznew GNParamString(Field::Objects, "", &m_workInProgress, GetEntityId());
         gnParam->m_value = m_currentObject;
         
         ei.m_editData.m_attributes.push_back(
@@ -403,6 +403,7 @@ namespace GeomNodes
             GNParamDataContext gndc;
             gndc.SetParamObject(itr);
             gndc.SetReadOnlyPointer(&m_workInProgress);
+            gndc.SetEntityId(GetEntityId());
             auto propertyName = gndc.GetParamName();
             auto paramType = gndc.GetParamType();
                 

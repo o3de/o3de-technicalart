@@ -128,12 +128,23 @@ namespace GeomNodes
             return m_pReadOnly;
         }
 
+        void SetEntityId(AZ::EntityId entityId)
+        {
+            m_entityId = entityId;
+        }
+
+        AZ::EntityId GetEntityId()
+        {
+            return m_entityId;
+        }
+
         const char* GetParamName();
         ParamType GetParamType();
 
     protected:
         const rapidjson::Value* m_curParamObj;
         bool* m_pReadOnly;
+        AZ::EntityId m_entityId;
     };
 
     template<class T>

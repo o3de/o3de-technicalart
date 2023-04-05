@@ -157,10 +157,6 @@ namespace Ipc
         Ipc();
         virtual ~Ipc();
 
-        void CreateOSAllocator();
-        void DestroyAllocator();
-        void CreateSystemAllocator();
-
         void Initialize(AZ::u64 id = SERVER_ID, IPCHandler handler = nullptr);
         void Uninitialize();
 
@@ -251,13 +247,6 @@ namespace Ipc
         typedef AZStd::queue<WaitingIPCMsg> MessageContainer;
         MessageContainer m_MessagesWaitingToExecute;
         AZStd::mutex m_MessageListMutex;
-
-        //
-        bool m_isStarted{ false };
-        bool m_isSystemAllocatorOwner{ false };
-        bool m_isOSAllocatorOwner{ false };
-        void* m_fixedMemoryBlock{ nullptr }; //!< Pointer to the memory block allocator, so we can free it OnDestroy.
-        AZ::IAllocator* m_osAllocator{ nullptr };
     };
 
 }

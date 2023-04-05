@@ -268,51 +268,6 @@ namespace Ipc
         Uninitialize();
     }
 
-    void Ipc::CreateOSAllocator()
-    {
-        if (!AZ::AllocatorInstance<AZ::OSAllocator>::IsReady())
-        {
-            AZ::AllocatorInstance<AZ::OSAllocator>::Create();
-            m_isOSAllocatorOwner = true;
-        }
-        m_osAllocator = &AZ::AllocatorInstance<AZ::OSAllocator>::Get();
-    }
-
-    void Ipc::DestroyAllocator()
-    {
-        // kill the system allocator if we created it
-        if (m_isSystemAllocatorOwner)
-        {
-            AZ::Debug::Trace::Instance().Destroy();
-            AZ::AllocatorInstance<AZ::SystemAllocator>::Destroy();
-
-            if (m_fixedMemoryBlock)
-            {
-                m_osAllocator->DeAllocate(m_fixedMemoryBlock);
-            }
-            m_fixedMemoryBlock = nullptr;
-            m_isSystemAllocatorOwner = false;
-        }
-
-        if (m_isOSAllocatorOwner)
-        {
-            AZ::AllocatorInstance<AZ::OSAllocator>::Destroy();
-            m_isOSAllocatorOwner = false;
-        }
-
-        m_osAllocator = nullptr;
-    }
-
-    void Ipc::CreateSystemAllocator()
-    {
-        if (!AZ::AllocatorInstance<AZ::SystemAllocator>::IsReady())
-        {
-            AZ::AllocatorInstance<AZ::SystemAllocator>::Create();
-
-            m_isSystemAllocatorOwner = true;
-        }
-    }
-
     void Ipc::Initialize(AZ::u64 id, IPCHandler handler)
     {
         //MessageBox(NULL, L"Debug-WMain-Install", L"Debug", MB_OK);
@@ -321,9 +276,6 @@ namespace Ipc
         m_handler = handler;
 
         bool bServer = id == SERVER_ID;
-
-        CreateOSAllocator();
-        CreateSystemAllocator();
 
         if (m_handler == nullptr && m_bServer)
         {
@@ -451,10 +403,6 @@ namespace Ipc
         }
 
         m_SharedMemMap.clear();
-
-
-        AZ_Warning("App", false, "GNIPC: Uninitialized called");
-        DestroyAllocator();
     }
 
     void Ipc::SendMsg(AZ::u32 pType, const AZ::u8* pData, AZ::u64 uSize, AZ::u64 id)
@@ -472,9 +420,6 @@ namespace Ipc
                     m_SharedMem.unlock();
                 }
             }
-
-            /*if (m_handler)
-                m_handler(0, "SendMessage", 11);*/
         }
     }
 

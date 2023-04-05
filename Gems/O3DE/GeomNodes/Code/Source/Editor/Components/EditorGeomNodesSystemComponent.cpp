@@ -18,7 +18,19 @@ namespace GeomNodes
         }
     }
 
-    EditorGeomNodesSystemComponent::EditorGeomNodesSystemComponent() = default;
+    EditorGeomNodesSystemComponent::EditorGeomNodesSystemComponent()
+		: m_onSystemInitializedHandler(
+			[](const GNConfiguration* /*config*/)
+	        {
+		        
+	        })
+		, m_onSystemConfigChangedHandler(
+			[](const GNConfiguration* /*config*/)
+	        {
+	        })
+    {
+
+    }
 
     EditorGeomNodesSystemComponent::~EditorGeomNodesSystemComponent() = default;
 

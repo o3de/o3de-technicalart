@@ -39,6 +39,7 @@ namespace GeomNodes
         void SetWorkInProgress(bool flag) override;
         bool GetWorkInProgress() override;
         void SendIPCMsg(const AZStd::string& msg) override;
+		void OnParamChange() override;
 
     private:
 		
@@ -56,7 +57,6 @@ namespace GeomNodes
         
 		void Clear();
         void OnPathChange(const AZStd::string& path);
-        void OnParamChange();
         // IpcHandlerNotificationBus overrides...
         void OnMessageReceived(const AZ::u8* content, const AZ::u64 length) override;
 

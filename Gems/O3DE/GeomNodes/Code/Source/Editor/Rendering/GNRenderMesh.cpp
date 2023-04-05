@@ -230,7 +230,7 @@ namespace GeomNodes
     {
 		if (m_meshFeatureProcessor)
 		{
-			m_meshFeatureProcessor->SetMaterialAssignmentMap(m_meshHandle, m_materialMap);
+			m_meshFeatureProcessor->SetCustomMaterials(m_meshHandle, AZ::Render::ConvertToCustomMaterialMap(m_materialMap));
 		}
     }
 
@@ -279,7 +279,7 @@ namespace GeomNodes
     {
 		if (m_meshFeatureProcessor)
 		{
-			m_meshFeatureProcessor->SetMaterialAssignmentMap(m_meshHandle, materials);
+            m_meshFeatureProcessor->SetCustomMaterials(m_meshHandle, AZ::Render::ConvertToCustomMaterialMap(materials));
 		}
     }
 

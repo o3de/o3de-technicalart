@@ -4,6 +4,7 @@
 #include <AzCore/Math/Crc.h>
 #include <AzCore/RTTI/TypeInfoSimple.h>
 #include <AzCore/Serialization/SerializeContext.h>
+#include <AzCore/Component/EntityId.h>
 #include <Editor/Systems/GNParamContext.h>
 #include <AzCore/Serialization/EditContext.h>
 
@@ -40,10 +41,11 @@ namespace GeomNodes
         GNProperty()
         {
         }
-        GNProperty(const char* name, bool* pReadOnly)
+        GNProperty(const char* name, bool* pReadOnly, AZ::EntityId entityId)
             : m_id(AZ::Crc32(name))
             , m_name(name)
             , m_pReadOnly(pReadOnly)
+            , m_entityId(entityId)
         {
         }
 
@@ -84,6 +86,11 @@ namespace GeomNodes
             return m_pReadOnly == nullptr ? false : *m_pReadOnly;
         }
 
+        void OnParamChange()
+        {
+            EditorGeomNodesComponentRequestBus::Event(m_entityId, &EditorGeomNodesComponentRequests::OnParamChange);
+        }
+
         AZ::u64         m_id;
         AZStd::string   m_gnId;                     // Geometry Node Param Id
         AZStd::string   m_name;                     // Geometry Node Param Name
@@ -91,6 +98,7 @@ namespace GeomNodes
         bool*           m_pReadOnly = nullptr;
         bool            m_isMaxSet = false;
         bool            m_isMinSet = false;
+        AZ::EntityId    m_entityId;
     protected:
         virtual void CloneDataFrom(const GNProperty* gnProperty) = 0;
     };
@@ -107,8 +115,8 @@ namespace GeomNodes
         GNParamNil()
         {
         }
-		GNParamNil(const char* name, bool* pReadOnly)
-			: GNProperty(name, pReadOnly)
+		GNParamNil(const char* name, bool* pReadOnly, AZ::EntityId entityId)
+			: GNProperty(name, pReadOnly, entityId)
         {
         }
 
@@ -137,8 +145,8 @@ namespace GeomNodes
         {
             m_type = GetEnumString(ParamType::Bool);
         }
-        GNParamBoolean(const char* name, bool value, bool* pReadOnly)
-            : GNProperty(name, pReadOnly)
+		GNParamBoolean(const char* name, bool value, bool* pReadOnly, AZ::EntityId entityId)
+			: GNProperty(name, pReadOnly, entityId)
             , m_value(value)
         {
             m_type = GetEnumString(ParamType::Bool);
@@ -178,8 +186,8 @@ namespace GeomNodes
         {
             m_type = GetEnumString(ParamType::Int);
         }
-		GNParamInt(const char* name, int value, bool* pReadOnly)
-			: GNProperty(name, pReadOnly)
+		GNParamInt(const char* name, int value, bool* pReadOnly, AZ::EntityId entityId)
+			: GNProperty(name, pReadOnly, entityId)
             , m_value(value)
         {
             m_type = GetEnumString(ParamType::Int);
@@ -231,8 +239,8 @@ namespace GeomNodes
         {
             m_type = GetEnumString(ParamType::Value);
         }
-		GNParamValue(const char* name, double value, bool* pReadOnly)
-			: GNProperty(name, pReadOnly)
+		GNParamValue(const char* name, double value, bool* pReadOnly, AZ::EntityId entityId)
+			: GNProperty(name, pReadOnly, entityId)
             , m_value(value)
         {
             m_type = GetEnumString(ParamType::Value);
@@ -283,8 +291,8 @@ namespace GeomNodes
         {
             m_type = GetEnumString(ParamType::String);
         }
-		GNParamString(const char* name, const char* value, bool* pReadOnly)
-			: GNProperty(name, pReadOnly)
+		GNParamString(const char* name, const char* value, bool* pReadOnly, AZ::EntityId entityId)
+			: GNProperty(name, pReadOnly, entityId)
             , m_value(value)
         {
             m_type = GetEnumString(ParamType::String);

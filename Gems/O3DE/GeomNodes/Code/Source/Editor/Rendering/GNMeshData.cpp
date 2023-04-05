@@ -82,7 +82,7 @@ namespace GeomNodes
                 // update the indexes using the new one
                 *indexPtr = m_loops[triangleLoops[i]] = aznumeric_cast<AZ::s32>(finalPositions.size() - 1);
 				finalNormals.emplace_back(normal);
-				uniqueKeys.emplace(AZStd::make_pair<UniqueKey, AZ::s32>(key, i));
+				uniqueKeys.emplace(AZStd::make_pair<UniqueKey, AZ::s32>(AZStd::move(key), AZStd::move(i)));
             }
             else
             {
