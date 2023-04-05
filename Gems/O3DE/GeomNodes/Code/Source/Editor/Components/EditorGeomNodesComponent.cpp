@@ -227,10 +227,10 @@ namespace GeomNodes
             }
             else if (jsonDocument.HasMember(Field::SHMOpen) && jsonDocument.HasMember(Field::MapId))
             {
+                SetWorkInProgress(true);
                 AZ::u64 mapId = jsonDocument[Field::MapId].GetInt64();
                 m_controller->ReadData(mapId);
                 m_instance->CloseMap(mapId);
-                SetWorkInProgress(false);
                 m_controller->RebuildRenderMesh();
             }
             else if (jsonDocument.HasMember(Field::Export) && jsonDocument.HasMember(Field::Error))

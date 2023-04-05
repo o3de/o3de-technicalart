@@ -113,10 +113,9 @@ namespace GeomNodes
 				m_renderMesh->UpdateTransform(m_worldFromLocal);
 				AzFramework::BoundsRequestBus::Handler::BusConnect(m_entityId);
 				AzToolsFramework::EditorComponentSelectionRequestsBus::Handler::BusConnect(m_entityId);
+				EditorGeomNodesComponentRequestBus::Event(m_entityId, &EditorGeomNodesComponentRequests::SetWorkInProgress, false);
 			});
 		}
-
-		m_requestingMeshRebuild = false;
 	}
 
 	void GNMeshController::ReadData(AZ::u64 mapId)
@@ -162,6 +161,9 @@ namespace GeomNodes
 				{
 					m_materialWaitList.push_back(azMaterialPath);
 				}
+			}
+			else {
+				m_materialWaitList.push_back(azMaterialPath);
 			}
 		}
 	}
@@ -255,7 +257,7 @@ namespace GeomNodes
 					if (iter != m_materialWaitList.end())
 					{
 						m_materialWaitList.erase(iter);
-						if (m_requestingMeshRebuild && m_materialWaitList.empty()) {
+						if (m_materialWaitList.empty()) {
 							RebuildRenderMesh();
 						}
 					}

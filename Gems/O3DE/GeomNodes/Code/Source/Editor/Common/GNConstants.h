@@ -39,7 +39,7 @@ namespace GeomNodes
 		Color
 	};
 
-    static constexpr AZStd::string_view AssetsFolderPath = "assets/geomNodes/";
+    static constexpr AZStd::string_view AssetsFolderPath = "assets/geomnodes/";
     static constexpr AZStd::string_view MaterialsFolder = "materials";
     static constexpr AZStd::string_view MaterialExtension = ".material";
     static constexpr AZStd::string_view AzMaterialExtension = ".azmaterial";

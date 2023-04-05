@@ -20,14 +20,14 @@ namespace GeomNodes
         Q_OBJECT
 
     public:
-        AZ_CLASS_ALLOCATOR(PropertyFuncValBrowseEditCtrl, AZ::SystemAllocator, 0);
+        AZ_CLASS_ALLOCATOR(PropertyFuncValBrowseEditCtrl, AZ::SystemAllocator);
 
         using ValidationCallbackType = AZ::Edit::AttributeFunction<void(const AZStd::string&)>;
 
         PropertyFuncValBrowseEditCtrl(QWidget* pParent = nullptr);
 
         virtual QString GetValue() const;
-        // Sets value programmtically and triggers validation
+        // Sets value programmatically and triggers validation
         virtual void SetValue(const QString& value);
         // Sets value as if user set it
         void SetValueUser(const QString& value);
@@ -63,7 +63,7 @@ namespace GeomNodes
     class PropertyFuncValBrowseEditHandler
         : public AzToolsFramework::PropertyHandler <AZStd::string, PropertyFuncValBrowseEditCtrl>
     {
-        AZ_CLASS_ALLOCATOR(PropertyFuncValBrowseEditHandler, AZ::SystemAllocator, 0);
+        AZ_CLASS_ALLOCATOR(PropertyFuncValBrowseEditHandler, AZ::SystemAllocator);
 
     public:
         PropertyFuncValBrowseEditHandler(ValidationHandler* valHdlr);

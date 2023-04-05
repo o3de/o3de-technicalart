@@ -12,7 +12,7 @@ namespace GeomNodes
     {
     public:
         AZ_RTTI(GeomNodesEditorModule, "{49C42A73-EF4E-4D42-8ECF-0ADE7F942CCD}", GeomNodesModuleInterface);
-        AZ_CLASS_ALLOCATOR(GeomNodesEditorModule, AZ::SystemAllocator, 0);
+        AZ_CLASS_ALLOCATOR(GeomNodesEditorModule, AZ::SystemAllocator);
 
         GeomNodesEditorModule()
             : m_gnSystem(AZStd::make_unique<GNEditorSettingsRegistryManager>())

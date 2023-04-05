@@ -106,7 +106,7 @@ namespace GeomNodes
     class GNParamNil : public GNProperty
     {
     public:
-        AZ_CLASS_ALLOCATOR(GNParamNil, AZ::SystemAllocator, 0);
+        AZ_CLASS_ALLOCATOR(GNParamNil, AZ::SystemAllocator);
         AZ_RTTI(GeomNodes::GNParamNil, "{519D98C7-054A-4047-BCEB-28DCD38CFCD4}", GNProperty);
 
         static void Reflect(AZ::ReflectContext* reflection);
@@ -134,7 +134,7 @@ namespace GeomNodes
     class GNParamBoolean : public GNProperty
     {
     public:
-        AZ_CLASS_ALLOCATOR(GNParamBoolean, AZ::SystemAllocator, 0);
+        AZ_CLASS_ALLOCATOR(GNParamBoolean, AZ::SystemAllocator);
         AZ_RTTI(GeomNodes::GNParamBoolean, "{6A05BCAB-50F7-4988-96E1-0EDB6B76C3A3}", GNProperty);
 
         static void Reflect(AZ::ReflectContext* reflection);
@@ -175,7 +175,7 @@ namespace GeomNodes
     class GNParamInt : public GNProperty
     {
     public:
-        AZ_CLASS_ALLOCATOR(GNParamInt, AZ::SystemAllocator, 0);
+        AZ_CLASS_ALLOCATOR(GNParamInt, AZ::SystemAllocator);
         AZ_RTTI(GNParamInt, "{B2457A3D-F30C-43F9-90F0-5BFAFFFD0F59}", GNProperty);
 
         static void Reflect(AZ::ReflectContext* reflection);
@@ -228,7 +228,7 @@ namespace GeomNodes
     class GNParamValue : public GNProperty
     {
     public:
-        AZ_CLASS_ALLOCATOR(GNParamValue, AZ::SystemAllocator, 0);
+        AZ_CLASS_ALLOCATOR(GNParamValue, AZ::SystemAllocator);
         AZ_RTTI(GeomNodes::GNParamValue, "{4790660B-B942-4421-B942-AE27DF67BF4F}", GNProperty);
 
         static void Reflect(AZ::ReflectContext* reflection);
@@ -281,7 +281,7 @@ namespace GeomNodes
     class GNParamString : public GNProperty
     {
     public:
-        AZ_CLASS_ALLOCATOR(GNParamString, AZ::SystemAllocator, 0);
+        AZ_CLASS_ALLOCATOR(GNParamString, AZ::SystemAllocator);
         AZ_RTTI(GeomNodes::GNParamString, "{9296C827-0281-4DBF-AC1A-B6636BCEC716}", GNProperty);
 
         static void Reflect(AZ::ReflectContext* reflection);

@@ -163,7 +163,7 @@ namespace GeomNodes
     public:
         typedef GNProperty* (*ParamTypeFactory)(GNParamDataContext& context, int valueIndex, const char* name);
 
-        AZ_CLASS_ALLOCATOR(GNParamContextImpl, AZ::SystemAllocator, 0);
+        AZ_CLASS_ALLOCATOR(GNParamContextImpl, AZ::SystemAllocator);
 
         GNParamContextImpl();
         ~GNParamContextImpl() = default;
@@ -177,7 +177,7 @@ namespace GeomNodes
         friend class EditorGeomNodesComponent;
 
     public:
-        AZ_CLASS_ALLOCATOR(GNParamContext, AZ::SystemAllocator, 0);
+        AZ_CLASS_ALLOCATOR(GNParamContext, AZ::SystemAllocator);
 
         AZ_TYPE_INFO(GeomNodes::GNParamContext, "{AA9713B7-70F1-43CB-9F95-5BEC9F44F556}");
 

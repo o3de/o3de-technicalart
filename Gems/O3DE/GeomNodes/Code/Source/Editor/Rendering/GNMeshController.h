@@ -59,8 +59,6 @@ namespace GeomNodes
 
 		AZStd::string m_blenderFilename;
 		AZStd::vector<AZStd::string> m_materialWaitList;	//!< List for materials building in AP. Having an empty list all materials are built and ready for loading.
-		
-		bool m_requestingMeshRebuild = false;
     };
 
 } // namespace GeomNodes

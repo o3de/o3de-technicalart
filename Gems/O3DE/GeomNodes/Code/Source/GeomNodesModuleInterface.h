@@ -10,7 +10,7 @@ namespace GeomNodes
     {
     public:
         AZ_RTTI(GeomNodesModuleInterface, "{2D38307D-709D-4B17-9878-AF59F988FC54}", AZ::Module);
-        AZ_CLASS_ALLOCATOR(GeomNodesModuleInterface, AZ::SystemAllocator, 0);
+        AZ_CLASS_ALLOCATOR(GeomNodesModuleInterface, AZ::SystemAllocator);
 
         GeomNodesModuleInterface()
         {

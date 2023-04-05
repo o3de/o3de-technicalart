@@ -6,7 +6,7 @@
 
 namespace GeomNodes
 {
-    AZ_CLASS_ALLOCATOR_IMPL(GNConfiguration, AZ::SystemAllocator, 0);
+    AZ_CLASS_ALLOCATOR_IMPL(GNConfiguration, AZ::SystemAllocator);
 
     /*static*/ void GNConfiguration::Reflect(AZ::ReflectContext* context)
     {
