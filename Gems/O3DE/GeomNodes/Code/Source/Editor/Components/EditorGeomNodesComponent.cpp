@@ -13,6 +13,7 @@
 #include <Atom/Feature/Mesh/MeshFeatureProcessorInterface.h>
 #include <Atom/RPI.Public/Scene.h>
 #include <AzCore/Component/NonUniformScaleBus.h>
+#include <AzCore/Settings/SettingsRegistryMergeUtils.h>
 
 namespace GeomNodes
 {
@@ -33,7 +34,13 @@ namespace GeomNodes
             serializeContext->Class<EditorGeomNodesComponent, EditorComponentBase>()
                 ->Version(1)
                 ->Field("GNParamContext", &EditorGeomNodesComponent::m_paramContext)
-                ->Field("BlenderFile", &EditorGeomNodesComponent::m_blenderFile);
+                ->Field("BlenderFile", &EditorGeomNodesComponent::m_blenderFile)
+				->Field("ObjectNameList", &EditorGeomNodesComponent::m_enumValues)
+				->Field("ObjectInfos", &EditorGeomNodesComponent::m_defaultObjectInfos)
+				//->Field("CurrentObject", &EditorGeomNodesComponent::m_currentObject)
+                ->Field("CurrentObjectInfo", &EditorGeomNodesComponent::m_currentObjectInfo)
+                ->Field("IsInitialized", &EditorGeomNodesComponent::m_initialized)
+                ;
             
             GNParamContext::Reflect(context);
             
@@ -136,21 +143,50 @@ namespace GeomNodes
                 m_paramContext.m_group.Clear();
                 ClearDataElements();
                 m_initialized = false;
+                m_currentObjectInfo.clear();
+                SetWorkInProgress(true);
             }
 
             if (!m_instance || bClearParams || (m_instance && !m_instance->IsValid()))
             {
-				SetWorkInProgress(true);
-
                 if (m_instance)
                     delete m_instance;
+                else
+                    SetWorkInProgress(true);
 
                 const AZ::IO::FixedMaxPath gemPath = AZ::Utils::GetGemPath("GeomNodes");
                 const AZ::IO::FixedMaxPath exePath = AZ::Utils::GetExecutableDirectory();
+                AZ::IO::FixedMaxPath bridgePath = exePath / "Bridge.dll"; //TODO: make this platform agnostic
+                if (!AZ::IO::SystemFile::Exists(bridgePath.c_str()))
+                {
+                    auto registry = AZ::SettingsRegistry::Get();
+                    AZ::IO::FixedMaxPath projectBuildPath;
+                    if (!registry->Get(projectBuildPath.Native(), AZ::SettingsRegistryMergeUtils::ProjectBuildPath))
+                    {
+                        //TODO: error check
+                        //"No project build path setting was found in the user registry folder"
+                        return;
+                    }
+
+                    bridgePath = projectBuildPath / "bin/profile/Bridge.dll"; //TODO: check if there is a way to get "bin/profile" in the registry or somewhere and not hard coded.
+                    if (!AZ::IO::SystemFile::Exists(bridgePath.c_str()))
+                    {
+                        //TODO: bail out
+                        // we can't find the Bridge.dll
+                        return;
+                    }
+
+                    bridgePath = projectBuildPath / "bin/profile";
+                }
+                else
+                {
+                    bridgePath = exePath.c_str();
+                }
+
                 AZStd::string scriptPath = AZStd::string::format(R"(%s\External\Scripts\__init__.py)", gemPath.c_str());
 
                 m_instance = new GNInstance;
-                m_instance->Init(path, scriptPath, exePath.c_str(), GetEntityId());
+                m_instance->Init(path, scriptPath, bridgePath.c_str(), GetEntityId());
                 if (m_instance->IsValid())
                 {
                     //AZ::EntityId entityId = AZ::EntityId(123456);
@@ -167,23 +203,29 @@ namespace GeomNodes
     {
         SetWorkInProgress(true);
         
-        auto gnParam = reinterpret_cast<GNParamString*>(m_paramContext.m_group.GetProperty(Field::Objects));
-        if (gnParam->m_value != m_currentObject)
+        if (m_paramContext.m_group.m_properties.size() > 0)
         {
-            m_currentObject = gnParam->m_value;
-            m_paramContext.m_group.Clear(); // clear the group/properties
-            CreateDataElements(m_paramContext.m_group);
+            // this checks if the user chooses another object.
+			auto gnParam = reinterpret_cast<GNParamString*>(m_paramContext.m_group.GetProperty(Field::Objects));
+			if (gnParam->m_value != m_currentObject)
+			{
+				m_currentObject = gnParam->m_value;
+				m_paramContext.m_group.Clear(); // clear the group/properties
+                CreateDataElements(m_paramContext.m_group);
+			}
         }
         
-        if(m_instance && !m_instance->IsValid())
+        if(m_instance)
         {
-            m_instance->RestartProcess();
+            if (!m_instance->IsValid())
+            {
+                m_instance->RestartProcess();
+            }
+            
+			m_currentObjectInfo = m_instance->SendParamUpdates(m_paramContext.m_group
+				.GetGroup(m_currentObject.c_str())->GetProperties(), m_currentObject);
         }
 
-        m_instance->SendParamUpdates(m_paramContext.m_group
-            .GetGroup(m_currentObject.c_str())->GetProperties()
-            , m_currentObject);
-        
         AZ_Printf("EditorGeomNodesComponent", "Parameter has changed");
     }
 
@@ -205,12 +247,11 @@ namespace GeomNodes
                     m_instance->RequestObjectParams();
                     m_initialized = true;
                 }
-                else
+                else if(m_fromActivate)
                 {
-                    // send messages that are queued.
-                    //SetWorkInProgress(false);
+                    OnParamChange();
                 }
-                
+                m_fromActivate = false;
             }
             else if (jsonDocument.HasMember(Field::ObjectNames) && jsonDocument.HasMember(Field::Objects) && jsonDocument.HasMember(Field::Materials))
             {
@@ -307,7 +348,6 @@ namespace GeomNodes
         // Load and save our param list object from json. Need this so it's faster to switch between objects and not need to send a request via IPC.
         LoadParams(objectArray);
 
-        // TODO: load from save point if any
         m_currentObject = m_enumValues[0];
     }
 
@@ -335,7 +375,7 @@ namespace GeomNodes
             rapidjson::PrettyWriter<rapidjson::StringBuffer> jsonDatawriter(jsonDataBuffer);
             (*itr).Accept(jsonDatawriter);
 
-            m_objectInfos.insert(AZStd::make_pair(objectName, jsonDataBuffer.GetString()));
+            m_defaultObjectInfos.insert(AZStd::make_pair(objectName, jsonDataBuffer.GetString()));
         }
     }
 
@@ -344,7 +384,7 @@ namespace GeomNodes
         ClearDataElements();
 
         // Create the combo box that will show the object names.
-        CreateObjectNames(m_enumValues, group);
+        CreateObjectNames(m_currentObject, m_enumValues, group);
 
         // Create the currently selected Object parameters and attributes. Load only the first or saved object.
         CreateParam(m_currentObject, group);
@@ -354,7 +394,7 @@ namespace GeomNodes
             &AzToolsFramework::ToolsApplicationRequests::Bus::Events::AddDirtyEntity, GetEntityId());
     }
 
-    void EditorGeomNodesComponent::CreateObjectNames(const StringVector& enumValues, GNPropertyGroup& group)
+    void EditorGeomNodesComponent::CreateObjectNames(const AZStd::string& objectName, const StringVector& enumValues, GNPropertyGroup& group)
     {
         ElementInfo ei;
         ei.m_editData.m_name = CacheString(Field::Objects);
@@ -363,7 +403,7 @@ namespace GeomNodes
         ei.m_sortOrder = FLT_MAX;
 
         auto gnParam = aznew GNParamString(Field::Objects, "", &m_workInProgress, GetEntityId());
-        gnParam->m_value = m_currentObject;
+        gnParam->m_value = objectName;
         
         ei.m_editData.m_attributes.push_back(
             AZ::Edit::AttributePair(AZ::Edit::Attributes::StringList, aznew AZ::AttributeContainerType<StringVector>(enumValues)));
@@ -375,22 +415,36 @@ namespace GeomNodes
 
     void EditorGeomNodesComponent::CreateParam(const AZStd::string& objectName, GNPropertyGroup& group)
     {
-        auto it = m_objectInfos.find(objectName);
-        if (it != m_objectInfos.end())
+        AZStd::string jsonBuffer;
+
+        if (m_currentObjectInfo.empty())
         {
-            rapidjson::Document jsonDocument;
-            jsonDocument.Parse((const char*)it->second.c_str(), it->second.size());
-            if (!jsonDocument.HasParseError())
-            {
-                GNPropertyGroup* subGroup = group.GetGroup(objectName.c_str());
-                if (subGroup == nullptr)
-                {
-                    group.m_groups.emplace_back();
-                    subGroup = &group.m_groups.back();
-                    subGroup->m_name = objectName;
-                }
-                LoadProperties(jsonDocument[Field::Params], *subGroup);
-            }
+			auto it = m_defaultObjectInfos.find(objectName);
+			if (it != m_defaultObjectInfos.end())
+			{
+				jsonBuffer = it->second;
+			}
+        }
+        else {
+			jsonBuffer = m_currentObjectInfo;
+        }
+        
+
+        if (!jsonBuffer.empty())
+        {
+			rapidjson::Document jsonDocument;
+			jsonDocument.Parse(jsonBuffer.c_str(), jsonBuffer.size());
+			if (!jsonDocument.HasParseError())
+			{
+				GNPropertyGroup* subGroup = group.GetGroup(objectName.c_str());
+				if (subGroup == nullptr)
+				{
+					group.m_groups.emplace_back();
+					subGroup = &group.m_groups.back();
+					subGroup->m_name = objectName;
+				}
+				LoadProperties(jsonDocument[Field::Params], *subGroup);
+			}
         }
     }
 
@@ -497,6 +551,10 @@ namespace GeomNodes
         EditorGeomNodesComponentRequestBus::Handler::BusConnect(GetEntityId());
         
         m_controller = AZStd::make_unique<GNMeshController>(GetEntityId());
+
+        m_fromActivate = true;
+
+        OnPathChange(m_blenderFile);
     }
 
     void EditorGeomNodesComponent::Deactivate()

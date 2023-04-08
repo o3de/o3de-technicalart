@@ -12,11 +12,13 @@
 #     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 ly_add_target(
-    NAME Bridge SHARED
+    NAME Bridge ${PAL_TRAIT_MONOLITHIC_DRIVEN_LIBRARY_TYPE}
     NAMESPACE GeomNodes
     FILES_CMAKE
         bridge_files.cmake
     INCLUDE_DIRECTORIES
+        INTERFACE
+            .
         PUBLIC
             .
     BUILD_DEPENDENCIES

@@ -3,13 +3,14 @@
 #include <AzCore/EBus/Event.h>
 #include <Editor/Common/GNEvents.h>
 #include <Editor/Configuration/GNConfiguration.h>
+#include <GeomNodes/GeomNodesTypeIds.h>
 
 namespace GeomNodes
 {
     class GNSystemInterface
     {
     public:
-        AZ_RTTI(GNSystemInterface, "{83173679-DAF6-4496-BEFA-B0D252C40366}");
+        AZ_RTTI(GNSystemInterface, GNSystemInterfaceTypeId);
 
         GNSystemInterface() = default;
         virtual ~GNSystemInterface() = default;

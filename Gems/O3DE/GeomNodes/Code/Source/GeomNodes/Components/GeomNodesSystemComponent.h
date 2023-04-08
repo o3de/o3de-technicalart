@@ -13,7 +13,7 @@ namespace GeomNodes
         , public AZ::TickBus::Handler
     {
     public:
-        AZ_COMPONENT(GeomNodesSystemComponent, "{ED1211E8-0025-4A8A-960F-CF405FBF7077}");
+        AZ_COMPONENT_DECL(GeomNodesSystemComponent);
 
         static void Reflect(AZ::ReflectContext* context);
 

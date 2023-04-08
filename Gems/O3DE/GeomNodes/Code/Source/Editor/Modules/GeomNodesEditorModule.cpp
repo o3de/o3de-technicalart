@@ -1,4 +1,5 @@
 
+#include <GeomNodes/GeomNodesTypeIds.h>
 #include <GeomNodesModuleInterface.h>
 #include "Editor/Components/EditorGeomNodesSystemComponent.h"
 #include "Editor/Components/EditorGeomNodesComponent.h"
@@ -11,7 +12,7 @@ namespace GeomNodes
         : public GeomNodesModuleInterface
     {
     public:
-        AZ_RTTI(GeomNodesEditorModule, "{49C42A73-EF4E-4D42-8ECF-0ADE7F942CCD}", GeomNodesModuleInterface);
+        AZ_RTTI(GeomNodesEditorModule, GeomNodesEditorModuleTypeId, GeomNodesModuleInterface);
         AZ_CLASS_ALLOCATOR(GeomNodesEditorModule, AZ::SystemAllocator);
 
         GeomNodesEditorModule()

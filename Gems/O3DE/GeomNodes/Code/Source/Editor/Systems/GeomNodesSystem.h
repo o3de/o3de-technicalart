@@ -8,6 +8,7 @@
 #include <AZCore/std/smart_ptr/unique_ptr.h>
 #include <AzToolsFramework/UI/PropertyEditor/PropertyEditorAPI.h>
 #include "Editor/EBus/ValidatorBus.h"
+#include <GeomNodes/GeomNodesTypeIds.h>
 
 namespace GeomNodes
 {
@@ -19,7 +20,7 @@ namespace GeomNodes
         , public ValidatorBus::Handler
     {
     public:
-        AZ_RTTI(GeomNodesSystem, "{23791BF8-D9DE-4827-88D8-37DA39258570}", GeomNodes::GNSystemInterface);
+        AZ_RTTI(GeomNodesSystem, GeomNodesSystemTypeId, GeomNodes::GNSystemInterface);
 
         GeomNodesSystem(AZStd::unique_ptr<GNSettingsRegistryManager> registryManager);
         virtual ~GeomNodesSystem();

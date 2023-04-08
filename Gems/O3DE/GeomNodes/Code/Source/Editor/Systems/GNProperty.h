@@ -7,6 +7,8 @@
 #include <AzCore/Component/EntityId.h>
 #include <Editor/Systems/GNParamContext.h>
 #include <AzCore/Serialization/EditContext.h>
+#include <Editor/EBus/EditorGeomNodesComponentBus.h>
+#include <GeomNodes/GeomNodesTypeIds.h>
 
 namespace AZ
 {
@@ -36,7 +38,7 @@ namespace GeomNodes
         virtual ~GNProperty()
         {
         }
-        AZ_RTTI(GeomNodes::GNProperty, "{71904E43-F0A1-45EA-B87F-4CC5234E1E52}");
+        AZ_RTTI(GeomNodes::GNProperty, GNPropertyTypeId);
 
         GNProperty()
         {
@@ -107,7 +109,7 @@ namespace GeomNodes
     {
     public:
         AZ_CLASS_ALLOCATOR(GNParamNil, AZ::SystemAllocator);
-        AZ_RTTI(GeomNodes::GNParamNil, "{519D98C7-054A-4047-BCEB-28DCD38CFCD4}", GNProperty);
+        AZ_RTTI(GeomNodes::GNParamNil, GNParamNilTypeId, GNProperty);
 
         static void Reflect(AZ::ReflectContext* reflection);
         static GNProperty* TryCreateProperty(GNParamDataContext& context, int valueIndex, const char* name);
@@ -135,7 +137,7 @@ namespace GeomNodes
     {
     public:
         AZ_CLASS_ALLOCATOR(GNParamBoolean, AZ::SystemAllocator);
-        AZ_RTTI(GeomNodes::GNParamBoolean, "{6A05BCAB-50F7-4988-96E1-0EDB6B76C3A3}", GNProperty);
+        AZ_RTTI(GeomNodes::GNParamBoolean, GNParamBooleanTypeId, GNProperty);
 
         static void Reflect(AZ::ReflectContext* reflection);
         static GNProperty* TryCreateProperty(GNParamDataContext& context, int valueIndex, const char* name);
@@ -176,7 +178,7 @@ namespace GeomNodes
     {
     public:
         AZ_CLASS_ALLOCATOR(GNParamInt, AZ::SystemAllocator);
-        AZ_RTTI(GNParamInt, "{B2457A3D-F30C-43F9-90F0-5BFAFFFD0F59}", GNProperty);
+        AZ_RTTI(GeomNodes::GNParamInt, GNParamIntTypeId, GNProperty);
 
         static void Reflect(AZ::ReflectContext* reflection);
         static GNProperty* TryCreateProperty(GNParamDataContext& context, int valueIndex, const char* name);
@@ -229,7 +231,7 @@ namespace GeomNodes
     {
     public:
         AZ_CLASS_ALLOCATOR(GNParamValue, AZ::SystemAllocator);
-        AZ_RTTI(GeomNodes::GNParamValue, "{4790660B-B942-4421-B942-AE27DF67BF4F}", GNProperty);
+        AZ_RTTI(GeomNodes::GNParamValue, GNParamValueTypeId, GNProperty);
 
         static void Reflect(AZ::ReflectContext* reflection);
         static GNProperty* TryCreateProperty(GNParamDataContext& context, int valueIndex, const char* name);
@@ -282,7 +284,7 @@ namespace GeomNodes
     {
     public:
         AZ_CLASS_ALLOCATOR(GNParamString, AZ::SystemAllocator);
-        AZ_RTTI(GeomNodes::GNParamString, "{9296C827-0281-4DBF-AC1A-B6636BCEC716}", GNProperty);
+        AZ_RTTI(GeomNodes::GNParamString, GNParamStringTypeId, GNProperty);
 
         static void Reflect(AZ::ReflectContext* reflection);
         static GNProperty* TryCreateProperty(GNParamDataContext& context, int valueIndex, const char* name);

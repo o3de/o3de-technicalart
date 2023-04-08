@@ -23,7 +23,7 @@ namespace GeomNodes
         bool RestartProcess();
 
         // Ipc messaging
-        void SendParamUpdates(const AZStd::string& params, const AZStd::string& objectName);
+        AZStd::string SendParamUpdates(const AZStd::string& params, const AZStd::string& objectName);
         void SendHeartbeat();
         void RequestObjectParams();
         void CloseMap(AZ::u64 mapId);

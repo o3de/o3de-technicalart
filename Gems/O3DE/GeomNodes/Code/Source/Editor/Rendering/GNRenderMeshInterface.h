@@ -1,4 +1,5 @@
 #include <AzCore/Component/Component.h>
+#include <GeomNodes/GeomNodesTypeIds.h>
 
 namespace AZ
 {
@@ -15,7 +16,7 @@ namespace GeomNodes
     class GNRenderMeshInterface
     {
     public:
-        AZ_RTTI(GNRenderMeshInterface, "{908CB056-4814-42FF-9D60-2D67A720D829}");
+        AZ_RTTI(GNRenderMeshInterface, GNRenderMeshInterfaceTypeId);
 
         virtual ~GNRenderMeshInterface() = 0;
 

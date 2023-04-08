@@ -2,7 +2,7 @@
 #include "Editor/UI/PropertyFileSelect.h"
 #include "Editor/UI/ValidationHandler.h"
 #include "Editor/UI/GeomNodesValidator.h"
-#include "Bridge.h"
+#include <Editor/Common/GNAPI.h>
 #include <Editor/EBus/IpcHandlerBus.h>
 
 namespace GeomNodes
@@ -41,7 +41,7 @@ namespace GeomNodes
 
 		m_systemConfig = *config;
 		
-		Init(SERVER_ID, IpcHandlerCB);
+		API::Init(SERVER_ID, IpcHandlerCB);
 
 		RegisterHandlersAndBuses();
 
@@ -57,7 +57,7 @@ namespace GeomNodes
 		}
 
 		UnregisterHandlersAndBuses();
-		Uninitialize();
+		API::Uninitialize();
 
 		m_state = State::Shutdown;
     }

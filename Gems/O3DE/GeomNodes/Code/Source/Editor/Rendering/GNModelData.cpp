@@ -2,7 +2,7 @@
 #include <Editor/Systems/GNParamContext.h>
 #include <AzCore/std/containers/set.h>
 #include <AzCore/std/containers/map.h>
-#include "Bridge.h"
+#include <Editor/Common/GNAPI.h>
 
 namespace GeomNodes
 {
@@ -19,7 +19,7 @@ namespace GeomNodes
     {
 		m_meshes.clear();
 		
-		if (OpenSHM(mapId))
+		if (API::OpenSHM(mapId))
 		{
 			AZ::s32 meshCount = Read<AZ::s32>(mapId);
 			AZ::s32 instanceCount = Read<AZ::s32>(mapId);
@@ -140,7 +140,7 @@ namespace GeomNodes
 			// Convert to only one buffers/arrays and keep track of the offsets and element counts
 			MergeMeshBuffers();
 
-			ClearSHM(mapId);
+			API::ClearSHM(mapId);
 		}
     }
 
@@ -242,7 +242,7 @@ namespace GeomNodes
     {
         AZ::u64 length;
         void* address;
-        ReadSHM(mapId, &address, &length);
+        API::ReadSHM(mapId, &address, &length);
 
         T* array = static_cast<T*>(address);
         return AZStd::vector<T>(array, array + (length / sizeof(T)));
@@ -253,7 +253,7 @@ namespace GeomNodes
     {
         AZ::u64 length;
         void* address;
-        ReadSHM(mapId, &address, &length);
+        API::ReadSHM(mapId, &address, &length);
         T value{};
         memcpy(&value, address, length);
         return value;

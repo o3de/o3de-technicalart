@@ -17,7 +17,8 @@ namespace GeomNodes
     {
         using BaseSystemComponent = GeomNodesSystemComponent;
     public:
-        AZ_COMPONENT(EditorGeomNodesSystemComponent, "{3B2D4C6C-C359-4890-8D78-0DDA7864131C}", BaseSystemComponent);
+        AZ_COMPONENT_DECL(EditorGeomNodesSystemComponent);
+        
         static void Reflect(AZ::ReflectContext* context);
 
         EditorGeomNodesSystemComponent();

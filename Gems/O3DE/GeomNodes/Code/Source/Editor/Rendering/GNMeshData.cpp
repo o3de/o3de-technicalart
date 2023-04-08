@@ -1,6 +1,5 @@
 #include <Editor/Rendering/GNMeshData.h>
 #include <AzCore/std/containers/unordered_map.h>
-#include "Bridge.h"
 
 namespace GeomNodes
 {
@@ -256,6 +255,12 @@ namespace GeomNodes
     }
 
     template<AttributeType AttributeTypeT>
+    void GNMeshData::SetCount(AZ::u64 count)
+    {
+        SetCount<AttributeTypeT>(aznumeric_cast<AZ::u32>(count));
+    }
+
+    template<AttributeType AttributeTypeT>
     void GNMeshData::SetOffset(AZ::u32 offset)
     {
 		if constexpr (AttributeTypeT == AttributeType::Position) {
@@ -276,6 +281,12 @@ namespace GeomNodes
 		else if constexpr (AttributeTypeT == AttributeType::Color) {
 			m_colorsRange.offset = offset;
 		}
+    }
+
+    template<AttributeType AttributeTypeT>
+    void GNMeshData::SetOffset(AZ::u64 offset)
+    {
+        SetOffset<AttributeTypeT>(aznumeric_cast<AZ::u32>(offset));
     }
 
     template<AttributeType AttributeTypeT>
@@ -316,9 +327,19 @@ namespace GeomNodes
         m_indicesRange.offset = offset;
     }
 
+    void GNMeshData::SetIndexOffset(AZ::u64 offset)
+    {
+        SetIndexOffset(aznumeric_cast<AZ::u32>(offset));
+    }
+
     void GNMeshData::SetIndexCount(AZ::u32 count)
     {
         m_indicesRange.count = count;
+    }
+
+    void GNMeshData::SetIndexCount(AZ::u64 count)
+    {
+        SetIndexCount(aznumeric_cast<AZ::u32>(count));
     }
 
     const U32Vector& GNMeshData::GetIndices() const

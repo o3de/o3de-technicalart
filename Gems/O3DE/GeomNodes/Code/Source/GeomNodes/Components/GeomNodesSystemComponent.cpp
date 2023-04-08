@@ -1,28 +1,22 @@
 
 #include "GeomNodesSystemComponent.h"
 
+#include <GeomNodes/GeomNodesTypeIds.h>
+
 #include <AzCore/Serialization/SerializeContext.h>
-#include <AzCore/Serialization/EditContext.h>
-#include <AzCore/Serialization/EditContextConstants.inl>
 
 namespace GeomNodes
 {
+    AZ_COMPONENT_IMPL(GeomNodesSystemComponent, "GeomNodesSystemComponent",
+        GeomNodesSystemComponentTypeId);
+
     void GeomNodesSystemComponent::Reflect(AZ::ReflectContext* context)
     {
-        if (AZ::SerializeContext* serialize = azrtti_cast<AZ::SerializeContext*>(context))
+        if (auto serializeContext = azrtti_cast<AZ::SerializeContext*>(context))
         {
-            serialize->Class<GeomNodesSystemComponent, AZ::Component>()
+            serializeContext->Class<GeomNodesSystemComponent, AZ::Component>()
                 ->Version(0)
                 ;
-
-            if (AZ::EditContext* ec = serialize->GetEditContext())
-            {
-                ec->Class<GeomNodesSystemComponent>("GeomNodes", "[Description of functionality provided by this System Component]")
-                    ->ClassElement(AZ::Edit::ClassElements::EditorData, "")
-                        ->Attribute(AZ::Edit::Attributes::AppearsInAddComponentMenu, AZ_CRC("System"))
-                        ->Attribute(AZ::Edit::Attributes::AutoExpand, true)
-                    ;
-            }
         }
     }
 

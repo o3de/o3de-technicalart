@@ -69,7 +69,7 @@ namespace GeomNodes
         void LoadObjectNames(const rapidjson::Value& objectNames);
         void LoadParams(const rapidjson::Value& objectArray);
         void CreateDataElements(GNPropertyGroup& group);
-        void CreateObjectNames(const StringVector& enumValues, GNPropertyGroup& group);
+        void CreateObjectNames(const AZStd::string& objectName, const StringVector& enumValues, GNPropertyGroup& group);
         void CreateParam(const AZStd::string& objectName, GNPropertyGroup& group);
         bool LoadProperties(const rapidjson::Value& paramVal, GNPropertyGroup& group);
         void LoadAttribute(ParamType type, AZ::Edit::ElementData& ed, GNProperty* prop);
@@ -86,7 +86,7 @@ namespace GeomNodes
         const char* CacheString(const char* str);
         AZStd::unordered_map<const void*, AZStd::string> m_cachedStrings;
         AZStd::unordered_map<const void*, ElementInfo> m_dataElements;
-        AZStd::unordered_map<AZStd::string, AZStd::string> m_objectInfos;
+        AZStd::unordered_map<AZStd::string, AZStd::string> m_defaultObjectInfos;
 
         StringVector m_enumValues;
 
@@ -96,11 +96,13 @@ namespace GeomNodes
 
         AZStd::string m_blenderFile;
         AZStd::string m_currentObject;
-        
+        AZStd::string m_currentObjectInfo; //!< in JSON form. This is the representation of the current selected object along with the current parameters.
+
         GNInstance* m_instance = nullptr;
         AzToolsFramework::EntityIdList m_entityIdList;
 
         bool m_initialized = false;
         bool m_workInProgress = false;
+        bool m_fromActivate = false;
     };
 }

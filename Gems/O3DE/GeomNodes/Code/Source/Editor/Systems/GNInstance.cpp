@@ -1,5 +1,5 @@
 #include "GNInstance.h"
-#include "Bridge.h"
+#include <Editor/Common/GNAPI.h>
 #include <Editor/Systems/GeomNodesSystem.h>
 #include <Editor/Common/GNConstants.h>
 
@@ -58,7 +58,7 @@ namespace GeomNodes
     {
         //AZ::u64 entityId = 123456;
         AZ::u64 entityId = (AZ::u64)m_entityId;
-        SendMsg(content.c_str(), content.size(), entityId);
+        API::SendMsg(content.c_str(), content.size(), entityId);
     }
 
     bool GNInstance::RestartProcess()
@@ -102,7 +102,7 @@ namespace GeomNodes
         return true;
     }
 
-    void GNInstance::SendParamUpdates(const AZStd::string& params, const AZStd::string& objectName)
+    AZStd::string GNInstance::SendParamUpdates(const AZStd::string& params, const AZStd::string& objectName)
     {
 		auto msg = AZStd::string::format(
 			R"JSON(
@@ -119,6 +119,8 @@ namespace GeomNodes
 		);
 
 		SendIPCMsg(msg);
+
+        return msg;
     }
 
     void GNInstance::SendHeartbeat()

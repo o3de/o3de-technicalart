@@ -38,7 +38,9 @@ namespace GeomNodes
         AZ::u32 GetIndexCount() const;
         AZ::u32 GetIndexOffset() const;
         void SetIndexOffset(AZ::u32 offset);
+        void SetIndexOffset(AZ::u64 offset);
         void SetIndexCount(AZ::u32 count);
+        void SetIndexCount(AZ::u64 count);
 
 		template<AttributeType AttributeTypeT>
 		AZ::u32 GetCount() const;
@@ -46,8 +48,12 @@ namespace GeomNodes
 		AZ::u32 GetOffset() const;
 		template<AttributeType AttributeTypeT>
 		void SetCount(AZ::u32 count);
+        template<AttributeType AttributeTypeT>
+        void SetCount(AZ::u64 count);
 		template<AttributeType AttributeTypeT>
 		void SetOffset(AZ::u32 offset);
+        template<AttributeType AttributeTypeT>
+        void SetOffset(AZ::u64 offset);
 
         const U32Vector& GetIndices() const;
         void SetIndices(const U32Vector& indices);

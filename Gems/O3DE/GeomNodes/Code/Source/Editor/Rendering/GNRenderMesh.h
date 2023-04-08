@@ -11,6 +11,7 @@
 #include <AzCore/Component/TransformBus.h>
 #include <AzCore/Name/Name.h>
 
+#include <GeomNodes/GeomNodesTypeIds.h>
 namespace AZ::RPI
 {
     class ModelLodAsset;
@@ -29,7 +30,7 @@ namespace GeomNodes
         , private AZ::TickBus::Handler
     {
     public:
-        AZ_RTTI(GNRenderMesh, "{4E293CD2-F9E6-417C-92B7-DDAF312F46CF}");
+        AZ_RTTI(GNRenderMesh, GNRenderMeshTypeId);
 
         explicit GNRenderMesh(AZ::EntityId entityId);
         ~GNRenderMesh();

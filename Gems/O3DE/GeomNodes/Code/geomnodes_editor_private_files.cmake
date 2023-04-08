@@ -3,6 +3,8 @@ set(FILES
     Source/Editor/Commons.h
     Source/Editor/Math/MathHelper.cpp
     Source/Editor/Math/MathHelper.h
+    Source/Editor/Common/GNAPI.cpp
+    Source/Editor/Common/GNAPI.h
     Source/Editor/Common/GNEvents.h
     Source/Editor/Common/GNConstants.h
     Source/Editor/Components/EditorGeomNodesSystemComponent.cpp
