@@ -16,7 +16,6 @@ _LOGGER = _logging.getLogger(_PACKAGENAME)
 #_logging.basicConfig(format=FRMT_LOG_LONG, level=_logging.DEBUG)
 _logging.basicConfig(level=_logging.DEBUG)
 _LOGGER.debug('Initializing: {0}.'.format({_PACKAGENAME}))
-#sys.stdout = open("f:/output.txt", "w")
 
 dir = os.path.dirname(__file__)
 if not dir in sys.path:
@@ -37,9 +36,5 @@ if __name__ == "__main__":
         bpy.app.timers.register(run)
     else:
         run()
-
-# Close the file
-#sys.stdout.close()
-#sys.stdout = sys.__stdout__
 
 del _LOGGER

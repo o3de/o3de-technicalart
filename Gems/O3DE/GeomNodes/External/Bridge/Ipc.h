@@ -212,7 +212,7 @@ namespace Ipc
         AZ::u32 m_uIDIdx = 0;
         AZ::u32 m_uServerPID = 0;
         AZ::u32 m_uiPrevMsgSequence = 0; // The index of the IPC message that was just accomplished
-        AZ::u32 m_uMsgAddIdx = 0;
+        AZ::u32 m_uMsgAddIdx = 5;
         AZ::s64 m_uLastCmdTime = 0;
 
         AZ::SharedMemory m_SharedMem;   // IPC map

@@ -835,7 +835,7 @@ namespace Ipc
                         }
 
                         ++m_uMsgAddIdx;
-                        if (m_uMsgAddIdx > 9)
+                        if (m_uMsgAddIdx > IPC_MAX_PID - 1)
                             m_uMsgAddIdx = 0;
 
                         if (m_uMsgAddIdx == nInitialIdx)
@@ -1095,7 +1095,7 @@ namespace Ipc
                 i = (pIDx * 10) + m_uMsgAddIdx;
                 dwToSendPid = m_MsgTable->message[i].pid;
 
-                if (dwToSendPid == SERVER_ID
+                if (dwToSendPid == 0
                     || ((tNow - m_MsgTable->message[i].i64Timestamp) > 30))
                 {
                     IPCMessage tMsg(pID, m_uID, pType, uSize, m_ProcessIDs->uiPrevMsgSequence[pIDx] + 1, tNow);

@@ -56,9 +56,7 @@ namespace GeomNodes
 
     void GNInstance::SendIPCMsg(const AZStd::string& content)
     {
-        //AZ::u64 entityId = 123456;
-        AZ::u64 entityId = (AZ::u64)m_entityId;
-        API::SendMsg(content.c_str(), content.size(), entityId);
+        API::SendMsg(content.c_str(), content.size(), (AZ::u64)m_entityId);
     }
 
     bool GNInstance::RestartProcess()
@@ -77,11 +75,12 @@ namespace GeomNodes
             m_scriptPath.c_str(),
             m_exePath.c_str(),
             (AZ::u64)m_entityId);
+        // NOTE: if you want to debug and see the console print outs set m_showWindow to true
         processLaunchInfo.m_showWindow = false;
         processLaunchInfo.m_processPriority = AzFramework::ProcessPriority::PROCESSPRIORITY_NORMAL;
 
         AzFramework::ProcessWatcher* outProcess = AzFramework::ProcessWatcher::LaunchProcess(
-            processLaunchInfo, AzFramework::ProcessCommunicationType::COMMUNICATOR_TYPE_STDINOUT);
+            processLaunchInfo, AzFramework::ProcessCommunicationType::COMMUNICATOR_TYPE_NONE);
 
         if (outProcess)
         {

@@ -189,9 +189,7 @@ namespace GeomNodes
                 m_instance->Init(path, scriptPath, bridgePath.c_str(), GetEntityId());
                 if (m_instance->IsValid())
                 {
-                    //AZ::EntityId entityId = AZ::EntityId(123456);
-                    auto entityId = GetEntityId();
-                    Ipc::IpcHandlerNotificationBus::Handler::BusConnect(entityId);
+                    Ipc::IpcHandlerNotificationBus::Handler::BusConnect(GetEntityId());
                 }
 
                 m_controller->SetFileName(path);
@@ -226,7 +224,7 @@ namespace GeomNodes
 				.GetGroup(m_currentObject.c_str())->GetProperties(), m_currentObject);
         }
 
-        AZ_Printf("EditorGeomNodesComponent", "Parameter has changed");
+        AZ_Printf("EditorGeomNodesComponent", "%llu: Parameter has changed", (AZ::u64)GetEntityId());
     }
 
     void EditorGeomNodesComponent::OnMessageReceived(const AZ::u8* content, const AZ::u64 length)
