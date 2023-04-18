@@ -19,7 +19,9 @@
     "restricted": "Journeys_in_Generative_AI",
     "gem_names": [
         "o3de_dreamstudio",
-        "DccScriptingInterface"
+        "DccScriptingInterface",
+        "PyShapeExample"
     ],
-    "engine_version": "1.2.0"
+    "engine_version": "1.2.0",
+    "version": "0.0.1"
 }
