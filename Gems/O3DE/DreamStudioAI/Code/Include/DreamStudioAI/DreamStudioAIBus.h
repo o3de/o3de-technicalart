@@ -4,17 +4,17 @@
 #include <AzCore/EBus/EBus.h>
 #include <AzCore/Interface/Interface.h>
 
-namespace o3de_dreamstudio
+namespace DreamStudioAI
 {
-    class o3de_dreamstudioRequests
+    class DreamStudioAIRequests
     {
     public:
-        AZ_RTTI(o3de_dreamstudioRequests, "{B6AED969-730D-430C-8E38-39A882415372}");
-        virtual ~o3de_dreamstudioRequests() = default;
+        AZ_RTTI(DreamStudioAIRequests, "{FE40DD24-2C5E-4A40-9998-F5AF74FD9E82}");
+        virtual ~DreamStudioAIRequests() = default;
         // Put your public methods here
     };
     
-    class o3de_dreamstudioBusTraits
+    class DreamStudioAIBusTraits
         : public AZ::EBusTraits
     {
     public:
@@ -25,7 +25,7 @@ namespace o3de_dreamstudio
         //////////////////////////////////////////////////////////////////////////
     };
 
-    using o3de_dreamstudioRequestBus = AZ::EBus<o3de_dreamstudioRequests, o3de_dreamstudioBusTraits>;
-    using o3de_dreamstudioInterface = AZ::Interface<o3de_dreamstudioRequests>;
+    using DreamStudioAIRequestBus = AZ::EBus<DreamStudioAIRequests, DreamStudioAIBusTraits>;
+    using DreamStudioAIInterface = AZ::Interface<DreamStudioAIRequests>;
 
-} // namespace o3de_dreamstudio
+} // namespace DreamStudioAI

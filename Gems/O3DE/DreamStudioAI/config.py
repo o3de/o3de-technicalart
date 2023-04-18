@@ -7,7 +7,7 @@
 #
 #
 # -------------------------------------------------------------------------
-"""! brief: configuration for o3de-dreamstudio Gem (aka DreamStudioAI)"""
+"""! brief: configuration for DreamStudioAI Gem (aka DreamStudioAI)"""
 
 # imports
 import sys
@@ -19,7 +19,7 @@ import logging as _logging
 path_root = Path(__file__).parents[1]
 sys.path.append(str(path_root))
 
-from o3de_dreamstudio import _PACKAGENAME
+from DreamStudioAI import _PACKAGENAME
 _MODULENAME = f'{_PACKAGENAME}.config'
 _LOGGER = _logging.getLogger(_MODULENAME)
 _LOGGER.debug('Initializing: {0}.'.format({_MODULENAME}))

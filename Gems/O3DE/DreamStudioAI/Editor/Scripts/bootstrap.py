@@ -5,7 +5,7 @@ For complete copyright and license terms please see the LICENSE at the root of t
 SPDX-License-Identifier: Apache-2.0 OR MIT
 """
 # -------------------------------------------------------------------------
-"""o3de_dreamstudio\\editor\\scripts\\boostrap.py
+"""\DreamStudioAI\\editor\\scripts\\bootstrap.py
 Generated from O3DE PythonToolGem Template"""
 
 import sys
@@ -16,20 +16,23 @@ import logging as _logging
 path_root = Path(__file__).parents[3]
 sys.path.append(str(path_root))
 
-from o3de_dreamstudio.Editor.Scripts import _PACKAGENAME
+from DreamStudioAI.Editor.Scripts import _PACKAGENAME
 _PACKAGENAME = f'{_PACKAGENAME}.bootstrap'
 _LOGGER = _logging.getLogger(_PACKAGENAME)
 _LOGGER.debug('Initializing: {0}.'.format({_PACKAGENAME}))
 
 import az_qt_helpers
 import azlmbr.editor as editor
-from o3de-dreamstudio_dialog import o3de_dreamstudioDialog
+from DreamStudioAI.Editor.Scripts.dialog import o3de_dreamstudioDialog
 
 if __name__ == "__main__":
-    print("o3de_dreamstudio.boostrap, Generated from O3DE PythonToolGem Template")
+    print(f'{_PACKAGENAME}, Generated from O3DE PythonToolGem Template')
 
     # Register our custom widget as a dockable tool with the Editor under an Examples sub-menu
     options = editor.ViewPaneOptions()
     options.showOnToolsToolbar = True
-    options.toolbarIcon = ":/o3de-dreamstudio/toolbar_icon.svg"
-    az_qt_helpers.register_view_pane('o3de_dreamstudio', o3de_dreamstudioDialog, category="Examples", options=options)
+    options.toolbarIcon = ":/DreamStudioAI/toolbar_icon.svg"
+    az_qt_helpers.register_view_pane('DreamStudioAI',
+                                     o3de_dreamstudioDialog,
+                                     category="Examples",
+                                     options=options)

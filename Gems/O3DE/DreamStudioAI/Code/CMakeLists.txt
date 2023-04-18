@@ -3,8 +3,8 @@
 # Get the platform specific folder ${pal_dir} for the current folder: ${CMAKE_CURRENT_LIST_DIR}/Platform/${PAL_PLATFORM_NAME}
 # Note: o3de_pal_dir will take care of the details for us, as this may be a restricted platform
 #       in which case it will see if that platform is present here or in the restricted folder.
-#       i.e. It could here in our gem : Gems/o3de-dreamstudio/Code/Platform/<platorm_name>  or
-#            <restricted_folder>/<platform_name>/Gems/o3de-dreamstudio/Code
+#       i.e. It could here in our gem : Gems/DreamStudioAI/Code/Platform/<platorm_name>  or
+#            <restricted_folder>/<platform_name>/Gems/DreamStudioAI/Code
 o3de_pal_dir(pal_dir ${CMAKE_CURRENT_LIST_DIR}/Platform/${PAL_PLATFORM_NAME} "${gem_restricted_path}" "${gem_path}" "${gem_parent_relative_path}")
 
 # Now that we have the platform abstraction layer (PAL) folder for this folder, thats where we will find the
@@ -12,17 +12,86 @@ o3de_pal_dir(pal_dir ${CMAKE_CURRENT_LIST_DIR}/Platform/${PAL_PLATFORM_NAME} "${
 # is supported by this platform.
 include(${pal_dir}/PAL_${PAL_PLATFORM_NAME_LOWERCASE}.cmake)
 
+# Check to see if building the Gem Modules are supported for the current platform
+if(NOT PAL_TRAIT_DREAMSTUDIOAI_SUPPORTED)
+    return()
+endif()
 
-# If we are on a host platform, we want to add the host tools targets like the ${gem_name}.Editor target which
-# will also depend on ${gem_name}.Editor.API target
+# The ${gem_name}.API target declares the common interface that users of this gem should depend on in their targets
+ly_add_target(
+    NAME ${gem_name}.API INTERFACE
+    NAMESPACE Gem
+    FILES_CMAKE
+        dreamstudioai_api_files.cmake
+        ${pal_dir}/dreamstudioai_api_files.cmake
+    INCLUDE_DIRECTORIES
+        INTERFACE
+            Include
+    BUILD_DEPENDENCIES
+        INTERFACE
+           AZ::AzCore
+)
+
+# The ${gem_name}.Private.Object target is an internal target
+# It should not be used outside of this Gems CMakeLists.txt
+ly_add_target(
+    NAME ${gem_name}.Private.Object STATIC
+    NAMESPACE Gem
+    FILES_CMAKE
+        dreamstudioai_private_files.cmake
+        ${pal_dir}/dreamstudioai_private_files.cmake
+    TARGET_PROPERTIES
+        O3DE_PRIVATE_TARGET TRUE
+    INCLUDE_DIRECTORIES
+        PRIVATE
+            Include
+            Source
+    BUILD_DEPENDENCIES
+        PUBLIC
+            AZ::AzCore
+            AZ::AzFramework
+)
+
+# Here add ${gem_name} target, it depends on the Private Object library and Public API interface
+ly_add_target(
+    NAME ${gem_name} ${PAL_TRAIT_MONOLITHIC_DRIVEN_MODULE_TYPE}
+    NAMESPACE Gem
+    FILES_CMAKE
+        dreamstudioai_shared_files.cmake
+        ${pal_dir}/dreamstudioai_shared_files.cmake
+    INCLUDE_DIRECTORIES
+        PUBLIC
+            Include
+        PRIVATE
+            Source
+    BUILD_DEPENDENCIES
+        PUBLIC
+            Gem::${gem_name}.API
+        PRIVATE
+            Gem::${gem_name}.Private.Object
+)
+
+# By default, we will specify that the above target ${gem_name} would be used by
+# Client and Server type targets when this gem is enabled.  If you don't want it
+# active in Clients or Servers by default, delete one of both of the following lines:
+ly_create_alias(NAME ${gem_name}.Clients NAMESPACE Gem TARGETS Gem::${gem_name})
+ly_create_alias(NAME ${gem_name}.Servers NAMESPACE Gem TARGETS Gem::${gem_name})
+ly_create_alias(NAME ${gem_name}.Unified NAMESPACE Gem TARGETS Gem::${gem_name})
+
+# For the Client and Server variants of ${gem_name} Gem, an alias to the ${gem_name}.API target will be made
+ly_create_alias(NAME ${gem_name}.Clients.API NAMESPACE Gem TARGETS Gem::${gem_name}.API)
+ly_create_alias(NAME ${gem_name}.Servers.API NAMESPACE Gem TARGETS Gem::${gem_name}.API)
+ly_create_alias(NAME ${gem_name}.Unified.API NAMESPACE Gem TARGETS Gem::${gem_name}.API)
+
+# If we are on a host platform, we want to add the host tools targets like the ${gem_name}.Editor MODULE target
 if(PAL_TRAIT_BUILD_HOST_TOOLS)
-     # The ${gem_name}.Editor.API target can be used by other gems that want to interact with the ${gem_name}.Editor module
+    # The ${gem_name}.Editor.API target can be used by other gems that want to interact with the ${gem_name}.Editor module
     ly_add_target(
         NAME ${gem_name}.Editor.API INTERFACE
         NAMESPACE Gem
         FILES_CMAKE
-            o3de-dreamstudio_editor_api_files.cmake
-            ${pal_dir}/o3de-dreamstudio_editor_api_files.cmake
+            dreamstudioai_editor_api_files.cmake
+            ${pal_dir}/dreamstudioai_editor_api_files.cmake
         INCLUDE_DIRECTORIES
             INTERFACE
                 Include
@@ -37,9 +106,8 @@ if(PAL_TRAIT_BUILD_HOST_TOOLS)
     ly_add_target(
         NAME ${gem_name}.Editor.Private.Object STATIC
         NAMESPACE Gem
-        AUTORCC
         FILES_CMAKE
-            o3de-dreamstudio_editor_private_files.cmake
+            dreamstudioai_editor_private_files.cmake
         TARGET_PROPERTIES
             O3DE_PRIVATE_TARGET TRUE
         INCLUDE_DIRECTORIES
@@ -49,6 +117,7 @@ if(PAL_TRAIT_BUILD_HOST_TOOLS)
         BUILD_DEPENDENCIES
             PUBLIC
                 AZ::AzToolsFramework
+                $<TARGET_OBJECTS:Gem::${gem_name}.Private.Object>
     )
 
     ly_add_target(
@@ -56,7 +125,7 @@ if(PAL_TRAIT_BUILD_HOST_TOOLS)
         NAMESPACE Gem
         AUTOMOC
         FILES_CMAKE
-            o3de-dreamstudio_editor_shared_files.cmake
+            dreamstudioai_editor_shared_files.cmake
         INCLUDE_DIRECTORIES
             PRIVATE
                 Source
@@ -67,8 +136,6 @@ if(PAL_TRAIT_BUILD_HOST_TOOLS)
                 Gem::${gem_name}.Editor.API
             PRIVATE
                 Gem::${gem_name}.Editor.Private.Object
-        RUNTIME_DEPENDENCIES
-            Gem::QtForPython.Editor
     )
 
     # By default, we will specify that the above target ${gem_name} would be used by
@@ -88,9 +155,56 @@ endif()
 ################################################################################
 # See if globally, tests are supported
 if(PAL_TRAIT_BUILD_TESTS_SUPPORTED)
-    # We globally support tests, see if we support tests on this platform for ${gem_name}.Editor.Tests
+    # We globally support tests, see if we support tests on this platform for ${gem_name}.Tests
+    if(PAL_TRAIT_DREAMSTUDIOAI_TEST_SUPPORTED)
+        # We support ${gem_name}.Tests on this platform, add dependency on the Private Object target
+        ly_add_target(
+            NAME ${gem_name}.Tests ${PAL_TRAIT_TEST_TARGET_TYPE}
+            NAMESPACE Gem
+            FILES_CMAKE
+                dreamstudioai_tests_files.cmake
+            INCLUDE_DIRECTORIES
+                PRIVATE
+                    Tests
+                    Source
+            BUILD_DEPENDENCIES
+                PRIVATE
+                    AZ::AzTest
+                    AZ::AzFramework
+                    Gem::${gem_name}.Private.Object
+        )
+
+        # Add ${gem_name}.Tests to googletest
+        ly_add_googletest(
+            NAME Gem::${gem_name}.Tests
+        )
+    endif()
 
     # If we are a host platform we want to add tools test like editor tests here
     if(PAL_TRAIT_BUILD_HOST_TOOLS)
+        # We are a host platform, see if Editor tests are supported on this platform
+        if(PAL_TRAIT_DREAMSTUDIOAI_EDITOR_TEST_SUPPORTED)
+            # We support ${gem_name}.Editor.Tests on this platform, add ${gem_name}.Editor.Tests target which depends on
+            # private ${gem_name}.Editor.Private.Object target
+            ly_add_target(
+                NAME ${gem_name}.Editor.Tests ${PAL_TRAIT_TEST_TARGET_TYPE}
+                NAMESPACE Gem
+                FILES_CMAKE
+                    dreamstudioai_editor_tests_files.cmake
+                INCLUDE_DIRECTORIES
+                    PRIVATE
+                        Tests
+                        Source
+                BUILD_DEPENDENCIES
+                    PRIVATE
+                        AZ::AzTest
+                        Gem::${gem_name}.Private.Object
+            )
+
+            # Add ${gem_name}.Editor.Tests to googletest
+            ly_add_googletest(
+                NAME Gem::${gem_name}.Editor.Tests
+            )
+        endif()
     endif()
 endif()

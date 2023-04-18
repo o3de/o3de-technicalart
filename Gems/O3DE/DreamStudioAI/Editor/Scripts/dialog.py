@@ -5,7 +5,7 @@ For complete copyright and license terms please see the LICENSE at the root of t
 SPDX-License-Identifier: Apache-2.0 OR MIT
 """
 # -------------------------------------------------------------------------
-"""o3de_dreamstudio\\editor\\scripts\\o3de_dreamstudio_dialog.py
+"""\DreamStudioAI\\editor\\scripts\\o3de_dreamstudio_dialog.py
 Generated from O3DE PythonToolGem Template"""
 
 import sys
@@ -30,16 +30,16 @@ from PySide2.QtWidgets import QCheckBox, QComboBox, QDialog, QFormLayout, QGridL
 path_root = Path(__file__).parents[3]
 sys.path.append(str(path_root))
 
-from o3de_dreamstudio.Editor.Scripts import _PACKAGENAME
-_PACKAGENAME = f'{_PACKAGENAME}.o3de-dreamstudio_dialog'
+from DreamStudioAI.Editor.Scripts import _PACKAGENAME
+_PACKAGENAME = f'{_PACKAGENAME}.dialog'
 _LOGGER = _logging.getLogger(_PACKAGENAME)
 _LOGGER.debug('Initializing: {0}.'.format({_PACKAGENAME}))
 
-from o3de_dreamstudio.config import settings
-from o3de_dreamstudio.config import _secrets_file
-from o3de_dreamstudio.config import ENVAR_STABILITY_API_KEY
-from o3de_dreamstudio.config import _stability_api_key
-from o3de_dreamstudio.config import _default_dream_file
+from DreamStudioAI.config import settings
+from DreamStudioAI.config import _secrets_file
+from DreamStudioAI.config import ENVAR_STABILITY_API_KEY
+from DreamStudioAI.config import _stability_api_key
+from DreamStudioAI.config import _default_dream_file
 # -------------------------------------------------------------------------
 
 
@@ -183,7 +183,7 @@ class o3de_dreamstudioDialog(QDialog):
         self.about_label = QLabel()
         self.about_label.setWordWrap(True)
         self.about_label.setOpenExternalLinks(True)
-        self.about_label.setText('The O3DE DreamStudioAI Gem was creaded by <a href=\"https://github.com/HogJonny-AMZN/\">HogJonny-AMZN</a>. Please let me know if you have ideas, enahncement requests, find any bugs, or would like to contribute. Enjoy Dreaming!')
+        self.about_label.setText("The O3DE DreamStudioAI Gem was creaded by <a href=\"https://github.com/HogJonny-AMZN/\">HogJonny-AMZN</a>. Please let me know if you have ideas, enahncement requests, find any bugs, or would like to contribute. Enjoy Dreaming!")
         self.main_layout.addWidget(self.about_label, 0, Qt.AlignCenter)
 
         self.help_text = str("For help getting started,"
@@ -204,6 +204,6 @@ if __name__ == "__main__":
     # Create a new instance of the tool if launched from the Python Scripts window,
     # which allows for quick iteration without having to close/re-launch the Editor
     test_dialog = o3de_dreamstudioDialog()
-    test_dialog.setWindowTitle("o3de_dreamstudio")
+    test_dialog.setWindowTitle("DreamStudioAI")
     test_dialog.show()
     test_dialog.adjustSize()

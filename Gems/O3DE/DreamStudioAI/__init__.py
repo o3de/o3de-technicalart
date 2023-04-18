@@ -38,7 +38,7 @@ __all__ = ['config', 'Editor']
 
 # -------------------------------------------------------------------------
 # global scope
-_PACKAGENAME = 'o3de_dreamstudio'
+_PACKAGENAME = 'DreamStudioAI'
 
 STR_CROSSBAR = f"{('-' * 74)}"
 FRMT_LOG_LONG = "[%(name)s][%(levelname)s] >> %(message)s (%(asctime)s; %(filename)s:%(lineno)d)"

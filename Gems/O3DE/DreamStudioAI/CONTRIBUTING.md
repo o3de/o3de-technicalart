@@ -8,7 +8,7 @@ Before you start participating in and contributing to O3DE code such as this Gem
 
 Contributions are more than just welcome. Fork this repo and create a new branch, then submit a pull request:
 
-1. Fork it: https://github.com/aws-lumberyard/o3de-dreamstudio
+1. Fork it: https://github.com/aws-lumberyard/DreamStudioAI
 
 2. Create your feature branch `git checkout -b my-new-feature`
 

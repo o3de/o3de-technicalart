@@ -18,7 +18,7 @@ __all__ = ['Scripts']
 path_root = Path(__file__).parents[2]
 sys.path.append(str(path_root))
 
-from o3de_dreamstudio import _PACKAGENAME
+from DreamStudioAI import _PACKAGENAME
 _PACKAGENAME = f'{_PACKAGENAME}.Editor'
 _LOGGER = _logging.getLogger(_PACKAGENAME)
 _LOGGER.debug(f'Initializing: {_PACKAGENAME}.')
