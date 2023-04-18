@@ -1,0 +1,26 @@
+{
+    "gem_name": "o3de_dreamstudio",
+    "display_name": "DreamStudioAI",
+    "license": "MIT",
+    "license_url": "https://opensource.org/licenses/MIT",
+    "origin": "HogJonny-AMZN",
+    "origin_url": "https://github.com/aws-lumberyard/o3de-atom-tech-art",
+    "type": "Code",
+    "summary": "AI Art Generator, using dreamstudio.ai a Stable Diffuse service.",
+    "canonical_tags": [
+        "Gem"
+    ],
+    "user_tags": [
+        "o3de_dreamstudio",
+        "GenerativeAI",
+        "dreamstudio.ai"
+    ],
+    "icon_path": ".",
+    "documentation_url": "${DocumentationURL}",
+    "dependencies": [
+        "QtForPython",
+        "DccScriptingInterface"
+    ],
+    "repo_uri": "https://github.com/aws-lumberyard/o3de-atom-tech-art",
+    "restricted": "o3de_dreamstudio"
+}
