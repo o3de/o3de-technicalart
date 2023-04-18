@@ -1,0 +1,18 @@
+{
+    "Amazon": {
+        "AssetProcessor": {
+            "Settings": {
+                "ScanFolder Journeys_in_Generative_AI/Assets": {
+                    "watch": "@GEMROOT:Journeys_in_Generative_AI@/Assets",
+                    "recursive": 1,
+                    "order": 101
+                },
+                "ScanFolder Journeys_in_Generative_AI/Registry": {
+                    "watch": "@GEMROOT:Journeys_in_Generative_AI@/Registry",
+                    "recursive": 1,
+                    "order": 102
+                }
+            }
+        }
+    }
+}
