@@ -1,0 +1,31 @@
+{
+    "gem_name": "wingpro",
+    "display_name": "Wing Pro IDE",
+    "license": "MIT",
+    "license_url": "https://opensource.org/licenses/MIT",
+    "origin": "HogJonny-AMZN",
+    "origin_url": "https://github.com/HogJonny-AMZN/o3de-dccsi-sandbox",
+    "type": "Code",
+    "summary": "A developer tool integration for the Wing Pro IDE",
+    "canonical_tags": [
+        "Gem"
+    ],
+    "user_tags": [
+        "wingpro",
+        "Python",
+        "StudioTools",
+        "IDE"
+    ],
+    "platforms": [
+        "Linux",
+        "Windows"
+    ],
+    "icon_path": ".",
+    "requirements": "Requires the StudioTools Gem",
+    "documentation_url": "",
+    "dependencies": [
+        "QtForPython"
+    ],
+    "repo_uri": "https://github.com/HogJonny-AMZN/o3de-dccsi-sandbox",
+    "restricted": "wingpro"
+}

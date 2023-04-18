@@ -1,0 +1,12 @@
+.mayaSwatches
+.temp
+__downloads__
+__pycache__
+__tmp__
+*.pyc
+*.pyo
+workspace.xml
+.secrets.*
+settings.local.json
+.env
+settings_export.json.tmp
