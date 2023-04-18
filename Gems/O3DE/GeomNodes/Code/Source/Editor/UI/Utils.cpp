@@ -3,8 +3,11 @@
 #include <AzCore/IO/SystemFile.h>
 #include <AzCore/std/algorithm.h>
 #include <AzCore/Utils/Utils.h>
+#include <AzCore/StringFunc/StringFunc.h>
 
 #include <QFileDialog>
+
+#include <Editor/Systems/GeomNodesSystem.h>
 
 namespace
 {
@@ -91,7 +94,14 @@ namespace GeomNodes
     QString SelectBlendFromFileDialog(const QString& currentFile)
     {
         // The selected file must be relative to this path
+        auto* gnSystem = GetGNSystem();
+        
         QString defaultPath = GetAbsoluteEngineRoot<QString>();
+        if (gnSystem != nullptr && !gnSystem->GetLastPath().empty())
+        {
+            defaultPath = gnSystem->GetLastPath().c_str();
+        }
+        
         QString startPath;
 
         // Choose the starting path for file dialog
@@ -115,12 +125,14 @@ namespace GeomNodes
             startPath, QObject::tr("Blender File (*.blend)"));
         ToUnixPath(pickedPath);
 
-        // Remove the default relative path
-        if (pickedPath.contains(defaultPath))
+        if (!pickedPath.isEmpty())
         {
-            pickedPath = pickedPath.mid(defaultPath.length());
+			AZStd::string lastFilePath;
+			AZ::StringFunc::Path::GetFolderPath(pickedPath.toUtf8().data(), lastFilePath);
+            gnSystem->SetLastPath(lastFilePath);
+            AZ_Printf("Utils", "pickedPath = %s", pickedPath.toUtf8().data());
         }
-
+        
         return pickedPath;
     }
 }

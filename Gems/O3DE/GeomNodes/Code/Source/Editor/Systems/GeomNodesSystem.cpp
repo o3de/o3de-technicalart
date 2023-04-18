@@ -77,6 +77,29 @@ namespace GeomNodes
 		return m_systemConfig;
 	}
 
+    void GeomNodesSystem::SetLastPath(const AZStd::string& lastPath)
+    {
+        m_systemConfig.m_lastFilePath = lastPath;
+        const GNSettingsRegistryManager& settingsRegManager = GetSettingsRegistryManager();
+		auto saveCallback = [](const GNConfiguration& config, GNSettingsRegistryManager::Result result)
+		{
+			AZ_Warning("GeomNodes", result == GNSettingsRegistryManager::Result::Success, "Unable to save the GeomNodes configuration. Any changes have not been applied.");
+			if (result == GNSettingsRegistryManager::Result::Success)
+			{
+				if (auto* gnSystem = GetGNSystem())
+				{
+					gnSystem->UpdateConfiguration(&config);
+				}
+			}
+		};
+		settingsRegManager.SaveSystemConfiguration(m_systemConfig, saveCallback);
+    }
+
+    AZStd::string GeomNodesSystem::GetLastPath()
+    {
+        return m_systemConfig.m_lastFilePath;
+    }
+
     void GeomNodesSystem::UpdateConfiguration(const GNConfiguration* newConfig)
     {
 		if(m_systemConfig != *newConfig)

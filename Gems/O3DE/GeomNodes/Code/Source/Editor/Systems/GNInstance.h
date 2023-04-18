@@ -8,7 +8,6 @@
 namespace GeomNodes
 {
     class GNInstance
-        : public AZ::TickBus::Handler
     {
     public:
         GNInstance() = default;
@@ -17,7 +16,6 @@ namespace GeomNodes
         bool Init(const AZStd::string& filePath, const AZStd::string& scriptPath, const AZStd::string& exePath, AZ::EntityId entityId);
         void Cleanup();
         bool IsValid();
-        void OnTick(float deltaTime, AZ::ScriptTimePoint time) override;
         bool IsSamePath(const AZStd::string& path);
         void SendIPCMsg(const AZStd::string& content);
         bool RestartProcess();

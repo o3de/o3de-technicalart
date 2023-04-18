@@ -49,9 +49,9 @@ namespace GeomNodes
             (void)node;
         }
 
-        void SettingsWidget::AfterPropertyModified(AzToolsFramework::InstanceDataNode* node)
+        void SettingsWidget::AfterPropertyModified(AzToolsFramework::InstanceDataNode* /*node*/)
         {
-            (void)node;
+            emit onValueChanged(m_gnSystemConfiguration);
         }
 
         void SettingsWidget::SetPropertyEditingActive(AzToolsFramework::InstanceDataNode* node)
@@ -59,9 +59,9 @@ namespace GeomNodes
             (void)node;
         }
 
-        void SettingsWidget::SetPropertyEditingComplete(AzToolsFramework::InstanceDataNode* /*node*/)
+        void SettingsWidget::SetPropertyEditingComplete(AzToolsFramework::InstanceDataNode* node)
         {
-            emit onValueChanged(m_gnSystemConfiguration);
+            (void)node;
         }
 
         void SettingsWidget::SealUndoStack()

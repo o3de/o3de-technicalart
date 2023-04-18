@@ -23,7 +23,7 @@ namespace GeomNodes
                 editContext->Class<GNConfiguration>("GeomNodes Configuration", "Default GeomNodes configuration")
                     ->ClassElement(AZ::Edit::ClassElements::EditorData, "")
                     ->Attribute(AZ::Edit::Attributes::AutoExpand, true)
-                    ->DataElement(AZ::Edit::UIHandlers::Default/*ExeSelectBrowseEdit*/, &GNConfiguration::m_blenderPath, "Blender Path", "Blender Path")
+                    ->DataElement(AZ::Edit::UIHandlers::ExeSelectBrowseEdit, &GNConfiguration::m_blenderPath, "Blender Path", "Blender Path")
                     ->Attribute(AZ::Edit::Attributes::ChangeNotify, &GNConfiguration::OnBlenderPathChanged)
                     ;
             }

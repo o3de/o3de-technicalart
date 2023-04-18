@@ -135,8 +135,6 @@ namespace GeomNodes
     {
         if (!path.empty())
         {
-            //TODO: we can maybe do a blender path check here so we are sure we can use blender.exe properly.
-
             bool bClearParams = (m_instance && !m_instance->IsSamePath(path));
             if (bClearParams)
             {
@@ -163,16 +161,14 @@ namespace GeomNodes
                     AZ::IO::FixedMaxPath projectBuildPath;
                     if (!registry->Get(projectBuildPath.Native(), AZ::SettingsRegistryMergeUtils::ProjectBuildPath))
                     {
-                        //TODO: error check
-                        //"No project build path setting was found in the user registry folder"
+                        AZ_Error("GeomNodes", false, "No project build path setting was found in the user registry folder");
                         return;
                     }
 
                     bridgePath = projectBuildPath / "bin/profile/Bridge.dll"; //TODO: check if there is a way to get "bin/profile" in the registry or somewhere and not hard coded.
                     if (!AZ::IO::SystemFile::Exists(bridgePath.c_str()))
                     {
-                        //TODO: bail out
-                        // we can't find the Bridge.dll
+                        AZ_Error("GeomNodes", false, "Can't find Bridge.dll");
                         return;
                     }
 
@@ -275,11 +271,8 @@ namespace GeomNodes
             else if (jsonDocument.HasMember(Field::Export) && jsonDocument.HasMember(Field::Error))
             {
                 AZStd::string errorMsg = jsonDocument[Field::Error].GetString();
-                if (errorMsg.empty())
+                if (!errorMsg.empty())
                 {
-                }
-                else {
-                    // TODO: error message
                     AZ_Warning("EditorGeomNodesComponent", false, errorMsg.c_str());
                     SetWorkInProgress(false);
                 }
@@ -387,9 +380,12 @@ namespace GeomNodes
         // Create the currently selected Object parameters and attributes. Load only the first or saved object.
         CreateParam(m_currentObject, group);
 
-        EBUS_EVENT(AzToolsFramework::ToolsApplicationEvents::Bus, InvalidatePropertyDisplay, AzToolsFramework::Refresh_EntireTree);
-        AzToolsFramework::ToolsApplicationRequests::Bus::Broadcast(
-            &AzToolsFramework::ToolsApplicationRequests::Bus::Events::AddDirtyEntity, GetEntityId());
+        AZ::SystemTickBus::QueueFunction(
+            [=]() {
+                EBUS_EVENT(AzToolsFramework::ToolsApplicationEvents::Bus, InvalidatePropertyDisplay, AzToolsFramework::Refresh_EntireTree);
+                AzToolsFramework::ToolsApplicationRequests::Bus::Broadcast(
+                    &AzToolsFramework::ToolsApplicationRequests::Bus::Events::AddDirtyEntity, GetEntityId());
+            });
     }
 
     void EditorGeomNodesComponent::CreateObjectNames(const AZStd::string& objectName, const StringVector& enumValues, GNPropertyGroup& group)
@@ -514,6 +510,9 @@ namespace GeomNodes
                 double value = ((GNParamValue*)prop)->m_max;
                 ed.m_attributes.push_back(AZ::Edit::AttributePair(AZ::Crc32("max"), aznew AZ::Edit::AttributeData<double>(value)));
             }
+
+            ed.m_attributes.push_back(AZ::Edit::AttributePair(AZ::Edit::Attributes::Step, aznew AZ::Edit::AttributeData<double>(0.1f)));
+            
             break;
         }
     }
@@ -624,13 +623,15 @@ namespace GeomNodes
         // being shown or edited, so a refresh is at best superfluous, and at worst could cause a feedback loop of infinite refreshes.
         if (GetEntity())
         {
-            AzToolsFramework::ToolsApplicationEvents::Bus::Broadcast(
-                &AzToolsFramework::ToolsApplicationEvents::InvalidatePropertyDisplay, AzToolsFramework::Refresh_EntireTree);
+            AZ::SystemTickBus::QueueFunction(
+                [=]() {
+                    AzToolsFramework::ToolsApplicationEvents::Bus::Broadcast(
+                        &AzToolsFramework::ToolsApplicationEvents::InvalidatePropertyDisplay, AzToolsFramework::Refresh_EntireTree);
+                });
         }
     }
 
-    const AZ::Edit::ElementData* EditorGeomNodesComponent::GetDataElement(
-        [[maybe_unused]] const void* element, [[maybe_unused]] const AZ::Uuid& typeUuid) const
+    const AZ::Edit::ElementData* EditorGeomNodesComponent::GetDataElement(const void* element, const AZ::Uuid& typeUuid) const
     {
         auto it = m_dataElements.find(element);
         if (it != m_dataElements.end())

@@ -27,7 +27,6 @@ namespace GeomNodes
             AZ_TracePrintf("GeomNodesSystem", R"(GNConfiguration was read from settings registry at pointer path)"
                 R"( "%s)" "\n",
                 m_settingsRegistryPath.c_str());
-            //TODO: validate if blender path is good.
             return systemConfig;
         }
         return AZStd::nullopt;

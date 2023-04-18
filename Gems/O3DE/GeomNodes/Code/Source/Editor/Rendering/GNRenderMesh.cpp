@@ -246,7 +246,6 @@ namespace GeomNodes
 
     void GNRenderMesh::UpdateTransform(const AZ::Transform& worldFromLocal, const AZ::Vector3& /*scale*/)
     {
-        // TODO: multiply this to worldFromLocal transform
         if (m_meshHandle.IsValid())
         {
             m_meshFeatureProcessor->SetTransform(m_meshHandle, worldFromLocal);

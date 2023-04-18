@@ -18,8 +18,6 @@ namespace GeomNodes
 
             m_blenderProcessWatcher = nullptr;
         }
-
-        AZ::TickBus::Handler::BusDisconnect();
     }
 
     bool GNInstance::IsValid()
@@ -34,13 +32,7 @@ namespace GeomNodes
         m_scriptPath = scriptPath;
         m_exePath = exePath;
 
-        AZ::TickBus::Handler::BusConnect();
         return RestartProcess();
-    }
-
-    void GNInstance::OnTick(float /*deltaTime*/, AZ::ScriptTimePoint /*time*/)
-    {
-        
     }
 
     bool GNInstance::IsSamePath(const AZStd::string& path)
@@ -63,9 +55,10 @@ namespace GeomNodes
     {
         AzFramework::ProcessLauncher::ProcessLaunchInfo processLaunchInfo;
         AZStd::string blenderPath = GetGNSystem()->GetBlenderPath();
-        if (blenderPath.empty()) // TODO: do some validation so we are sure the blender.exe path is good if not bail out.
+        if (blenderPath.empty())
         {
-
+			AZ_Error("GNInstance", false, "Blender instance failed to launch! Blender path is not set or valid.");
+			return false;
         }
 
         processLaunchInfo.m_commandlineParameters = AZStd::string::format(

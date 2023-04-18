@@ -40,6 +40,9 @@ namespace GeomNodes
 
         const GNConfiguration& GetSystemConfiguration() const;
 
+        void SetLastPath(const AZStd::string& lastPath);
+        AZStd::string GetLastPath();
+
     private:
         // Un/Registers and dis/connect handlers and buses
         void RegisterHandlersAndBuses();
