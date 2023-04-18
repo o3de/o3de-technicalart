@@ -1,0 +1,18 @@
+{
+    "Amazon": {
+        "AssetProcessor": {
+            "Settings": {
+                "ScanFolder DreamStudioAI/Assets": {
+                    "watch": "@GEMROOT:DreamStudioAI@/Assets",
+                    "recursive": 1,
+                    "order": 101
+                },
+                "ScanFolder DreamStudioAI/Registry": {
+                    "watch": "@GEMROOT:DreamStudioAI@/Registry",
+                    "recursive": 1,
+                    "order": 102
+                }
+            }
+        }
+    }
+}

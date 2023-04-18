@@ -1,0 +1,46 @@
+This Open 3D Engine "DreamStudioAI" repo is licensed under the following conditions:
+
+CODE
+Project data and code samples, including inline code, and
+related data are dual-licensed under the MIT licenses.
+(LICENSE_MIT.TXT)
+
+ASSETS
+Project asset data including 3D models, images and textures, and other game asset
+files are licensed under the Creative Commons license Attribution 4.0
+International (See LICENSE-CC-BY-4.0.txt)
+
+DOCUMENTATION
+Any additional documentation content excluding code, and including images,
+is licensed under the Creative Commons license Attribution 4.0 International
+(See LICENSE-CC-BY-4.0.txt)
+
+OPEN 3D ENGINE LICENSING
+The default license for Open 3D Engine is the Apache License, Version 2.0 
+(see LICENSE_APACHE2.TXT); you may elect at your option to use the Open 3D 
+Engine under the MIT License (see LICENSE_MIT.TXT).  Contributions must be 
+made under both licenses.
+
+THIRD PARTY COMPONENTS
+Open 3D Engine requires the use of (and in some cases makes available to you) 
+software and assets that have been developed by third parties and are subject 
+to separate license terms (such as code licensed under other open source 
+licenses).  It is your responsibility to comply with the applicable licenses. 
+Information on third party materials, and the applicable license terms, are 
+referenced in or included with the materials, such as in separate LICENSE.txt 
+files accompanying the materials.
+
+For more information on the licensing terms of Open 3D Engine source code,
+read the O3DE License: https://github.com/o3de/o3de/blob/development/LICENSE.txt
+
+The following are the python package dependencies marked in the requirements.txt,
+these packages are installed automatically when the project is built.
+stability-sdk MIT, https://github.com/Stability-AI/stability-sdk/blob/main/LICENSE
+six MIT, https://github.com/benjaminp/six/blob/master/LICENSE
+python-magic MIT, https://github.com/ahupp/python-magic/blob/master/LICENSE
+python-magic-bin MIT, https://github.com/julian-r/python-magic/blob/master/LICENSE
+python-dotenv Custom, https://github.com/theskumar/python-dotenv/blob/main/LICENSE
+protobuf Google, https://github.com/protocolbuffers/protobuf/blob/main/LICENSE
+grpcio-tools Apache Software License (Apache License 2.0), https://pypi.org/project/grpcio-tools/
+grpcio Apache Software License (Apache License 2.0), https://pypi.org/project/grpcio/
+pillow Historical Permission Notice and Disclaimer (HPND), https://github.com/python-pillow/Pillow/blob/main/LICENSE

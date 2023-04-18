@@ -1,0 +1,30 @@
+
+set(ENABLED_GEMS
+    Journeys_in_Generative_AI
+    Atom
+    AudioSystem
+    AWSCore
+    CameraFramework
+    DebugDraw
+    EditorPythonBindings
+    EMotionFX
+    GameState
+    ImGui
+    LandscapeCanvas
+    LyShine
+    PhysX
+    PrimitiveAssets
+    PrefabBuilder
+    SaveData
+    ScriptCanvasPhysics
+    ScriptEvents
+    StartingPointInput
+    TextureAtlas
+    WhiteBox
+    DiffuseProbeGrid
+    FastNoise
+    NvCloth
+    Terrain
+    DccScriptingInterface
+    o3de_dreamstudio
+)
