@@ -17,9 +17,6 @@ AZ_DEFINE_BUDGET(GeomNodes);
 
 namespace GeomNodes
 {
-    AZ_COMPONENT_IMPL(EditorGeomNodesSystemComponent, "EditorGeomNodesSystemComponent",
-        GeomNodesEditorSystemComponentTypeId, BaseSystemComponent);
-
     void EditorGeomNodesSystemComponent::Reflect(AZ::ReflectContext* context)
     {
         GNConfiguration::Reflect(context);

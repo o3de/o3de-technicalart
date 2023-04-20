@@ -12,6 +12,7 @@
 #include <AzCore/JSON/document.h>
 #include <AzCore/JSON/rapidjson.h>
 #include <Editor/Common/GNConstants.h>
+#include <GeomNodes/GeomNodesTypeIds.h>
 
 namespace GeomNodes
 {
@@ -69,7 +70,7 @@ namespace GeomNodes
 
     struct GNPropertyGroup
     {
-        AZ_TYPE_INFO(GNPropertyGroup, "{439E8395-77B5-4BC6-94D6-5A0F51DBE9FD}");
+        AZ_TYPE_INFO(GNPropertyGroup, GNPropertyGroupTypeId);
         AZStd::string m_name;
         AZStd::vector<GNProperty*> m_properties;
         AZStd::vector<GNPropertyGroup> m_groups;
@@ -102,7 +103,7 @@ namespace GeomNodes
     {
         friend GNParamContext;
     public:
-        AZ_TYPE_INFO(GNParamDataContext, "{61ED88BA-210A-458B-A5E5-C71C05C05411}");
+        AZ_TYPE_INFO(GNParamDataContext, GNParamDataContextTypeId);
 
         GNParamDataContext()
         {
@@ -187,7 +188,7 @@ namespace GeomNodes
     public:
         AZ_CLASS_ALLOCATOR(GNParamContext, AZ::SystemAllocator);
 
-        AZ_TYPE_INFO(GeomNodes::GNParamContext, "{AA9713B7-70F1-43CB-9F95-5BEC9F44F556}");
+        AZ_TYPE_INFO(GeomNodes::GNParamContext, GNParamContextTypeId);
 
         GNParamContext();
         ~GNParamContext();

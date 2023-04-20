@@ -27,7 +27,7 @@ namespace GeomNodes
         , private EditorGeomNodesComponentRequestBus::Handler
     {
     public:
-        AZ_EDITOR_COMPONENT(EditorGeomNodesComponent, "{E59507EF-9EBB-4F6C-8D89-92DCA57722E5}", EditorComponentBase);
+        AZ_EDITOR_COMPONENT(EditorGeomNodesComponent, EditorGeomNodesComponentTypeId, EditorComponentBase);
 
         static void Reflect(AZ::ReflectContext* context);
 
@@ -92,6 +92,7 @@ namespace GeomNodes
         void AddDataElement(GNProperty* gnParam, ElementInfo& ei);
 
         const char* CacheString(const char* str);
+    
         AZStd::unordered_map<const void*, AZStd::string> m_cachedStrings;
         AZStd::unordered_map<const void*, ElementInfo> m_dataElements;
         AZStd::unordered_map<AZStd::string, AZStd::string> m_defaultObjectInfos;

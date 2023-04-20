@@ -20,7 +20,7 @@ namespace GeomNodes
         , public AZ::TickBus::Handler
     {
     public:
-        AZ_COMPONENT_DECL(GeomNodesSystemComponent);
+		AZ_COMPONENT(GeomNodesSystemComponent, GeomNodesSystemComponentTypeId);
 
         static void Reflect(AZ::ReflectContext* context);
 

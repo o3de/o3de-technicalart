@@ -10,6 +10,7 @@
 
 #include <AzCore/std/string/string.h>
 #include <AzCore/Memory/Memory.h>
+#include <GeomNodes/GeomNodesTypeIds.h>
 
 namespace AZ
 {
@@ -22,7 +23,7 @@ namespace GeomNodes
     struct GNConfiguration
     {
         AZ_CLASS_ALLOCATOR_DECL;
-        AZ_TYPE_INFO(GNConfiguration, "{828F21E8-D1C4-480E-A29B-33B618695874}");
+        AZ_TYPE_INFO(GNConfiguration, GNConfigurationTypeId);
         static void Reflect(AZ::ReflectContext* context);
 
         static GNConfiguration CreateDefault();

@@ -10,6 +10,7 @@
 
 namespace GeomNodes
 {
+	//! Keys used for IPC JSON messages between clients(blender instances) and server(gem)
 	namespace Field
 	{
 		static constexpr char Initialized[] = "Initialized";

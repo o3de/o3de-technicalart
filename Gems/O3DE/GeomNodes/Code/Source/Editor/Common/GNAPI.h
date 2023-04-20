@@ -20,10 +20,14 @@ typedef unsigned int u32;
 
 typedef long (*HandlerCallback)(u64, const char*, u64);
 #endif
+
 namespace GeomNodes
 {
     namespace API
     {
+        /*!
+        * Interface for Bridge methods
+        */
         bool Init(u64 id, HandlerCallback cb);
         void Uninitialize();
         void SendMsg(const char* data, u64 length, u64 id);

@@ -24,6 +24,9 @@ namespace GeomNodes
     // Interface TypeIds
     inline constexpr const char* GeomNodesRequestsTypeId = "{A5ECC740-0242-4ED8-A4BB-DFC9B5CBAD44}";
 
+    // Component TypeIds
+    inline constexpr const char* EditorGeomNodesComponentTypeId = "{E59507EF-9EBB-4F6C-8D89-92DCA57722E5}";
+
     // Other TypeIds
     inline constexpr const char* GNRenderMeshTypeId = "{4E293CD2-F9E6-417C-92B7-DDAF312F46CF}";
     inline constexpr const char* GNRenderMeshInterfaceTypeId = "{908CB056-4814-42FF-9D60-2D67A720D829}";
@@ -35,4 +38,8 @@ namespace GeomNodes
     inline constexpr const char* GNParamValueTypeId = "{4790660B-B942-4421-B942-AE27DF67BF4F}";
     inline constexpr const char* GNParamStringTypeId = "{9296C827-0281-4DBF-AC1A-B6636BCEC716}";
     inline constexpr const char* GNSystemInterfaceTypeId = "{83173679-DAF6-4496-BEFA-B0D252C40366}";
+    inline constexpr const char* GNPropertyGroupTypeId = "{439E8395-77B5-4BC6-94D6-5A0F51DBE9FD}";
+    inline constexpr const char* GNParamContextTypeId = "{AA9713B7-70F1-43CB-9F95-5BEC9F44F556}";
+    inline constexpr const char* GNParamDataContextTypeId = "{61ED88BA-210A-458B-A5E5-C71C05C05411}";
+    inline constexpr const char* GNConfigurationTypeId = "{828F21E8-D1C4-480E-A29B-33B618695874}";
 } // namespace GeomNodes

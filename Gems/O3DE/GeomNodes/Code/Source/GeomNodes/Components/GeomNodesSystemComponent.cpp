@@ -14,9 +14,6 @@
 
 namespace GeomNodes
 {
-    AZ_COMPONENT_IMPL(GeomNodesSystemComponent, "GeomNodesSystemComponent",
-        GeomNodesSystemComponentTypeId);
-
     void GeomNodesSystemComponent::Reflect(AZ::ReflectContext* context)
     {
         if (auto serializeContext = azrtti_cast<AZ::SerializeContext*>(context))
