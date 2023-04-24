@@ -16,6 +16,8 @@
 namespace GeomNodes
 {
 	class GNRenderMesh;
+	//! A common class that handles everything from storing the model data, rendering the mesh via GNRenderMesh
+	//! handling different mesh events like bound request, transform updates and others.
     class GNMeshController
 		: public AzFramework::BoundsRequestBus::Handler
 		, public AzToolsFramework::EditorComponentSelectionRequestsBus::Handler
@@ -37,36 +39,46 @@ namespace GeomNodes
 		AZ::Aabb GetWorldBounds() override;
 		AZ::Aabb GetLocalBounds() override;
 
+		//! Builds the model for atom rendering.
 		void RebuildRenderMesh();
+		//! Read the data from the shared memory and setup everything before building the render mesh.
 		void ReadData(AZ::u64 mapId);
 
+		//! Load the materials giver the json array. If there materials that are still in the AP in will tag them for waiting
+		//! so that the render mesh can properly load the materials.
 		void LoadMaterials(const rapidjson::Value& materialArray);
+		//! Sets the blender filename.
 		void SetFileName(const AZStd::string& path);
+		//! Generates the full FBX Path. This is usually used when exporting. 
 		AZStd::string GenerateFBXPath();
+		//! Generates the Model asset name with the full path but without the file extension.
 		AZStd::string GenerateModelAssetName();
-		AZStd::string GenerateAZModelFilename();
-
 
     private:
 		// TransformNotificationBus overrides ...
 		void OnTransformChanged(const AZ::Transform& local, const AZ::Transform& world) override;
 
 		// AssetCatalogEventBus::Handler ...
+		//! we use these functions to know if our assets like materials are already loaded so we can proceed with rendering the model/meshes
 		void OnCatalogAssetAdded(const AZ::Data::AssetId& assetId) override;
 		void OnCatalogAssetChanged(const AZ::Data::AssetId& assetId) override;
 
+		//! assigned EntityId to this Mesh Controller
         AZ::EntityId m_entityId;
-
+		//! Stores the model's data.
 		GNModelData m_modelData;
-
+		//! Reference to our render mesh.
 		AZStd::unique_ptr<GNRenderMesh> m_renderMesh;
-		AZ::Transform m_worldFromLocal = AZ::Transform::CreateIdentity();
-
-		AZStd::optional<AZ::Aabb> m_worldAabb; //!< Cached world aabb (used for selection/view determination).
-		AZStd::optional<AZ::Aabb> m_localAabb; //!< Cached local aabb (used for center pivot calculation).
-
+		//! Current world transform of the object.
+		AZ::Transform m_world = AZ::Transform::CreateIdentity();
+		//! Cached world aabb (used for selection/view determination).
+		AZStd::optional<AZ::Aabb> m_worldAabb; 
+		//! Cached local aabb (used for center pivot calculation).
+		AZStd::optional<AZ::Aabb> m_localAabb; 
+		//! Current loaded blender filename
 		AZStd::string m_blenderFilename;
-		AZStd::vector<AZStd::string> m_materialWaitList;	//!< List for materials building in AP. Having an empty list all materials are built and ready for loading.
+		//! List for materials building in AP. Having an empty list all materials are built and ready for loading.
+		AZStd::vector<AZStd::string> m_materialWaitList;
     };
 
 } // namespace GeomNodes

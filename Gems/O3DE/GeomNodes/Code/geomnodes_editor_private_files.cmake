@@ -25,7 +25,6 @@ set(FILES
     Source/Editor/Configuration/GNSettingsRegistryManager.cpp
     Source/Editor/Configuration/GNSettingsRegistryManager.h
     Source/Editor/EBus/EditorGeomNodesComponentBus.h
-    Source/Editor/EBus/GeomNodesBus.h
     Source/Editor/EBus/ValidatorBus.h
     Source/Editor/EBus/IpcHandlerBus.h
     Source/Editor/UI/ConfigurationWidget.cpp
@@ -60,7 +59,6 @@ set(FILES
     Source/Editor/Rendering/GNModelData.h
     Source/Editor/Rendering/GNRenderMesh.cpp
     Source/Editor/Rendering/GNRenderMesh.h
-    Source/Editor/Rendering/GNRenderMeshInterface.h
     Source/Editor/Systems/GeomNodesSystem.cpp
     Source/Editor/Systems/GeomNodesSystem.h
     Source/Editor/Systems/GNInstance.cpp

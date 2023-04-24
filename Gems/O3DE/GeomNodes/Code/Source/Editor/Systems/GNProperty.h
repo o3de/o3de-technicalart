@@ -62,35 +62,9 @@ namespace GeomNodes
         virtual const void* GetDataAddress() const = 0;
         virtual AZ::TypeId GetDataTypeUuid() const = 0;
         virtual AZStd::string ToJSONString() const = 0;
-        /**
-         * Test if the value at the index valueIndex is of the same type as that of the instance of GNProperty's subclass.
-         */
-        virtual bool DoesTypeMatch(GNParamDataContext& /*context*/, int /*valueIndex*/) const
-        {
-            return false;
-        }
-
+        
         virtual void ReadSetGNId(GNParamDataContext& context);
         
-        /*virtual bool Write(AZ::ScriptContext& context) = 0;
-        virtual bool TryRead(GNParamDataContext& context, int valueIndex)
-        {
-            (void)context;
-            (void)valueIndex;
-            return false;
-        };*/
-        bool TryUpdate(const GNProperty* gnProperty)
-        {
-            bool allowUpdate = azrtti_typeid(gnProperty) == azrtti_typeid(this);
-
-            if (allowUpdate)
-            {
-                CloneDataFrom(gnProperty);
-            }
-
-            return allowUpdate;
-        }
-
         virtual bool IsReadOnly()
         {
             return m_pReadOnly == nullptr ? false : *m_pReadOnly;
@@ -109,8 +83,6 @@ namespace GeomNodes
         bool            m_isMaxSet = false;
         bool            m_isMinSet = false;
         AZ::EntityId    m_entityId;
-    protected:
-        virtual void CloneDataFrom(const GNProperty* gnProperty) = 0;
     };
 
     class GNParamNil : public GNProperty
@@ -133,12 +105,6 @@ namespace GeomNodes
         const void* GetDataAddress() const override;
         AZ::TypeId GetDataTypeUuid() const override;
         AZStd::string ToJSONString() const override;
-
-        /*bool Write(AZ::ScriptContext& context) override;
-        bool TryRead(GNParamDataContext& context, int valueIndex) override;*/
-
-    protected:
-        void CloneDataFrom(const GNProperty* gnProperty) override;
     };
 
     class GNParamBoolean : public GNProperty
@@ -171,15 +137,7 @@ namespace GeomNodes
 
         AZ::TypeId GetDataTypeUuid() const override;
 
-        bool DoesTypeMatch(GNParamDataContext& context, int valueIndex) const override;
-
-        /*bool Write(AZ::ScriptContext& context) override;
-        bool TryRead(GNParamDataContext& context, int valueIndex) override;*/
-
         bool m_value;
-
-    protected:
-        void CloneDataFrom(const GNProperty* gnProperty) override;
     };
 
     class GNParamInt : public GNProperty
@@ -210,11 +168,6 @@ namespace GeomNodes
         AZ::TypeId GetDataTypeUuid() const override;
         AZStd::string ToJSONString() const override;
 
-        bool DoesTypeMatch(GNParamDataContext& context, int valueIndex) const override;
-
-        /*bool Write(AZ::ScriptContext& context) override;
-        bool TryRead(GNParamDataContext& context, int valueIndex) override;*/
-
         void SetMinValue(int min)
         {
             m_min = min;
@@ -231,8 +184,6 @@ namespace GeomNodes
         int m_max;      // Geometry Node Param Max(int)
         int m_min;      // Geometry Node Param Min(int)
 
-    protected:
-        void CloneDataFrom(const GNProperty* gnProperty) override;
     };
 
     class GNParamValue : public GNProperty
@@ -263,11 +214,6 @@ namespace GeomNodes
         AZ::TypeId GetDataTypeUuid() const override;
         AZStd::string ToJSONString() const override;
 
-        bool DoesTypeMatch(GNParamDataContext& context, int valueIndex) const override;
-
-        /*bool Write(AZ::ScriptContext& context) override;
-        bool TryRead(GNParamDataContext& context, int valueIndex) override;*/
-
         void SetMinValue(double min)
         {
             m_min = min;
@@ -284,8 +230,6 @@ namespace GeomNodes
         double m_max;       // Geometry Node Param Max(double)
         double m_min;       // Geometry Node Param Min(double)
 
-    protected:
-        void CloneDataFrom(const GNProperty* gnProperty) override;
     };
 
     class GNParamString : public GNProperty
@@ -315,14 +259,7 @@ namespace GeomNodes
         AZ::TypeId GetDataTypeUuid() const override;
         AZStd::string ToJSONString() const override;
 
-        bool DoesTypeMatch(GNParamDataContext& context, int valueIndex) const override;
-
-        /*bool Write(AZ::ScriptContext& context) override;
-        bool TryRead(GNParamDataContext& context, int valueIndex) override;*/
-
         AZStd::string m_value;
 
-    protected:
-        void CloneDataFrom(const GNProperty* gnProperty) override;
     };
 } // namespace GeomNodes

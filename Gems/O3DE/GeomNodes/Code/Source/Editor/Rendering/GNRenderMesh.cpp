@@ -160,7 +160,7 @@ namespace GeomNodes
 
         m_materialMap.clear();
         AZ::RPI::ModelMaterialSlot::StableId slotId = 0;
-        for (auto materialPath : m_materialList)
+        for (auto materialPath : m_materialPathList)
         {
 			if (auto materialAsset = AZ::RPI::AssetUtils::LoadAssetByProductPath<AZ::RPI::MaterialAsset>(materialPath.c_str()))
 			{
@@ -236,25 +236,25 @@ namespace GeomNodes
 
     void GNRenderMesh::SetMaterials()
     {
-		if (m_meshFeatureProcessor)
+		if (m_meshFeatureProcessor && m_meshHandle.IsValid())
 		{
 			m_meshFeatureProcessor->SetCustomMaterials(m_meshHandle, AZ::Render::ConvertToCustomMaterialMap(m_materialMap));
 		}
     }
 
-    void GNRenderMesh::SetMaterialList(const AZStd::vector<AZStd::string>& materials)
+    void GNRenderMesh::SetMaterialPathList(const AZStd::vector<AZStd::string>& materialPaths)
     {
-        m_materialList = materials;
+        m_materialPathList = materialPaths;
     }
 
-    void GNRenderMesh::BuildMesh(const GNModelData& modelData, const AZ::Transform& /*worldFromLocal*/)
+    void GNRenderMesh::BuildMesh(const GNModelData& modelData)
     {
         CreateMesh(modelData);
     }
 
     void GNRenderMesh::UpdateTransform(const AZ::Transform& worldFromLocal, const AZ::Vector3& /*scale*/)
     {
-        if (m_meshHandle.IsValid())
+        if (m_meshFeatureProcessor && m_meshHandle.IsValid())
         {
             m_meshFeatureProcessor->SetTransform(m_meshHandle, worldFromLocal);
         }

@@ -29,7 +29,6 @@ namespace GeomNodes
 
     // Other TypeIds
     inline constexpr const char* GNRenderMeshTypeId = "{4E293CD2-F9E6-417C-92B7-DDAF312F46CF}";
-    inline constexpr const char* GNRenderMeshInterfaceTypeId = "{908CB056-4814-42FF-9D60-2D67A720D829}";
     inline constexpr const char* GeomNodesSystemTypeId = "{23791BF8-D9DE-4827-88D8-37DA39258570}";
     inline constexpr const char* GNPropertyTypeId = "{71904E43-F0A1-45EA-B87F-4CC5234E1E52}";
     inline constexpr const char* GNParamNilTypeId = "{519D98C7-054A-4047-BCEB-28DCD38CFCD4}";

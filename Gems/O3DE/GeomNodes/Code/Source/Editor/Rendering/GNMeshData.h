@@ -17,6 +17,7 @@ namespace GeomNodes
 {
     using MaterialList = AZStd::vector<AZStd::string>;
 
+    //! Mesh specific data class
     class GNMeshData
     {
     public:
@@ -91,6 +92,15 @@ namespace GeomNodes
         U32Vector m_indices;
         S32Vector m_loops;
         S32Vector m_materialIndices;
+        
+		//! hash are used to easily matched if you have the same mesh.
+		AZ::s64 m_hash = 0;
+		//! List of material names used by the mesh.
+		MaterialList m_materialNames;
+		//! List of instances. Instances are used so that you have the same mesh but on a different transform.
+		Mat4Vector m_instances;
+
+		AZ::Aabb m_aabb = AZ::Aabb::CreateNull();
 
         Vert3Vector m_positions;
         Vert3Vector m_normals;
@@ -99,6 +109,8 @@ namespace GeomNodes
         Vert2Vector m_uvs;
         Vert4Vector m_colors;
         
+        //! As meshes are eventually merged to common buffers we need to keep track of the offset and element count.
+        //! When we create the Atom Buffers we will need these infos while the mesh buffers will be held in GNModelData.
         DataRange m_indicesRange;
         DataRange m_positionsRange;
         DataRange m_normalsRange;
@@ -107,13 +119,8 @@ namespace GeomNodes
         DataRange m_uvsRange;
         DataRange m_colorsRange;
 
-        MaterialList m_materialNames;
-
+        //! Material index or slot that will be used by the mesh. Note that eventually a mesh will only be assigned to one material.
+        //! This way they can be grouped together by material and merge the vertices.
         AZ::u32 m_materialIndex = 0;
-
-        AZ::Aabb m_aabb = AZ::Aabb::CreateNull();
-        AZ::s64 m_hash = 0;
-
-        Mat4Vector m_instances;
     };
 }

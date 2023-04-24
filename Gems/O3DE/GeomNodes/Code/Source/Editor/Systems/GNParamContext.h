@@ -75,14 +75,14 @@ namespace GeomNodes
         AZStd::vector<GNProperty*> m_properties;
         AZStd::vector<GNPropertyGroup> m_groups;
 
-        // Get the pointer to the specified group in m_groups. Returns nullptr if not found.
+        //! Get the pointer to the specified group in m_groups. Returns nullptr if not found.
         GNPropertyGroup* GetGroup(const char* groupName);
-        // Get the pointer to the specified property in m_properties. Returns nullptr if not found.
+        //! Get the pointer to the specified property in m_properties. Returns nullptr if not found.
         GNProperty* GetProperty(const char* propertyName);
-        // Generate JSON string of all properties/parameters. NOTE: only select details are included.
+        //! Generate JSON string of all properties/parameters. NOTE: only select details are included.
         AZStd::string GetProperties();
 
-        // Remove all properties and groups
+        //! Remove all properties and groups
         void Clear();
 
         GNPropertyGroup() = default;

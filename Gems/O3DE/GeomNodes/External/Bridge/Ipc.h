@@ -208,7 +208,6 @@ namespace Ipc
         void PerformClientCheck(AZStd::sys_time_t ts);
         void ProcessOverlowQueue(AZStd::sys_time_t ts);
         void PollForMessages(IPCMsgSequence& mapMsgSequence);
-        void ExecuteIPCHandlers();
         bool CreateSHMRingBuffer(AZ::u64 mapId, AZ::u64 uSize);
 
         static Ipc* m_Instance;

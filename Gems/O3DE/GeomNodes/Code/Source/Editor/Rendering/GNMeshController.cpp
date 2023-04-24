@@ -37,8 +37,8 @@ namespace GeomNodes
 		AZ::TransformNotificationBus::Handler::BusConnect(m_entityId);
 		AzFramework::AssetCatalogEventBus::Handler::BusConnect();
 
-		m_worldFromLocal = AZ::Transform::CreateIdentity();
-		AZ::TransformBus::EventResult(m_worldFromLocal, m_entityId, &AZ::TransformBus::Events::GetWorldTM);
+		m_world = AZ::Transform::CreateIdentity();
+		AZ::TransformBus::EventResult(m_world, m_entityId, &AZ::TransformBus::Events::GetWorldTM);
     }
 
     GNMeshController::~GNMeshController()
@@ -89,7 +89,7 @@ namespace GeomNodes
 		if (!m_worldAabb.has_value())
 		{
 			m_worldAabb = GetLocalBounds();
-			m_worldAabb->ApplyTransform(m_worldFromLocal);
+			m_worldAabb->ApplyTransform(m_world);
 		}
 
 		return m_worldAabb.value();
@@ -117,8 +117,8 @@ namespace GeomNodes
 				[=]() {
 				AzToolsFramework::EditorComponentSelectionRequestsBus::Handler::BusDisconnect();
 				AzFramework::BoundsRequestBus::Handler::BusDisconnect();
-				m_renderMesh->BuildMesh(m_modelData, m_worldFromLocal);
-				m_renderMesh->UpdateTransform(m_worldFromLocal);
+				m_renderMesh->BuildMesh(m_modelData);
+				m_renderMesh->UpdateTransform(m_world);
 				AzFramework::BoundsRequestBus::Handler::BusConnect(m_entityId);
 				AzToolsFramework::EditorComponentSelectionRequestsBus::Handler::BusConnect(m_entityId);
 				EditorGeomNodesComponentRequestBus::Event(m_entityId, &EditorGeomNodesComponentRequests::SetWorkInProgress, false);
@@ -139,7 +139,7 @@ namespace GeomNodes
 			materialList.push_back(azMaterialPath);
 		}
 
-		m_renderMesh->SetMaterialList(materialList);
+		m_renderMesh->SetMaterialPathList(materialList);
 	}
 
 	void GNMeshController::LoadMaterials(const rapidjson::Value& materialArray)
@@ -197,17 +197,12 @@ namespace GeomNodes
 		return m_blenderFilename + "_" + AZStd::string::format("%llu", (AZ::u64)m_entityId);
 	}
 
-	AZStd::string GNMeshController::GenerateAZModelFilename()
-	{
-		return GenerateModelAssetName() + AzModelExtension.data();
-	}
-
     void GNMeshController::OnTransformChanged(const AZ::Transform& /*local*/, const AZ::Transform& world)
     {
 		m_worldAabb.reset();
 		m_localAabb.reset();
 
-		m_worldFromLocal = world;
+		m_world = world;
 
 		if (m_renderMesh)
 		{

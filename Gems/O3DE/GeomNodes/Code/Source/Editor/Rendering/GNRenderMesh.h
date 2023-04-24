@@ -43,11 +43,13 @@ namespace GeomNodes
         explicit GNRenderMesh(AZ::EntityId entityId);
         ~GNRenderMesh();
 
-        // RenderMeshInterface ...
-        void BuildMesh(const GNModelData& renderData, const AZ::Transform& worldFromLocal);
+        //! For building the mesh.
+        void BuildMesh(const GNModelData& renderData);
+        //! Updates the models transform
         void UpdateTransform(const AZ::Transform& worldFromLocal, const AZ::Vector3& scale = AZ::Vector3::CreateOne());
-        //void UpdateMaterial(const GNMaterial& material);
+        //! Returns if the Model/Mesh is visible or not.
         bool IsVisible() const;
+        //! Sets the visibility of the Model/Mesh
         void SetVisiblity(bool visibility);
 
         // AZ::TickBus overrides ...
@@ -63,9 +65,12 @@ namespace GeomNodes
 		// MaterialComponentNotificationBus::Handler overrides...
 		void OnMaterialsUpdated(const AZ::Render::MaterialAssignmentMap& materials) override;
 
+        //! Returns the Model's data instance
         AZ::Data::Instance<AZ::RPI::Model> GetModel() const;
 
-        void SetMaterialList(const AZStd::vector<AZStd::string>& materials);
+        //! Sets the material paths used by the model. These are full paths with the azmaterial extension.
+        void SetMaterialPathList(const AZStd::vector<AZStd::string>& materialPaths);
+
     private:
         //! Creates an attribute buffer in the slot dictated by AttributeTypeT.
         template<AttributeType AttributeTypeT, typename VertexStreamDataType>
@@ -87,28 +92,45 @@ namespace GeomNodes
         // MeshHandleStateRequestBus overrides ...
         const AZ::Render::MeshFeatureProcessorInterface::MeshHandle* GetMeshHandle() const override;
 
+        //! Creates the attribute mesh buffers
 		bool CreateMeshBuffers(const GNModelData& modelData);
+        //! Creates everything related to the model for Atom Rendering. 
         bool CreateMesh(const GNModelData& modelData);
+        //! Using the ModelLodAssetCreator creates the Model LOD asset and the meshes.
         bool CreateLodAsset(const GNModelData& modelData);
+        //! Using the ModelAssetCreator creates the model asset and sets the material slots.
         void CreateModelAsset();
+        //! Final step for create the model by acquiring the mesh handle from the mesh feature processor 
         bool CreateModel();
+        //! Add LOD buffers to ModelLodAsset
         void AddLodBuffers(AZ::RPI::ModelLodAssetCreator& modelLodCreator);
+        //! Add Mesh Buffers to ModelLodAsset
         void AddMeshBuffers(AZ::RPI::ModelLodAssetCreator& modelLodCreator, const GNMeshData& meshData);
+        //! Checks if attributes are valid.
         bool AreAttributesValid() const;
         bool DoesMeshRequireFullRebuild(const GNMeshData& meshData) const;
-
+        //! Set the material map in the mesh feature processor.
         void SetMaterials();
 
+        //! Stores the assigned EntityId.
         AZ::EntityId m_entityId;
+        //! Reference to a ModelLodAsset
         AZ::Data::Asset<AZ::RPI::ModelLodAsset> m_lodAsset;
+        //! Reference to a ModelAsset
         AZ::Data::Asset<AZ::RPI::ModelAsset> m_modelAsset;
+        //! Reference to a Model instance
         AZ::Data::Instance<AZ::RPI::Model> m_model;
+        //! Reference to MeshFeatureProcessor
 		AZ::Render::MeshFeatureProcessorInterface* m_meshFeatureProcessor = nullptr;
+        //! Reference to MeshHandle
         AZ::Render::MeshFeatureProcessorInterface::MeshHandle m_meshHandle;
+        //! Material map
         AZ::Render::MaterialAssignmentMap m_materialMap;
-        AZStd::vector<AZStd::string> m_materialList;
-        uint32_t m_vertexCount = 0;
+        //! List of Material paths (i.e. azmodel)
+        AZStd::vector<AZStd::string> m_materialPathList;
+        //! LOD Index buffer
         AZStd::unique_ptr<IndexBuffer> m_indexBuffer;
+        //! Buffers
         AZStd::array<
             AZStd::variant<
                 AZStd::unique_ptr<PositionAttribute>,
@@ -119,12 +141,15 @@ namespace GeomNodes
                 AZStd::unique_ptr<ColorAttribute>>,
             NumAttributes>
             m_attributes;
+        //! For toggling visibility
         bool m_visible = true;
 
         //! model name.
         static constexpr AZStd::string_view ModelName = "GeomNodesMesh";
 
+        //! current model transform
         AZ::Transform m_transform;
+        //! current model scale
         AZ::Vector3 m_scale;
     };
 }

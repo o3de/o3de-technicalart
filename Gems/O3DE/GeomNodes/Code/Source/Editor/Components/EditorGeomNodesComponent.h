@@ -52,25 +52,24 @@ namespace GeomNodes
     private:
 		
     protected:
-        //got this from ScriptEditorComponent
+        //! got this from ScriptEditorComponent
         struct ElementInfo
         {
-            AZ::Uuid m_uuid;                    // Type uuid for the class field that should use this edit data.
-            AZ::Edit::ElementData m_editData;   // Edit metadata (name, description, attribs, etc).
-            bool m_isAttributeOwner;            // True if this ElementInfo owns the internal attributes. We can use a single
-                                                // ElementInfo for more than one class field, but only one owns the Attributes.
-            float m_sortOrder;                  // Sort order of the property as defined by using the "order" attribute, by default the order is FLT_MAX
-                                                // which means alphabetical sort will be used
+            AZ::Uuid m_uuid;                    //! Type uuid for the class field that should use this edit data.
+            AZ::Edit::ElementData m_editData;   //! Edit metadata (name, description, attribs, etc).
+            bool m_isAttributeOwner;            //! True if this ElementInfo owns the internal attributes. We can use a single
+                                                //! ElementInfo for more than one class field, but only one owns the Attributes.
+            float m_sortOrder;                  //! Sort order of the property as defined by using the "order" attribute, by default the order is FLT_MAX
+                                                //! which means alphabetical sort will be used
         };
         
-		void Clear();
-        void OnPathChange(const AZStd::string& path);
-        // IpcHandlerNotificationBus overrides...
+		// IpcHandlerNotificationBus overrides...
         void OnMessageReceived(const AZ::u8* content, const AZ::u64 length) override;
 
+		void Clear();
+		void OnPathChange(const AZStd::string& path);
         void ExportToStaticMesh();
         bool IsBlenderFileLoaded();
-        
         AZStd::string ExportButtonText();
 
         void LoadObjects(const rapidjson::Value& objectNameArray, const rapidjson::Value& objectArray);
@@ -99,19 +98,29 @@ namespace GeomNodes
 
         StringVector m_enumValues;
 
+        //! Handles the dynamic parameter
         GNParamContext m_paramContext;
+
+        //! Stores the model data
         GNModelData m_modelData;
+        //! A reference to the mesh controller.
         AZStd::unique_ptr<GNMeshController> m_controller;
 
-        AZStd::string m_blenderFile;
-        AZStd::string m_currentObject;
-        AZStd::string m_currentObjectInfo; //!< in JSON form. This is the representation of the current selected object along with the current parameters.
+        //! Current blender file loaded.
+        AZStd::string m_blenderFile;        
+        //! The current object name selected.
+        AZStd::string m_currentObject;      
+        //! in JSON form. This is the representation of the current selected object along with the current parameters.
+        AZStd::string m_currentObjectInfo;  
 
+        //! a handle on the blender instance.
         GNInstance* m_instance = nullptr;
-        AzToolsFramework::EntityIdList m_entityIdList;
-
+        
+        //! Flag if the component is done initializing.
         bool m_initialized = false;
+        //! Flag to set if parameters needs to be disabled or not.
         bool m_workInProgress = false;
+        //! Flag if set true triggers a parameter reload coming from a saved point.
         bool m_fromActivate = false;
     };
 }

@@ -113,11 +113,6 @@ namespace GeomNodes
         return AZStd::string();
     }
 
-    void GNParamNil::CloneDataFrom(const GNProperty* gnProperty)
-    {
-        (void)gnProperty;
-    }
-
     //////////////////////////
     // GNParamBoolean
     //////////////////////////
@@ -153,12 +148,6 @@ namespace GeomNodes
         return retVal;
     }
     
-
-    bool GNParamBoolean::DoesTypeMatch(GNParamDataContext& context, int valueIndex) const
-    {
-        return context.IsBoolean(valueIndex);
-    }
-
     AZStd::string GNParamBoolean::ToJSONString() const
     {
         auto jsonString = AZStd::string::format(
@@ -185,17 +174,6 @@ namespace GeomNodes
     AZ::TypeId GNParamBoolean::GetDataTypeUuid() const
     {
         return AZ::SerializeTypeInfo<bool>::GetUuid();
-    }
-
-    void GNParamBoolean::CloneDataFrom(const GNProperty* gnProperty)
-    {
-        const GNParamBoolean* booleanProperty = azrtti_cast<const GNParamBoolean*>(gnProperty);
-        AZ_Error("GNParamBoolean", booleanProperty, "Invalid call to CloneData. Types must match before clone attempt is made.\n");
-
-        if (booleanProperty)
-        {
-            m_value = booleanProperty->m_value;
-        }
     }
 
     /////////////////////////
@@ -245,13 +223,6 @@ namespace GeomNodes
         return retVal;
     }
 
-    bool GNParamInt::DoesTypeMatch(GNParamDataContext& context, int valueIndex) const
-    {
-        return context.IsInt(valueIndex);
-    }
-
- 
-
     AZ::TypeId GNParamInt::GetDataTypeUuid() const
     {
         return AZ::SerializeTypeInfo<int>::GetUuid();
@@ -278,17 +249,6 @@ namespace GeomNodes
 			, m_name.c_str()
         );
         return jsonString;
-    }
-
-    void GNParamInt::CloneDataFrom(const GNProperty* gnProperty)
-    {
-        const GNParamInt* numberProperty = azrtti_cast<const GNParamInt*>(gnProperty);
-        AZ_Error("GNParamValue", numberProperty, "Invalid call to CloneData. Types must match before clone attempt is made.\n");
-
-        if (numberProperty)
-        {
-            m_value = numberProperty->m_value;
-        }
     }
 
     /////////////////////////
@@ -338,11 +298,6 @@ namespace GeomNodes
         return retVal;
     }
 
-    bool GNParamValue::DoesTypeMatch(GNParamDataContext& context, int valueIndex) const
-    {
-        return context.IsValue(valueIndex);
-    }
-
     AZ::TypeId GNParamValue::GetDataTypeUuid() const
     {
         return AZ::SerializeTypeInfo<double>::GetUuid();
@@ -369,17 +324,6 @@ namespace GeomNodes
 			, m_name.c_str()
         );
         return jsonString;
-    }
-
-    void GNParamValue::CloneDataFrom(const GNProperty* gnProperty)
-    {
-        const GNParamValue* numberProperty = azrtti_cast<const GNParamValue*>(gnProperty);
-        AZ_Error("GNParamValue", numberProperty, "Invalid call to CloneData. Types must match before clone attempt is made.\n");
-
-        if (numberProperty)
-        {
-            m_value = numberProperty->m_value;
-        }
     }
 
     /////////////////////////
@@ -416,11 +360,6 @@ namespace GeomNodes
         return retVal;
     }
 
-    bool GNParamString::DoesTypeMatch(GNParamDataContext& context, int valueIndex) const
-    {
-        return context.IsString(valueIndex);
-    }
-
     AZ::TypeId GNParamString::GetDataTypeUuid() const
     {
         return AZ::SerializeGenericTypeInfo<AZStd::string>::GetClassTypeId();
@@ -447,16 +386,5 @@ namespace GeomNodes
 			, m_name.c_str()
         );
         return jsonString;
-    }
-
-    void GNParamString::CloneDataFrom(const GNProperty* gnProperty)
-    {
-        const GNParamString* stringProperty = azrtti_cast<const GNParamString*>(gnProperty);
-        AZ_Error("GNParamString", stringProperty, "Invalid call to CloneData. Types must match before clone attempt is made.\n");
-
-        if (stringProperty)
-        {
-            m_value = stringProperty->m_value;
-        }
     }
 } // namespace GeomNodes

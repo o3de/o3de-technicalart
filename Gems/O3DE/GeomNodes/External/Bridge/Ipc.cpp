@@ -902,35 +902,6 @@ namespace Ipc
         }
     }
 
-    void Ipc::ExecuteIPCHandlers()
-    {
-        /*MessageContainer batch;
-        {
-            AZStd::lock_guard<AZStd::recursive_mutex> guard(m_MessageListMutex);
-            batch = AZStd::move(m_MessagesWaitingToExecute);
-        }*/
-
-        // iterate through the messages
-        AZStd::unique_lock<AZStd::mutex> lock(m_MessageListMutex);
-
-        while (!m_MessagesWaitingToExecute.empty())
-        {
-            if (!m_handler) break; // no handlers
-
-            auto msg = m_MessagesWaitingToExecute.front();
-            if (!m_bServer)
-            {
-                m_handler(0, "", 0);
-            }
-            else
-            {
-                m_handler(msg.m_id, (const char*)msg.m_content.data(), msg.m_content.size());
-            }
-
-            m_MessagesWaitingToExecute.pop();
-        }
-    }
-
     void Ipc::ProcessThread()
     {
         // AZ::u32 tCounter = 0;
@@ -1021,9 +992,6 @@ namespace Ipc
                             m_MessagesWaitingToExecute.pop();
                         }
                     }
-                    
-                    //ExecuteIPCHandlers();
-                    //EBUS_QUEUE_FUNCTION(AZ::SystemTickBus, &Ipc::ExecuteIPCHandlers, this);
                 }
                 else
                 {

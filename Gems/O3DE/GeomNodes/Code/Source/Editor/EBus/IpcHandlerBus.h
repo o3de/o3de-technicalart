@@ -12,6 +12,7 @@
 
 namespace Ipc
 {
+    //! IPC related notifications
     class IpcHandlerNotifications : public AZ::EBusTraits
     {
     public:
@@ -23,6 +24,7 @@ namespace Ipc
 
         virtual ~IpcHandlerNotifications() {}
 
+        //! Triggered when an IPC message is sent from the client(s) to the gem.
         virtual void OnMessageReceived(const AZ::u8* content, const AZ::u64 length) = 0;
     };
 

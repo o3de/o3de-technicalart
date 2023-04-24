@@ -52,13 +52,14 @@ namespace GeomNodes
         AZStd::string GetLastPath();
 
     private:
-        // Un/Registers and dis/connect handlers and buses
+        //! Un/Registers and dis/connect handlers and buses
         void RegisterHandlersAndBuses();
         void UnregisterHandlersAndBuses();
 
-        AZStd::unique_ptr<GNSettingsRegistryManager> m_registryManager; //! Handles all settings registry interactions.
+        //! Handles all settings registry interactions.
+        AZStd::unique_ptr<GNSettingsRegistryManager> m_registryManager; 
 
-        // Allows lookup and contains all allocated QValidators
+        //! Allows lookup and contains all allocated QValidators
         AZStd::unique_ptr<Validator> m_validator;
 
         AZStd::vector<AzToolsFramework::PropertyHandlerBase*> m_propertyHandlers;
@@ -75,6 +76,6 @@ namespace GeomNodes
 		State m_state = State::Uninitialized;
     };
 
-	//! Helper function for getting the GeomNOdes System interface from inside the GeomNodes gem.
+	//! Helper function for getting the GeomNodes System interface from inside the GeomNodes gem.
 	GeomNodesSystem* GetGNSystem();
 }
