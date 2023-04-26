@@ -58,7 +58,7 @@ namespace
             return RetType(QValidator::Invalid, QObject::tr("Fails to match requirements at all."));
         }
     }
-}
+} // namespace
 
 namespace GeomNodes
 {
@@ -139,5 +139,5 @@ namespace GeomNodes
                 return STANDARD_SUCCESS;
             }
         }
-    }
-}
+    } // namespace Validators
+} // namespace GeomNodes

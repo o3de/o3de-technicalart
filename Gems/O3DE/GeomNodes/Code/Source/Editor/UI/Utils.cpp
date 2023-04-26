@@ -9,9 +9,10 @@
 #include "Utils.h"
 
 #include <AzCore/IO/SystemFile.h>
-#include <AzCore/std/algorithm.h>
-#include <AzCore/Utils/Utils.h>
 #include <AzCore/StringFunc/StringFunc.h>
+#include <AzCore/Utils/Utils.h>
+#include <AzCore/std/algorithm.h>
+
 
 #include <QFileDialog>
 
@@ -62,7 +63,7 @@ namespace
     AZStd::string GetProjectName()
     {
         auto projectName = AZ::Utils::GetProjectName();
-        return AZStd::string{projectName.c_str()};
+        return AZStd::string{ projectName.c_str() };
     }
 
     template<>
@@ -71,7 +72,7 @@ namespace
         auto projectName = AZ::Utils::GetProjectName();
         return QString::fromUtf8(projectName.c_str(), aznumeric_cast<int>(projectName.size()));
     }
-}
+} // namespace
 
 namespace GeomNodes
 {
@@ -85,31 +86,31 @@ namespace GeomNodes
         return reinterpret_cast<void*>(func);
     }
 
-	AZStd::string GetEngineRoot()
-	{
-		return GetAbsoluteEngineRoot<AZStd::string>();
-	}
-	AZStd::string GetProjectRoot()
-	{
-		return GetAbsoluteProjectRoot<AZStd::string>();
-	}
+    AZStd::string GetEngineRoot()
+    {
+        return GetAbsoluteEngineRoot<AZStd::string>();
+    }
+    AZStd::string GetProjectRoot()
+    {
+        return GetAbsoluteProjectRoot<AZStd::string>();
+    }
 
-	AZStd::string GetProjectName()
-	{
-		return ::GetProjectName<AZStd::string>();
-	}
+    AZStd::string GetProjectName()
+    {
+        return ::GetProjectName<AZStd::string>();
+    }
 
     QString SelectBlendFromFileDialog(const QString& currentFile)
     {
         // The selected file must be relative to this path
         auto* gnSystem = GetGNSystem();
-        
+
         QString defaultPath = GetAbsoluteEngineRoot<QString>();
         if (gnSystem != nullptr && !gnSystem->GetLastPath().empty())
         {
             defaultPath = gnSystem->GetLastPath().c_str();
         }
-        
+
         QString startPath;
 
         // Choose the starting path for file dialog
@@ -129,18 +130,18 @@ namespace GeomNodes
             startPath = defaultPath;
         }
 
-        QString pickedPath = QFileDialog::getOpenFileName(nullptr, QObject::tr("Select Blend file"),
-            startPath, QObject::tr("Blender File (*.blend)"));
+        QString pickedPath =
+            QFileDialog::getOpenFileName(nullptr, QObject::tr("Select Blend file"), startPath, QObject::tr("Blender File (*.blend)"));
         ToUnixPath(pickedPath);
 
         if (!pickedPath.isEmpty())
         {
-			AZStd::string lastFilePath;
-			AZ::StringFunc::Path::GetFolderPath(pickedPath.toUtf8().data(), lastFilePath);
+            AZStd::string lastFilePath;
+            AZ::StringFunc::Path::GetFolderPath(pickedPath.toUtf8().data(), lastFilePath);
             gnSystem->SetLastPath(lastFilePath);
             AZ_Printf("Utils", "pickedPath = %s", pickedPath.toUtf8().data());
         }
-        
+
         return pickedPath;
     }
-}
+} // namespace GeomNodes

@@ -9,16 +9,17 @@
 #pragma once
 #include <AzCore/IPC/SharedMemory.h>
 #include <AzCore/std/containers/deque.h>
-#include <AzCore/std/containers/queue.h>
 #include <AzCore/std/containers/map.h>
-#include <AzCore/std/function/function_template.h>
+#include <AzCore/std/containers/queue.h>
 #include <AzCore/std/containers/unordered_map.h>
+#include <AzCore/std/function/function_template.h>
 #include <AzCore/std/string/string.h>
+
 //#include <AzCore/std/containers/vector.h>
-#include <AzCore/std/parallel/atomic.h>
-#include <AzCore/std/parallel/thread.h>
-#include <AzCore/std/parallel/mutex.h>
 #include <AzCore/Memory/OSAllocator.h>
+#include <AzCore/std/parallel/atomic.h>
+#include <AzCore/std/parallel/mutex.h>
+#include <AzCore/std/parallel/thread.h>
 
 #ifndef WINAPI
 #define WINAPI __stdcall
@@ -35,21 +36,20 @@ namespace Ipc
         struct RingData;
     } // namespace Internal
 
-    constexpr auto IPC_MAX_PID      = 10;       // Max size of process ID table
-    constexpr auto IPC_MAX_MSGS     = 100;      // Max number of messages stored in queue
-    constexpr auto IPC_MAX_MSG_SIZE = 0x8000;   // Max size of of a message (32KB)
-    constexpr auto IPC_MAX_MAP      = 20;       // Max number of simultaneous extended maps;
-    constexpr auto IPC_MIN_MAP_SIZE = 0x100000; // min map size (1MB);
-    constexpr auto MAP_PAGE_SIZE    = 4096;
+    constexpr auto IPC_MAX_PID = 10; //! Max size of process ID table
+    constexpr auto IPC_MAX_MSGS = 100; //! Max number of messages stored in queue
+    constexpr auto IPC_MAX_MSG_SIZE = 0x8000; //! Max size of of a message (32KB)
+    constexpr auto IPC_MAX_MAP = 20; //! Max number of simultaneous extended maps;
+    constexpr auto IPC_MIN_MAP_SIZE = 0x100000; //! min map size (1MB);
+    constexpr auto MAP_PAGE_SIZE = 4096;
 
     enum IPC_MSG_TYPE
     {
-        IPC_MSG_JSON,               // normal messages
-        IPC_MSG_SHM                 // Message is SHM map related
-                                    // 
+        IPC_MSG_JSON, //! normal messages
+        IPC_MSG_SHM //! Message is SHM map related
     };
 
-    // Table of processes that uses this IPC object
+    //! Table of processes that uses this IPC object
     struct IpcIdTable
     {
         AZ::u64 pid[IPC_MAX_PID];
@@ -59,21 +59,21 @@ namespace Ipc
 
     struct IpcMapTable
     {
-        // a table of available maps in the SHM
-        AZ::u64 id[IPC_MAX_MAP];       // owner? if 0 means it's free
-        AZ::u64 mapID[IPC_MAX_MAP];    // a randomly generated ID, it could be a uuid or current tick.
-        AZ::u64 uSize[IPC_MAX_MAP];    // map size; there should be no similar size. I don't think there will
-                                       // be two users that will use a map at the same time
+        //! a table of available maps in the SHM
+        AZ::u64 id[IPC_MAX_MAP]; //! owner? if 0 means it's free
+        AZ::u64 mapID[IPC_MAX_MAP]; //! a randomly generated ID, it could be a uuid or current tick.
+        AZ::u64 uSize[IPC_MAX_MAP]; //! map size; there should be no similar size. I don't think there will
+                                    //! be two users that will use a map at the same time
     };
 
     struct IpcMapSortArray
     {
-        AZ::u32 arraySize;              // number of created SHM
-        AZ::u32 sortArray[IPC_MAX_MAP]; // the actual sort array containing indexes mapping to IpcMapTable
-                                        // sort order is ascending
+        AZ::u32 arraySize; //! number of created SHM
+        AZ::u32 sortArray[IPC_MAX_MAP]; //! the actual sort array containing indexes mapping to IpcMapTable
+                                        //! sort order is ascending
     };
 
-    // Structure of an element in the IPC_MESSAGE_TABLE
+    //! Structure of an element in the IPC_MESSAGE_TABLE
     struct IPCMessage
     {
         IPCMessage() = default;
@@ -96,20 +96,13 @@ namespace Ipc
         AZ::u8 ucMsg[IPC_MAX_MSG_SIZE] = { 0 };
     };
 
-    #define IPC_MESSAGE_DATA_SIZE 40 // 64+64+32+64+32+64
+#define IPC_MESSAGE_DATA_SIZE 40 // 64+64+32+64+32+64
 
-    // Table of messages to be processed by IPC
+    //! Table of messages to be processed by IPC
     struct IpcMessageTable
     {
         IPCMessage message[IPC_MAX_MSGS];
-        // AZ::u32		crc[BRIPC_MAX_MESSAGES];
     };
-
-    /*class IpcHandler
-    {
-    public:
-        virtual void HandleMessage(AZ::u32 pType, AZ::u8* pData, AZ::u32 uSize) = 0;
-    };*/
 
     /**
      * Same implementation as SharedMemoryRingBuffer but with a public m_info
@@ -124,27 +117,27 @@ namespace Ipc
     public:
         SHMRingBuffer();
 
-        // If return true if we are create
+        //! If return true if we are create
         bool Create(const char* name, unsigned int size, bool openIfCreated = false);
 
-        /// Maps to the created map. If size == 0 it will map the whole memory.
+        //! Maps to the created map. If size == 0 it will map the whole memory.
         bool Map(AccessMode mode = ReadWrite, unsigned int size = 0);
         bool UnMap();
 
-        /// IMPORTANT: All functions below are UNSAFE. Don't forget to Lock/Unlock before/after using them.
+        //! IMPORTANT: All functions below are UNSAFE. Don't forget to Lock/Unlock before/after using them.
 
-        /// Returns true is we wrote the data, false if the free memory is insufficient.
+        //! Returns true is we wrote the data, false if the free memory is insufficient.
         bool Write(const void* data, unsigned int dataSize);
-        /// Reads data up to the maxDataSize, returns number of bytes red.
+        //! Reads data up to the maxDataSize, returns number of bytes red.
         unsigned int Read(void* data, unsigned int maxDataSize);
 
         unsigned int Read(void** data, unsigned int maxDataSize);
 
-        /// Get number of bytes to read.
+        //! Get number of bytes to read.
         unsigned int DataToRead() const;
-        /// Get maximum data we can write.
+        //! Get maximum data we can write.
         unsigned int MaxToWrite() const;
-        /// Clears the ring buffer data and reset it to initial condition.
+        //! Clears the ring buffer data and reset it to initial condition.
         void Clear();
 
         Internal::RingData* m_info;
@@ -157,7 +150,6 @@ namespace Ipc
         typedef AZStd::deque<IPCMessage> IPCMessageQueue;
         typedef AZStd::map<AZ::u64, IPCMessageQueue> IPCMessageQueueMap;
         typedef long (*IPCHandler)(AZ::u64, const char*, AZ::u64);
-        //typedef AZStd::unordered_map<AZ::u64, IPCHandler> IPCHandlerContainer;
         typedef AZStd::map<AZ::u32, AZ::u32> IPCMsgSequence;
         typedef AZStd::vector<AZ::u8> ByteStream;
         typedef AZStd::map<AZ::u64, SHMRingBuffer*> SHMMap;
@@ -177,7 +169,7 @@ namespace Ipc
         AZ::u64 CheckForMessage();
         bool ReadMessage(char* buffer, AZ::u64 length);
 
-        // Map Functions
+        //! Map Functions
         AZ::u64 RequestSHM(AZ::u64 uSize);
         bool OpenSHM(AZ::u64 mapId);
         bool ReadSHM(AZ::u64 mapId, void** address, AZ::u64* length);
@@ -186,7 +178,7 @@ namespace Ipc
 
         bool IsServerRunning();
         bool IsPeerAttached();
-        
+
         static Ipc* GetInstance();
         static void DestroyInstance()
         {
@@ -218,23 +210,23 @@ namespace Ipc
         AZ::u64 m_uID = 0;
         AZ::u32 m_uIDIdx = 0;
         AZ::u32 m_uServerPID = 0;
-        AZ::u32 m_uiPrevMsgSequence = 0; // The index of the IPC message that was just accomplished
+        AZ::u32 m_uiPrevMsgSequence = 0; //! The index of the IPC message that was just accomplished
         AZ::u32 m_uMsgAddIdx = 5;
         AZ::s64 m_uLastCmdTime = 0;
 
-        AZ::SharedMemory m_SharedMem;   // IPC map
-        SHMMap m_SharedMemMap;          // contains the large allocation of SHM.
-                                        // server: eventually handles the management of all SHMs
-                                        // client: if no available map for the requested size it will create it's own SHM and will not close it until the server has sent a message back to the client.
+        AZ::SharedMemory m_SharedMem; //! IPC map
+        SHMMap m_SharedMemMap; //! contains the large allocation of SHM.
+                               //! server: eventually handles the management of all SHMs
+                               //! client: if no available map for the requested size it will create it's own SHM and will not close it
+                               //! until the server has sent a message back to the client.
 
         AZStd::thread m_PollThread;
 
-        IpcIdTable* m_ProcessIDs;       // Pointer to an instance of IPC_PID_TABLE
-        IpcMessageTable* m_MsgTable;    // Pointer to an instance of IPC_MESSAGE_TABLE
-        IpcMapTable* m_MapTable;        // Point to an instance of IPC_MAP_TABLE
+        IpcIdTable* m_ProcessIDs; //! Pointer to an instance of IPC_PID_TABLE
+        IpcMessageTable* m_MsgTable; //! Pointer to an instance of IPC_MESSAGE_TABLE
+        IpcMapTable* m_MapTable; //! Point to an instance of IPC_MAP_TABLE
         IpcMapSortArray* m_MapSortArray;
-        IPCMessageQueueMap m_OverflowQueue; // Extra tables should the m_MsgTable be filled
-        //IPCHandlerContainer m_Handlers;
+        IPCMessageQueueMap m_OverflowQueue; //! Extra tables should the m_MsgTable be filled
         IPCHandler m_handler = nullptr;
 
         struct WaitingIPCMsg
@@ -256,5 +248,4 @@ namespace Ipc
         AZStd::mutex m_MessageListMutex;
     };
 
-}
-
+} // namespace Ipc

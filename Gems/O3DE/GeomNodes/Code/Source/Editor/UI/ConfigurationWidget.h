@@ -9,8 +9,9 @@
 #pragma once
 
 #if !defined(Q_MOC_RUN)
-#include <Editor/Configuration/GNConfiguration.h>
 #include <AzCore/Memory/SystemAllocator.h>
+#include <Editor/Configuration/GNConfiguration.h>
+
 #endif
 
 namespace GeomNodes
@@ -18,11 +19,10 @@ namespace GeomNodes
     namespace Editor
     {
         class SettingsWidget;
-        
+
         /// Widget for editing GeomNodes configuration and settings.
         ///
-        class ConfigurationWidget
-            : public QWidget
+        class ConfigurationWidget : public QWidget
         {
             Q_OBJECT
 
@@ -39,7 +39,7 @@ namespace GeomNodes
 
         private:
             GNConfiguration m_gnSystemConfiguration;
-            
+
             SettingsWidget* m_settings;
         };
     } // namespace Editor

@@ -8,11 +8,12 @@
 
 #pragma once
 
-#include <AzCore/RTTI/ReflectContext.h>
 #include <AzCore/JSON/document.h>
 #include <AzCore/JSON/rapidjson.h>
+#include <AzCore/RTTI/ReflectContext.h>
 #include <Editor/Common/GNConstants.h>
 #include <GeomNodes/GeomNodesTypeIds.h>
+
 
 namespace GeomNodes
 {
@@ -37,7 +38,8 @@ namespace GeomNodes
     template<class T>
     struct GNValue
     {
-        typedef typename AZStd::remove_const<typename AZStd::remove_reference<typename AZStd::remove_pointer<T>::type>::type>::type ValueType;
+        typedef
+            typename AZStd::remove_const<typename AZStd::remove_reference<typename AZStd::remove_pointer<T>::type>::type>::type ValueType;
     };
 
     template<>
@@ -102,6 +104,7 @@ namespace GeomNodes
     class GNParamDataContext
     {
         friend GNParamContext;
+
     public:
         AZ_TYPE_INFO(GNParamDataContext, GNParamDataContextTypeId);
 
@@ -163,7 +166,7 @@ namespace GeomNodes
             return false;
 
         valueRef = GNValue<T>::Read((*m_curParamObj)[key]);
-        
+
         return true;
     }
 

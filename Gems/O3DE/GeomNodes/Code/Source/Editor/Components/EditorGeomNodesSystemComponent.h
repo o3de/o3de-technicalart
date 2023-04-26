@@ -10,8 +10,9 @@
 
 #include <AzToolsFramework/API/ToolsApplicationAPI.h>
 
-#include <GeomNodes/Components/GeomNodesSystemComponent.h>
 #include <Editor/Common/GNEvents.h>
+#include <GeomNodes/Components/GeomNodesSystemComponent.h>
+
 
 namespace GeomNodes
 {
@@ -23,6 +24,7 @@ namespace GeomNodes
         , private AzToolsFramework::EditorEvents::Bus::Handler
     {
         using BaseSystemComponent = GeomNodesSystemComponent;
+
     public:
         AZ_COMPONENT(EditorGeomNodesSystemComponent, GeomNodesEditorSystemComponentTypeId, BaseSystemComponent);
 
@@ -43,11 +45,11 @@ namespace GeomNodes
         void Activate() override;
         void Deactivate() override;
 
-		// AztoolsFramework::EditorEvents overrides...
-		void NotifyRegisterViews() override;
+        // AztoolsFramework::EditorEvents overrides...
+        void NotifyRegisterViews() override;
 
         GeomNodesSystem* m_system = nullptr;
-		SystemEvents::OnInitializedEvent::Handler m_onSystemInitializedHandler;
-		SystemEvents::OnConfigurationChangedEvent::Handler m_onSystemConfigChangedHandler;
+        SystemEvents::OnInitializedEvent::Handler m_onSystemInitializedHandler;
+        SystemEvents::OnConfigurationChangedEvent::Handler m_onSystemConfigChangedHandler;
     };
 } // namespace GeomNodes

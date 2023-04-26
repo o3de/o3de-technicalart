@@ -9,14 +9,15 @@
 #pragma once
 
 #include "GNBuffer.h"
-#include <Editor/Common/GNConstants.h>
 #include <Atom/RHI.Reflect/ShaderSemantic.h>
 #include <Atom/RPI.Reflect/Model/ModelLodAssetCreator.h>
+#include <Editor/Common/GNConstants.h>
 #include <Editor/Rendering/GNMeshData.h>
+
 
 namespace GeomNodes
 {
-	//! The number of attributes required by the mesh.
+    //! The number of attributes required by the mesh.
     inline constexpr uint32_t NumAttributes = 6;
 
     //! Trait to describe mesh vertex attribute format.
@@ -130,9 +131,7 @@ namespace GeomNodes
     {
         if (!IsValid())
         {
-            AZ_Error(
-                "AttributeBuffer", false, "Couldn't create buffer for attribute %s",
-                m_shaderSemantic.ToString().c_str());
+            AZ_Error("AttributeBuffer", false, "Couldn't create buffer for attribute %s", m_shaderSemantic.ToString().c_str());
         }
     }
 
@@ -167,12 +166,15 @@ namespace GeomNodes
     }
 
     template<AttributeType AttributeTypeT>
-    void AttributeBuffer<AttributeTypeT>::AddMeshStreamBuffer(AZ::RPI::ModelLodAssetCreator& modelLodCreator, const GNMeshData& meshData) const
+    void AttributeBuffer<AttributeTypeT>::AddMeshStreamBuffer(
+        AZ::RPI::ModelLodAssetCreator& modelLodCreator, const GNMeshData& meshData) const
     {
-        modelLodCreator.AddMeshStreamBuffer(GetShaderSemantic(), AZ::Name(),
-            { m_buffer.GetBuffer(), 
-                AZ::RHI::BufferViewDescriptor::CreateTyped(meshData.GetOffset<AttributeTypeT>(), meshData.GetCount<AttributeTypeT>(), m_format)
-            });
+        modelLodCreator.AddMeshStreamBuffer(
+            GetShaderSemantic(),
+            AZ::Name(),
+            { m_buffer.GetBuffer(),
+              AZ::RHI::BufferViewDescriptor::CreateTyped(
+                  meshData.GetOffset<AttributeTypeT>(), meshData.GetCount<AttributeTypeT>(), m_format) });
     }
 
     template<AttributeType AttributeTypeT>
@@ -187,9 +189,7 @@ namespace GeomNodes
     {
         if (!m_buffer.UpdateData(data))
         {
-            AZ_Error(
-                "AttributeBuffer", false, "Couldn't update buffer for attribute %s",
-                m_shaderSemantic.ToString().c_str());
+            AZ_Error("AttributeBuffer", false, "Couldn't update buffer for attribute %s", m_shaderSemantic.ToString().c_str());
             return false;
         }
 

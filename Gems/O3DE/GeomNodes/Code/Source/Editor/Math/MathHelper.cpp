@@ -69,7 +69,7 @@ namespace GeomNodes
 
         return Scale3D;
     }
-        
+
     AZ::Matrix4x4 MathHelper::ConvertTransformAndScaleToMat4(const AZ::Transform& transform, const AZ::Vector3& nonUniformScale)
     {
         const AZ::Vector3& o3deTranslation = transform.GetTranslation();
@@ -80,37 +80,42 @@ namespace GeomNodes
         newTransform.SetTranslation(o3deTranslation);
         newTransform.SetRotationPartFromQuaternion(o3deRotation);
         newTransform.MultiplyByScale(newScale);
-        
+
         return newTransform;
     }
 
     std::size_t MathHelper::Align(std::size_t location, std::size_t align)
     {
-        //AZ_Assert(((0 != align) && !(align & (align - 1))), "non-power of 2 alignment");
         return ((location + (align - 1)) & ~(align - 1));
     }
+
     AZ::Vector2 MathHelper::Vec2fToVec2(const Vector2f& vec)
     {
         return AZ::Vector2(vec[0], vec[1]);
     }
+
     AZ::Vector3 MathHelper::Vec3fToVec3(const Vector3f& vec)
     {
         return AZ::Vector3(vec[0], vec[1], vec[2]);
     }
+
     AZ::Vector4 MathHelper::Vec4fToVec4(const Vector4f& vec)
     {
         return AZ::Vector4(vec[0], vec[1], vec[2], vec[3]);
     }
+
     Vector2f MathHelper::Vec2ToVec2f(const AZ::Vector2& vec)
     {
         return Vector2f{ vec.GetX(), vec.GetY() };
     }
+
     Vector3f MathHelper::Vec3ToVec3f(const AZ::Vector3& vec)
     {
         return Vector3f{ vec.GetX(), vec.GetY(), vec.GetZ() };
     }
+
     Vector4f MathHelper::Vec4ToVec4f(const AZ::Vector4& vec)
     {
         return Vector4f{ vec.GetX(), vec.GetY(), vec.GetZ(), vec.GetW() };
     }
-}
+} // namespace GeomNodes

@@ -6,14 +6,15 @@
  *
  */
 
-#include <AzFramework/Physics/SystemBus.h>
 #include <AzFramework/Physics/Collision/CollisionGroups.h>
 #include <AzFramework/Physics/Collision/CollisionLayers.h>
-#include <AzToolsFramework/UI/PropertyEditor/ReflectedPropertyEditor.hxx>
+#include <AzFramework/Physics/SystemBus.h>
 #include <AzToolsFramework/UI/PropertyEditor/InstanceDataHierarchy.h>
-#include <QBoxLayout>
+#include <AzToolsFramework/UI/PropertyEditor/ReflectedPropertyEditor.hxx>
 #include <Editor/UI/ConfigurationWidget.h>
 #include <Editor/UI/SettingsWidget.h>
+#include <QBoxLayout>
+
 
 namespace GeomNodes
 {
@@ -27,23 +28,25 @@ namespace GeomNodes
             verticalLayout->setSpacing(0);
 
             m_settings = new SettingsWidget();
-            
+
             verticalLayout->addWidget(m_settings);
 
-            connect(m_settings, &SettingsWidget::onValueChanged,
-                this, [this](const GNConfiguration& gnSystemConfiguration)
-            {
-                m_gnSystemConfiguration = gnSystemConfiguration;
-                emit onConfigurationChanged(m_gnSystemConfiguration);
-            });
+            connect(
+                m_settings,
+                &SettingsWidget::onValueChanged,
+                this,
+                [this](const GNConfiguration& gnSystemConfiguration)
+                {
+                    m_gnSystemConfiguration = gnSystemConfiguration;
+                    emit onConfigurationChanged(m_gnSystemConfiguration);
+                });
         }
 
         ConfigurationWidget::~ConfigurationWidget()
         {
         }
 
-        void ConfigurationWidget::SetConfiguration(
-            const GNConfiguration& gnSystemConfiguration)
+        void ConfigurationWidget::SetConfiguration(const GNConfiguration& gnSystemConfiguration)
         {
             m_gnSystemConfiguration = gnSystemConfiguration;
             m_settings->SetValue(m_gnSystemConfiguration);

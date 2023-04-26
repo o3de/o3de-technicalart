@@ -8,14 +8,14 @@
 
 #pragma once
 
-#include <AzCore/Memory/SystemAllocator.h>
-#include <AzCore/Math/Crc.h>
-#include <AzCore/RTTI/TypeInfoSimple.h>
-#include <AzCore/Serialization/SerializeContext.h>
 #include <AzCore/Component/EntityId.h>
-#include <Editor/Systems/GNParamContext.h>
+#include <AzCore/Math/Crc.h>
+#include <AzCore/Memory/SystemAllocator.h>
+#include <AzCore/RTTI/TypeInfoSimple.h>
 #include <AzCore/Serialization/EditContext.h>
+#include <AzCore/Serialization/SerializeContext.h>
 #include <Editor/EBus/EditorGeomNodesComponentBus.h>
+#include <Editor/Systems/GNParamContext.h>
 #include <GeomNodes/GeomNodesTypeIds.h>
 
 namespace AZ
@@ -25,7 +25,6 @@ namespace AZ
 
 namespace GeomNodes
 {
-    
     class GNProperties
     {
     public:
@@ -38,8 +37,6 @@ namespace GeomNodes
     class GNProperty
     {
     public:
-        //static void UpdateScriptProperty(GNParamDataContext& sdc, int valueIndex, GNProperty** targetProperty);
-
         static void Reflect(AZ::ReflectContext* reflection);
         static bool VersionConverter(AZ::SerializeContext& context, AZ::SerializeContext::DataElementNode& classElement);
 
@@ -62,9 +59,9 @@ namespace GeomNodes
         virtual const void* GetDataAddress() const = 0;
         virtual AZ::TypeId GetDataTypeUuid() const = 0;
         virtual AZStd::string ToJSONString() const = 0;
-        
+
         virtual void ReadSetGNId(GNParamDataContext& context);
-        
+
         virtual bool IsReadOnly()
         {
             return m_pReadOnly == nullptr ? false : *m_pReadOnly;
@@ -75,14 +72,17 @@ namespace GeomNodes
             EditorGeomNodesComponentRequestBus::Event(m_entityId, &EditorGeomNodesComponentRequests::OnParamChange);
         }
 
-        AZ::u64         m_id;
-        AZStd::string   m_gnId;                     // Geometry Node Param Id
-        AZStd::string   m_name;                     // Geometry Node Param Name
-        AZStd::string   m_type = "UNKNOWN";         // Geometry Node Param Type
-        bool*           m_pReadOnly = nullptr;
-        bool            m_isMaxSet = false;
-        bool            m_isMinSet = false;
-        AZ::EntityId    m_entityId;
+        AZ::u64 m_id;
+        //! Geometry Node Param Id
+        AZStd::string m_gnId;
+        //! Geometry Node Param Name
+        AZStd::string m_name;
+        //! Geometry Node Param Type
+        AZStd::string m_type = "UNKNOWN";
+        bool* m_pReadOnly = nullptr;
+        bool m_isMaxSet = false;
+        bool m_isMinSet = false;
+        AZ::EntityId m_entityId;
     };
 
     class GNParamNil : public GNProperty
@@ -97,8 +97,8 @@ namespace GeomNodes
         GNParamNil()
         {
         }
-		GNParamNil(const char* name, bool* pReadOnly, AZ::EntityId entityId)
-			: GNProperty(name, pReadOnly, entityId)
+        GNParamNil(const char* name, bool* pReadOnly, AZ::EntityId entityId)
+            : GNProperty(name, pReadOnly, entityId)
         {
         }
 
@@ -121,8 +121,8 @@ namespace GeomNodes
         {
             m_type = GetEnumString(ParamType::Bool);
         }
-		GNParamBoolean(const char* name, bool value, bool* pReadOnly, AZ::EntityId entityId)
-			: GNProperty(name, pReadOnly, entityId)
+        GNParamBoolean(const char* name, bool value, bool* pReadOnly, AZ::EntityId entityId)
+            : GNProperty(name, pReadOnly, entityId)
             , m_value(value)
         {
             m_type = GetEnumString(ParamType::Bool);
@@ -154,8 +154,8 @@ namespace GeomNodes
         {
             m_type = GetEnumString(ParamType::Int);
         }
-		GNParamInt(const char* name, int value, bool* pReadOnly, AZ::EntityId entityId)
-			: GNProperty(name, pReadOnly, entityId)
+        GNParamInt(const char* name, int value, bool* pReadOnly, AZ::EntityId entityId)
+            : GNProperty(name, pReadOnly, entityId)
             , m_value(value)
         {
             m_type = GetEnumString(ParamType::Int);
@@ -181,9 +181,10 @@ namespace GeomNodes
         }
 
         int m_value;
-        int m_max;      // Geometry Node Param Max(int)
-        int m_min;      // Geometry Node Param Min(int)
-
+        //! Geometry Node Param Max(int)
+        int m_max;
+        //! Geometry Node Param Min(int)
+        int m_min;
     };
 
     class GNParamValue : public GNProperty
@@ -200,8 +201,8 @@ namespace GeomNodes
         {
             m_type = GetEnumString(ParamType::Value);
         }
-		GNParamValue(const char* name, double value, bool* pReadOnly, AZ::EntityId entityId)
-			: GNProperty(name, pReadOnly, entityId)
+        GNParamValue(const char* name, double value, bool* pReadOnly, AZ::EntityId entityId)
+            : GNProperty(name, pReadOnly, entityId)
             , m_value(value)
         {
             m_type = GetEnumString(ParamType::Value);
@@ -227,9 +228,10 @@ namespace GeomNodes
         }
 
         double m_value;
-        double m_max;       // Geometry Node Param Max(double)
-        double m_min;       // Geometry Node Param Min(double)
-
+        //! Geometry Node Param Max(double)
+        double m_max;
+        //! Geometry Node Param Min(double)
+        double m_min;
     };
 
     class GNParamString : public GNProperty
@@ -245,8 +247,8 @@ namespace GeomNodes
         {
             m_type = GetEnumString(ParamType::String);
         }
-		GNParamString(const char* name, const char* value, bool* pReadOnly, AZ::EntityId entityId)
-			: GNProperty(name, pReadOnly, entityId)
+        GNParamString(const char* name, const char* value, bool* pReadOnly, AZ::EntityId entityId)
+            : GNProperty(name, pReadOnly, entityId)
             , m_value(value)
         {
             m_type = GetEnumString(ParamType::String);
@@ -260,6 +262,5 @@ namespace GeomNodes
         AZStd::string ToJSONString() const override;
 
         AZStd::string m_value;
-
     };
 } // namespace GeomNodes

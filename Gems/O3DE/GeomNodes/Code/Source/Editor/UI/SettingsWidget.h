@@ -10,8 +10,9 @@
 
 #if !defined(Q_MOC_RUN)
 #include <AzToolsFramework/UI/PropertyEditor/PropertyEditorAPI_Internals.h>
-#include <QWidget>
 #include <Editor/Configuration/GNConfiguration.h>
+#include <QWidget>
+
 #endif
 
 namespace GeomNodes
@@ -46,5 +47,5 @@ namespace GeomNodes
             AzToolsFramework::ReflectedPropertyEditor* m_propertyEditor;
             GNConfiguration m_gnSystemConfiguration;
         };
-    }
-}
+    } // namespace Editor
+} // namespace GeomNodes

@@ -7,12 +7,12 @@
  */
 
 #include "Ipc.h"
-#include <AzCore/std/time.h>
-#include <AzCore/std/functional.h>
-#include <AzCore/std/containers/set.h>
-#include <AzCore/Component/TickBus.h>
 #include <AzCore/Component/Entity.h> // we just use this for create a random u64 id
+#include <AzCore/Component/TickBus.h>
+#include <AzCore/std/containers/set.h>
+#include <AzCore/std/functional.h>
 #include <AzCore/std/parallel/spin_mutex.h>
+#include <AzCore/std/time.h>
 
 #define SHMEM_NAME "GNIPCSharedMemory"
 
@@ -265,7 +265,7 @@ namespace Ipc
     }
 
     Ipc* Ipc::m_Instance = nullptr;
-    
+
     Ipc::Ipc()
     {
         m_OverflowQueue.clear();
@@ -278,8 +278,6 @@ namespace Ipc
 
     void Ipc::Initialize(AZ::u64 id, IPCHandler handler)
     {
-        //MessageBox(NULL, L"Debug-WMain-Install", L"Debug", MB_OK);
-
         m_uID = id;
         m_handler = handler;
 
@@ -422,7 +420,7 @@ namespace Ipc
                 bool bMutexLocked = m_SharedMem.try_lock();
                 bMutexLocked = m_bServer ? bMutexLocked : (m_uIDIdx != 0 ? bMutexLocked : false);
                 AddMessage(id, pType, pData, uSize, bMutexLocked);
-                
+
                 if (bMutexLocked)
                 {
                     m_SharedMem.unlock();
@@ -449,7 +447,7 @@ namespace Ipc
     bool Ipc::ReadMessage(char* buffer, AZ::u64 length)
     {
         // https://stackoverflow.com/questions/26277322/passing-arrays-with-ctypes
-        //TODO: need to allocate memory and have another function to release the allocated memory.
+        // TODO: need to allocate memory and have another function to release the allocated memory.
         // or do the second method where we allocate the buffer in python.
         // modify CheckForMessage that will return the length of the needed buffer.
         AZStd::unique_lock<AZStd::mutex> lock(m_MessageListMutex);
@@ -521,12 +519,12 @@ namespace Ipc
                         break;
                     }
                 }
-                
+
                 if (mapId == 0) // if we are still zero here we create one
                 {
                     mapId = (AZ::u64)AZ::Entity::MakeId();
 
-                    auto mapTblidx = m_MapSortArray->arraySize; // 
+                    auto mapTblidx = m_MapSortArray->arraySize; //
                     m_MapTable->id[mapTblidx] = m_uID;
                     m_MapTable->mapID[mapTblidx] = mapId;
                     m_MapTable->uSize[mapTblidx] = alignedSize;
@@ -549,10 +547,6 @@ namespace Ipc
                     AZ_Error("Ipc", false, "Wasn't able to create or open an existing Map!");
                 }
             }
-            /*else
-            {
-                AZ_Error("Ipc", false, "RequestSHM: failed to lock the SHM!");
-            }*/
         }
 
         AZ_Assert(mapId != 0, "RequestSHM : there should be no zero map Id!");
@@ -603,7 +597,7 @@ namespace Ipc
                 if (chunkSize > 0)
                 {
                     auto dataRead = shmInstance->Read(address, chunkSize - headerSize);
-                    
+
                     if (length)
                         *length = dataRead;
 
@@ -868,7 +862,6 @@ namespace Ipc
                     {
                         ++mapIter;
                     }
-                    
                 }
 
                 m_SharedMem.unlock();
@@ -904,7 +897,6 @@ namespace Ipc
 
     void Ipc::ProcessThread()
     {
-        // AZ::u32 tCounter = 0;
         auto tLastCleanup = AZStd::GetTimeNowSecond();
         while (!m_ShutdownThread)
         {
@@ -1004,13 +996,6 @@ namespace Ipc
                     AZStd::this_thread::sleep_for(AZStd::chrono::milliseconds(10));
                 }
             }
-            /*else
-            {
-                if (!IsPeerAttached() || ((AZStd::GetTimeNowSecond() - m_uLastCmdTime) > 10))
-                    AZStd::this_thread::sleep_for(AZStd::chrono::milliseconds(10));
-
-                AZStd::this_thread::sleep_for(AZStd::chrono::milliseconds(10));
-            }*/
         }
     }
 
@@ -1071,8 +1056,7 @@ namespace Ipc
                 i = (pIDx * 10) + m_uMsgAddIdx;
                 dwToSendPid = m_MsgTable->message[i].pid;
 
-                if (dwToSendPid == 0
-                    || ((tNow - m_MsgTable->message[i].i64Timestamp) > 30))
+                if (dwToSendPid == 0 || ((tNow - m_MsgTable->message[i].i64Timestamp) > 30))
                 {
                     IPCMessage tMsg(pID, m_uID, pType, uSize, m_ProcessIDs->uiPrevMsgSequence[pIDx] + 1, tNow);
                     IPCMessage* tIPCMsg = &m_MsgTable->message[i];
@@ -1090,7 +1074,6 @@ namespace Ipc
 
                 if (m_uMsgAddIdx == initialIdx)
                 {
-                    //AZ_Warning("App", false, "GNIPC: Unable to find room for new message; defaulting to overflow!");
                     break;
                 }
             }

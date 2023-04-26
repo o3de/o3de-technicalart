@@ -12,13 +12,11 @@ namespace GeomNodes
 {
     namespace API
     {
-        bool Init(u64 id, HandlerCallback cb)
+        bool Init([[maybe_unused]] u64 id, [[maybe_unused]] HandlerCallback cb)
         {
 #ifdef USE_BRIDGE
             return ::Init(id, cb);
 #else
-            (void)id;
-            (void)cb;
             return false;
 #endif
         }
@@ -30,56 +28,44 @@ namespace GeomNodes
 #endif
         }
 
-        void SendMsg(const char* data, u64 length, u64 id)
+        void SendMsg([[maybe_unused]] const char* data, [[maybe_unused]] u64 length, [[maybe_unused]] u64 id)
         {
 #ifdef USE_BRIDGE
             ::SendMsg(data, length, id);
-#else
-            (void)data;
-            (void)length;
-            (void)id;
 #endif
         }
 
-        bool ReadMsg(char* buffer, u64 length)
+        bool ReadMsg([[maybe_unused]] char* buffer, [[maybe_unused]] u64 length)
         {
 #ifdef USE_BRIDGE
             return ::ReadMsg(buffer, length);
 #else
-            (void)buffer;
-            (void)length;
             return false;
 #endif
         }
 
-        bool OpenSHM(u64 mapId)
+        bool OpenSHM([[maybe_unused]] u64 mapId)
         {
 #ifdef USE_BRIDGE
             return ::OpenSHM(mapId);
 #else
-            (void)mapId;
             return false;
 #endif
         }
 
-        bool ReadSHM(u64 uId, void** address, u64* length)
+        bool ReadSHM([[maybe_unused]] u64 uId, [[maybe_unused]] void** address, [[maybe_unused]] u64* length)
         {
 #ifdef USE_BRIDGE
             return ::ReadSHM(uId, address, length);
 #else
-            (void)uId;
-            (void)address;
-            (void)length;
             return false;
 #endif
         }
 
-        void ClearSHM(u64 uId)
+        void ClearSHM([[maybe_unused]] u64 uId)
         {
 #ifdef USE_BRIDGE
             ::ClearSHM(uId);
-#else
-            (void)uId;
 #endif
         }
     } // namespace API

@@ -8,10 +8,11 @@
 
 #pragma once
 
+#include <AZCore/std/string/string.h>
+#include <AzCore/Math/Aabb.h>
 #include <Editor/Common/GNConstants.h>
 #include <Editor/Math/MathHelper.h>
-#include <AzCore/Math/Aabb.h>
-#include <AZCore/std/string/string.h>
+
 
 namespace GeomNodes
 {
@@ -23,24 +24,24 @@ namespace GeomNodes
     public:
         struct DataRange
         {
-            AZ::u32 offset = 0; 
+            AZ::u32 offset = 0;
             AZ::u32 count = 0;
         };
 
         GNMeshData();
         explicit GNMeshData(
-            const Vert3Vector& positions
-            , const Vert3Vector& normals
-            , const S32Vector& indices
-            , const S32Vector& triangleLoops
-            , const S32Vector& loops
-            , const Vert2Vector& uvs
-            , const Vert4Vector& colors
-            , const S32Vector& materialIndices
-            , const MaterialList& materials
-            , AZ::u64 hash
-            , bool isIndexedUVs
-            , bool isIndexedColors);
+            const Vert3Vector& positions,
+            const Vert3Vector& normals,
+            const S32Vector& indices,
+            const S32Vector& triangleLoops,
+            const S32Vector& loops,
+            const Vert2Vector& uvs,
+            const Vert4Vector& colors,
+            const S32Vector& materialIndices,
+            const MaterialList& materials,
+            AZ::u64 hash,
+            bool isIndexedUVs,
+            bool isIndexedColors);
 
         ~GNMeshData() = default;
 
@@ -51,16 +52,16 @@ namespace GeomNodes
         void SetIndexCount(AZ::u32 count);
         void SetIndexCount(AZ::u64 count);
 
-		template<AttributeType AttributeTypeT>
-		AZ::u32 GetCount() const;
-		template<AttributeType AttributeTypeT>
-		AZ::u32 GetOffset() const;
-		template<AttributeType AttributeTypeT>
-		void SetCount(AZ::u32 count);
+        template<AttributeType AttributeTypeT>
+        AZ::u32 GetCount() const;
+        template<AttributeType AttributeTypeT>
+        AZ::u32 GetOffset() const;
+        template<AttributeType AttributeTypeT>
+        void SetCount(AZ::u32 count);
         template<AttributeType AttributeTypeT>
         void SetCount(AZ::u64 count);
-		template<AttributeType AttributeTypeT>
-		void SetOffset(AZ::u32 offset);
+        template<AttributeType AttributeTypeT>
+        void SetOffset(AZ::u32 offset);
         template<AttributeType AttributeTypeT>
         void SetOffset(AZ::u64 offset);
 
@@ -69,14 +70,14 @@ namespace GeomNodes
 
         template<AttributeType AttributeTypeT>
         const auto& GetDataBuffer() const;
-        
+
         const Mat4Vector& GetInstances() const;
         const MaterialList& GetMaterials() const;
         void ClearMaterialList();
         void SetMaterialIndex(AZ::u32 materialIndex);
         AZ::u32 GetMaterialIndex() const;
         void AddInstance(const AZ::Matrix4x4& mat4);
-		
+
         U32Vector GetIndicesByMaterialIndex(int materialIndex);
 
         AZ::Aabb GetAabb() const;
@@ -92,15 +93,15 @@ namespace GeomNodes
         U32Vector m_indices;
         S32Vector m_loops;
         S32Vector m_materialIndices;
-        
-		//! hash are used to easily matched if you have the same mesh.
-		AZ::s64 m_hash = 0;
-		//! List of material names used by the mesh.
-		MaterialList m_materialNames;
-		//! List of instances. Instances are used so that you have the same mesh but on a different transform.
-		Mat4Vector m_instances;
 
-		AZ::Aabb m_aabb = AZ::Aabb::CreateNull();
+        //! hash are used to easily matched if you have the same mesh.
+        AZ::s64 m_hash = 0;
+        //! List of material names used by the mesh.
+        MaterialList m_materialNames;
+        //! List of instances. Instances are used so that you have the same mesh but on a different transform.
+        Mat4Vector m_instances;
+
+        AZ::Aabb m_aabb = AZ::Aabb::CreateNull();
 
         Vert3Vector m_positions;
         Vert3Vector m_normals;
@@ -108,7 +109,7 @@ namespace GeomNodes
         Vert3Vector m_bitangents;
         Vert2Vector m_uvs;
         Vert4Vector m_colors;
-        
+
         //! As meshes are eventually merged to common buffers we need to keep track of the offset and element count.
         //! When we create the Atom Buffers we will need these infos while the mesh buffers will be held in GNModelData.
         DataRange m_indicesRange;
@@ -123,4 +124,4 @@ namespace GeomNodes
         //! This way they can be grouped together by material and merge the vertices.
         AZ::u32 m_materialIndex = 0;
     };
-}
+} // namespace GeomNodes

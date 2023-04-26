@@ -21,13 +21,12 @@ namespace Ui
 namespace GeomNodes
 {
     struct GNConfiguration;
-    
+
     namespace Editor
     {
         /// Window pane wrapper for the GeomNodes Configuration Widget.
         ///
-        class EditorWindow
-            : public QWidget
+        class EditorWindow : public QWidget
         {
             Q_OBJECT
         public:
@@ -41,7 +40,5 @@ namespace GeomNodes
 
             QScopedPointer<Ui::EditorWindowClass> m_ui;
         };
-    }
-};
-
-
+    } // namespace Editor
+}; // namespace GeomNodes

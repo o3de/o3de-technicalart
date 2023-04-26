@@ -23,10 +23,10 @@ namespace GeomNodes
         //! Sends an IPC message to the script running on the blender instance.
         virtual void SendIPCMsg(const AZStd::string& msg) = 0;
         //! Tells the component that a parameter value has changed. Usually tied to AZ::Edit::Attributes::ChangeNotify
-		virtual void OnParamChange() = 0;
+        virtual void OnParamChange() = 0;
 
-	protected:
-		~EditorGeomNodesComponentRequests() = default;
+    protected:
+        ~EditorGeomNodesComponentRequests() = default;
     };
 
     using EditorGeomNodesComponentRequestBus = AZ::EBus<EditorGeomNodesComponentRequests>;

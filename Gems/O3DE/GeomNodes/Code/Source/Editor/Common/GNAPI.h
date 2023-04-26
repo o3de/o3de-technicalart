@@ -26,8 +26,8 @@ namespace GeomNodes
     namespace API
     {
         /*!
-        * Interface for Bridge methods
-        */
+         * Interface for Bridge methods
+         */
         bool Init(u64 id, HandlerCallback cb);
         void Uninitialize();
         void SendMsg(const char* data, u64 length, u64 id);

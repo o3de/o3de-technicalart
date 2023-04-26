@@ -10,9 +10,8 @@
 
 #include "FunctorValidator.h"
 
-#include <AzCore/std/string/string.h>
 #include <AzCore/std/containers/unordered_map.h>
-
+#include <AzCore/std/string/string.h>
 
 namespace GeomNodes
 {
@@ -25,9 +24,9 @@ namespace GeomNodes
         Validator();
         ~Validator();
 
-        // Finds the QValidator for a given validator or makes one and returns it
+        //! Finds the QValidator for a given validator or makes one and returns it
         FunctorValidator* GetQValidator(FunctorValidator::FunctorType validator);
-        // Tracks this QValidator and deletes it in the destructor
+        //! Tracks this QValidator and deletes it in the destructor
         void TrackThisValidator(FunctorValidator* validator);
 
     private:
@@ -36,9 +35,9 @@ namespace GeomNodes
 
         AZ_DISABLE_COPY_MOVE(Validator);
 
-        // Maps validator functions to QValidators
+        //! Maps validator functions to QValidators
         ValidatorToQValidatorType m_validatorToQValidator;
-        // Tracks allocations of other QValidators so they don't leak
+        //! Tracks allocations of other QValidators so they don't leak
         QValidatorList m_otherValidators;
     };
 } // namespace GeomNodes

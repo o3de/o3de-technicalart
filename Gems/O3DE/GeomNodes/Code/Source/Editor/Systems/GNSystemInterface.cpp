@@ -10,7 +10,7 @@
 
 namespace GeomNodes
 {
-    void GNSystemInterface::Reflect(AZ::ReflectContext* /*context*/)
+    void GNSystemInterface::Reflect([[maybe_unused]] AZ::ReflectContext* context)
     {
     }
-}
+} // namespace GeomNodes

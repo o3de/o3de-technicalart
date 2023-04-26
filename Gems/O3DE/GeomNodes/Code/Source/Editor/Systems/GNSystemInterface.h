@@ -37,21 +37,27 @@ namespace GeomNodes
         //! @return the Blender Editor path
         virtual AZStd::string_view GetBlenderPath() = 0;
 
-		//! Get the current GNConfiguration used to initialize the GeomNodes system.
-		virtual const GNConfiguration* GetConfiguration() const = 0;
+        //! Get the current GNConfiguration used to initialize the GeomNodes system.
+        virtual const GNConfiguration* GetConfiguration() const = 0;
 
-		//! Update the GNConfiguration.
-		//! This will apply the new configuration
-		//! @param newConfig The new configuration to apply.
-		virtual void UpdateConfiguration(const GNConfiguration* newConfig) = 0;
+        //! Update the GNConfiguration.
+        //! This will apply the new configuration
+        //! @param newConfig The new configuration to apply.
+        virtual void UpdateConfiguration(const GNConfiguration* newConfig) = 0;
 
         //! Register to receive notifications when the GeomNodes System is Initialized.
         //! @param handler The handler to receive the event.
-        void RegisterSystemInitializedEvent(SystemEvents::OnInitializedEvent::Handler& handler) { handler.Connect(m_initializeEvent); }
+        void RegisterSystemInitializedEvent(SystemEvents::OnInitializedEvent::Handler& handler)
+        {
+            handler.Connect(m_initializeEvent);
+        }
         //! Register to receive notifications when the GNConfiguration changes.
         //! @param handler The handler to receive the event.
-        void RegisterSystemConfigurationChangedEvent(SystemEvents::OnConfigurationChangedEvent::Handler& handler) { handler.Connect(m_configChangeEvent); }
-    
+        void RegisterSystemConfigurationChangedEvent(SystemEvents::OnConfigurationChangedEvent::Handler& handler)
+        {
+            handler.Connect(m_configChangeEvent);
+        }
+
     protected:
         SystemEvents::OnInitializedEvent m_initializeEvent;
         SystemEvents::OnConfigurationChangedEvent m_configChangeEvent;

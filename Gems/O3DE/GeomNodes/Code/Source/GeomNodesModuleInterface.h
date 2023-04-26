@@ -10,13 +10,13 @@
 #include <AzCore/Module/Module.h>
 #include <AzCore/RTTI/RTTIMacros.h>
 #include <AzCore/RTTI/TypeInfoSimple.h>
-#include <GeomNodes/GeomNodesTypeIds.h>
 #include <GeomNodes/Components/GeomNodesSystemComponent.h>
+#include <GeomNodes/GeomNodesTypeIds.h>
+
 
 namespace GeomNodes
 {
-    class GeomNodesModuleInterface
-        : public AZ::Module
+    class GeomNodesModuleInterface : public AZ::Module
     {
     public:
         AZ_RTTI(GeomNodesModuleInterface, GeomNodesModuleInterfaceTypeId, AZ::Module);
@@ -26,10 +26,12 @@ namespace GeomNodes
         {
             // Push results of [MyComponent]::CreateDescriptor() into m_descriptors here.
             // Add ALL components descriptors associated with this gem to m_descriptors.
-            // This will associate the AzTypeInfo information for the components with the the SerializeContext, BehaviorContext and EditContext.
-            // This happens through the [MyComponent]::Reflect() function.
-            m_descriptors.insert(m_descriptors.end(), {
-                GeomNodesSystemComponent::CreateDescriptor(),
+            // This will associate the AzTypeInfo information for the components with the the SerializeContext, BehaviorContext and
+            // EditContext. This happens through the [MyComponent]::Reflect() function.
+            m_descriptors.insert(
+                m_descriptors.end(),
+                {
+                    GeomNodesSystemComponent::CreateDescriptor(),
                 });
         }
 
@@ -40,4 +42,4 @@ namespace GeomNodes
             };
         }
     };
-}// namespace GeomNodes
+} // namespace GeomNodes

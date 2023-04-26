@@ -20,14 +20,13 @@ namespace GeomNodes
     // Forward declare
     class ValidationHandler;
 
-    class PropertyFileSelectCtrl
-        : public PropertyFuncValBrowseEditCtrl
+    class PropertyFileSelectCtrl : public PropertyFuncValBrowseEditCtrl
     {
         Q_OBJECT
 
     public:
         AZ_CLASS_ALLOCATOR(PropertyFileSelectCtrl, AZ::SystemAllocator)
-        typedef QString(* FileSelectFuncType)(const QString&);
+        typedef QString (*FileSelectFuncType)(const QString&);
 
         PropertyFileSelectCtrl(QWidget* pParent = nullptr);
 
@@ -40,8 +39,7 @@ namespace GeomNodes
         FileSelectFuncType m_selectFunctor;
     };
 
-    class PropertyFileSelectHandler
-        : public AzToolsFramework::PropertyHandler<AZStd::string, PropertyFileSelectCtrl>
+    class PropertyFileSelectHandler : public AzToolsFramework::PropertyHandler<AZStd::string, PropertyFileSelectCtrl>
     {
         AZ_CLASS_ALLOCATOR(PropertyFileSelectHandler, AZ::SystemAllocator);
 
@@ -50,12 +48,21 @@ namespace GeomNodes
 
         AZ::u32 GetHandlerName(void) const override;
         // Need to unregister ourselves
-        bool AutoDelete() const override { return false; }
+        bool AutoDelete() const override
+        {
+            return false;
+        }
 
         QWidget* CreateGUI(QWidget* pParent) override;
-        void ConsumeAttribute(PropertyFileSelectCtrl* GUI, AZ::u32 attrib, AzToolsFramework::PropertyAttributeReader* attrValue, const char* debugName) override;
-        void WriteGUIValuesIntoProperty(size_t index, PropertyFileSelectCtrl* GUI, property_t& instance, AzToolsFramework::InstanceDataNode* node) override;
-        bool ReadValuesIntoGUI(size_t index, PropertyFileSelectCtrl* GUI, const property_t& instance, AzToolsFramework::InstanceDataNode* node)  override;
+        void ConsumeAttribute(
+            PropertyFileSelectCtrl* GUI,
+            AZ::u32 attrib,
+            AzToolsFramework::PropertyAttributeReader* attrValue,
+            const char* debugName) override;
+        void WriteGUIValuesIntoProperty(
+            size_t index, PropertyFileSelectCtrl* GUI, property_t& instance, AzToolsFramework::InstanceDataNode* node) override;
+        bool ReadValuesIntoGUI(
+            size_t index, PropertyFileSelectCtrl* GUI, const property_t& instance, AzToolsFramework::InstanceDataNode* node) override;
         static PropertyFileSelectHandler* Register(ValidationHandler* valHdlr);
 
     private:

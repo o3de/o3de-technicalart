@@ -8,15 +8,16 @@
 
 #pragma once
 
-#include <AzCore/Interface/Interface.h>
-#include <Editor/Systems/GNSystemInterface.h>
-#include <Editor/Configuration/GNConfiguration.h>
-#include <Editor/Configuration/GNSettingsRegistryManager.h>
+#include "Editor/EBus/ValidatorBus.h"
 #include <AZCore/std/containers/vector.h>
 #include <AZCore/std/smart_ptr/unique_ptr.h>
+#include <AzCore/Interface/Interface.h>
 #include <AzToolsFramework/UI/PropertyEditor/PropertyEditorAPI.h>
-#include "Editor/EBus/ValidatorBus.h"
+#include <Editor/Configuration/GNConfiguration.h>
+#include <Editor/Configuration/GNSettingsRegistryManager.h>
+#include <Editor/Systems/GNSystemInterface.h>
 #include <GeomNodes/GeomNodesTypeIds.h>
+
 
 namespace GeomNodes
 {
@@ -37,7 +38,7 @@ namespace GeomNodes
         void Initialize(const GNConfiguration* config) override;
         void Shutdown() override;
         AZStd::string_view GetBlenderPath() override;
-		const GNConfiguration* GetConfiguration() const override;
+        const GNConfiguration* GetConfiguration() const override;
         void UpdateConfiguration(const GNConfiguration* newConfig) override;
 
         //! Accessor to get the Settings Registry Manager.
@@ -57,7 +58,7 @@ namespace GeomNodes
         void UnregisterHandlersAndBuses();
 
         //! Handles all settings registry interactions.
-        AZStd::unique_ptr<GNSettingsRegistryManager> m_registryManager; 
+        AZStd::unique_ptr<GNSettingsRegistryManager> m_registryManager;
 
         //! Allows lookup and contains all allocated QValidators
         AZStd::unique_ptr<Validator> m_validator;
@@ -67,15 +68,15 @@ namespace GeomNodes
 
         GNConfiguration m_systemConfig;
 
-		enum class State : AZ::u8
-		{
-			Uninitialized = 0,
-			Initialized,
-			Shutdown
-		};
-		State m_state = State::Uninitialized;
+        enum class State : AZ::u8
+        {
+            Uninitialized = 0,
+            Initialized,
+            Shutdown
+        };
+        State m_state = State::Uninitialized;
     };
 
-	//! Helper function for getting the GeomNodes System interface from inside the GeomNodes gem.
-	GeomNodesSystem* GetGNSystem();
-}
+    //! Helper function for getting the GeomNodes System interface from inside the GeomNodes gem.
+    GeomNodesSystem* GetGNSystem();
+} // namespace GeomNodes

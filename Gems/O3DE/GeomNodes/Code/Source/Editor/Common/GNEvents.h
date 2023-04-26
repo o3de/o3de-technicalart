@@ -22,5 +22,5 @@ namespace GeomNodes
         //! Event triggers when the GeomNodes system has completed initialization.
         //! When triggered the event will send the GNConfiguration used to initialize the system.
         using OnInitializedEvent = AZ::Event<const GNConfiguration*>;
-    }
+    } // namespace SystemEvents
 } // namespace GeomNodes

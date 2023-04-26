@@ -14,10 +14,11 @@
 #include <Editor/Rendering/GNModelData.h>
 
 #include <Atom/Feature/Mesh/MeshFeatureProcessorInterface.h>
-#include <AtomLyIntegration/CommonFeatures/Mesh/MeshHandleStateBus.h>
 #include <AtomLyIntegration/CommonFeatures/Material/MaterialComponentBus.h>
+#include <AtomLyIntegration/CommonFeatures/Mesh/MeshHandleStateBus.h>
 #include <AzCore/Component/TransformBus.h>
 #include <AzCore/Name/Name.h>
+
 
 #include <GeomNodes/GeomNodesTypeIds.h>
 namespace AZ::RPI
@@ -46,7 +47,7 @@ namespace GeomNodes
         //! For building the mesh.
         void BuildMesh(const GNModelData& renderData);
         //! Updates the models transform
-        void UpdateTransform(const AZ::Transform& worldFromLocal, const AZ::Vector3& scale = AZ::Vector3::CreateOne());
+        void UpdateTransform(const AZ::Transform& worldFromLocal);
         //! Returns if the Model/Mesh is visible or not.
         bool IsVisible() const;
         //! Sets the visibility of the Model/Mesh
@@ -55,15 +56,15 @@ namespace GeomNodes
         // AZ::TickBus overrides ...
         void OnTick(float deltaTime, AZ::ScriptTimePoint time) override;
 
-		// MaterialConsumerRequestBus::Handler overrides...
-		AZ::Render::MaterialAssignmentId FindMaterialAssignmentId(
-			const AZ::Render::MaterialAssignmentLodIndex lod, const AZStd::string& label) const override;
+        // MaterialConsumerRequestBus::Handler overrides...
+        AZ::Render::MaterialAssignmentId FindMaterialAssignmentId(
+            const AZ::Render::MaterialAssignmentLodIndex lod, const AZStd::string& label) const override;
         AZ::Render::MaterialAssignmentLabelMap GetMaterialLabels() const override;
         AZ::Render::MaterialAssignmentMap GetDefautMaterialMap() const override;
-		AZStd::unordered_set<AZ::Name> GetModelUvNames() const override;
+        AZStd::unordered_set<AZ::Name> GetModelUvNames() const override;
 
-		// MaterialComponentNotificationBus::Handler overrides...
-		void OnMaterialsUpdated(const AZ::Render::MaterialAssignmentMap& materials) override;
+        // MaterialComponentNotificationBus::Handler overrides...
+        void OnMaterialsUpdated(const AZ::Render::MaterialAssignmentMap& materials) override;
 
         //! Returns the Model's data instance
         AZ::Data::Instance<AZ::RPI::Model> GetModel() const;
@@ -93,14 +94,14 @@ namespace GeomNodes
         const AZ::Render::MeshFeatureProcessorInterface::MeshHandle* GetMeshHandle() const override;
 
         //! Creates the attribute mesh buffers
-		bool CreateMeshBuffers(const GNModelData& modelData);
-        //! Creates everything related to the model for Atom Rendering. 
+        bool CreateMeshBuffers(const GNModelData& modelData);
+        //! Creates everything related to the model for Atom Rendering.
         bool CreateMesh(const GNModelData& modelData);
         //! Using the ModelLodAssetCreator creates the Model LOD asset and the meshes.
         bool CreateLodAsset(const GNModelData& modelData);
         //! Using the ModelAssetCreator creates the model asset and sets the material slots.
         void CreateModelAsset();
-        //! Final step for create the model by acquiring the mesh handle from the mesh feature processor 
+        //! Final step for create the model by acquiring the mesh handle from the mesh feature processor
         bool CreateModel();
         //! Add LOD buffers to ModelLodAsset
         void AddLodBuffers(AZ::RPI::ModelLodAssetCreator& modelLodCreator);
@@ -121,7 +122,7 @@ namespace GeomNodes
         //! Reference to a Model instance
         AZ::Data::Instance<AZ::RPI::Model> m_model;
         //! Reference to MeshFeatureProcessor
-		AZ::Render::MeshFeatureProcessorInterface* m_meshFeatureProcessor = nullptr;
+        AZ::Render::MeshFeatureProcessorInterface* m_meshFeatureProcessor = nullptr;
         //! Reference to MeshHandle
         AZ::Render::MeshFeatureProcessorInterface::MeshHandle m_meshHandle;
         //! Material map
@@ -152,4 +153,4 @@ namespace GeomNodes
         //! current model scale
         AZ::Vector3 m_scale;
     };
-}
+} // namespace GeomNodes

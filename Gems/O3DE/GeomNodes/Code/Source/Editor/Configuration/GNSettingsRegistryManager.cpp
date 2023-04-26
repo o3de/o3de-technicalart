@@ -15,7 +15,8 @@ namespace GeomNodes
 {
     GNSettingsRegistryManager::GNSettingsRegistryManager()
     {
-        m_settingsRegistryPath = AZStd::string::format("%s/Gems/GeomNodes/GNConfiguration", AZ::SettingsRegistryMergeUtils::OrganizationRootKey);
+        m_settingsRegistryPath =
+            AZStd::string::format("%s/Gems/GeomNodes/GNConfiguration", AZ::SettingsRegistryMergeUtils::OrganizationRootKey);
     }
 
     AZStd::optional<GNConfiguration> GNSettingsRegistryManager::LoadSystemConfiguration() const
@@ -23,7 +24,7 @@ namespace GeomNodes
         GNConfiguration systemConfig;
 
         bool configurationRead = false;
-        
+
         AZ::SettingsRegistryInterface* settingsRegistry = AZ::SettingsRegistry::Get();
         if (settingsRegistry)
         {
@@ -32,19 +33,23 @@ namespace GeomNodes
 
         if (configurationRead)
         {
-            AZ_TracePrintf("GeomNodesSystem", R"(GNConfiguration was read from settings registry at pointer path)"
-                R"( "%s)" "\n",
+            AZ_TracePrintf(
+                "GeomNodesSystem",
+                R"(GNConfiguration was read from settings registry at pointer path)"
+                R"( "%s)"
+                "\n",
                 m_settingsRegistryPath.c_str());
             return systemConfig;
         }
         return AZStd::nullopt;
     }
 
-    void GNSettingsRegistryManager::SaveSystemConfiguration([[maybe_unused]] const GNConfiguration& config, const OnGNConfigSaveComplete& saveCallback) const
+    void GNSettingsRegistryManager::SaveSystemConfiguration(
+        [[maybe_unused]] const GNConfiguration& config, const OnGNConfigSaveComplete& saveCallback) const
     {
         if (saveCallback)
         {
             saveCallback(config, Result::Failed);
-        } 
+        }
     }
-}
+} // namespace GeomNodes

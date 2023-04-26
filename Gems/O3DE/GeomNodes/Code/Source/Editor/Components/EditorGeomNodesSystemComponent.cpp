@@ -6,9 +6,9 @@
  *
  */
 
+#include "EditorGeomNodesSystemComponent.h"
 #include <AzCore/Serialization/SerializeContext.h>
 #include <Editor/Systems/GeomNodesSystem.h>
-#include "EditorGeomNodesSystemComponent.h"
 #include <Editor/UI/EditorWindow.h>
 
 #include <GeomNodes/GeomNodesTypeIds.h>
@@ -22,23 +22,21 @@ namespace GeomNodes
         GNConfiguration::Reflect(context);
         if (auto serializeContext = azrtti_cast<AZ::SerializeContext*>(context))
         {
-            serializeContext->Class<EditorGeomNodesSystemComponent, GeomNodesSystemComponent>()
-                ->Version(0);
+            serializeContext->Class<EditorGeomNodesSystemComponent, GeomNodesSystemComponent>()->Version(0);
         }
     }
 
     EditorGeomNodesSystemComponent::EditorGeomNodesSystemComponent()
-		: m_onSystemInitializedHandler(
-			[](const GNConfiguration* /*config*/)
-	        {
-		        
-	        })
-		, m_onSystemConfigChangedHandler(
-			[](const GNConfiguration* /*config*/)
-	        {
-	        })
-    {
+        : m_onSystemInitializedHandler(
+              []([[maybe_unused]] const GNConfiguration* config)
+              {
 
+              })
+        , m_onSystemConfigChangedHandler(
+              []([[maybe_unused]] const GNConfiguration* config)
+              {
+              })
+    {
     }
 
     EditorGeomNodesSystemComponent::~EditorGeomNodesSystemComponent() = default;
@@ -70,26 +68,28 @@ namespace GeomNodes
         m_system = GetGNSystem();
         if (m_system)
         {
-			m_system->RegisterSystemInitializedEvent(m_onSystemInitializedHandler);
-			m_system->RegisterSystemConfigurationChangedEvent(m_onSystemConfigChangedHandler);
-			const GNSettingsRegistryManager& registryManager = m_system->GetSettingsRegistryManager();
-			if (AZStd::optional<GNConfiguration> config = registryManager.LoadSystemConfiguration();
-				config.has_value())
-			{
-				m_system->Initialize(&(*config));
-			}
-			else //load defaults if there is no config
-			{
-				const GNConfiguration defaultConfig = GNConfiguration::CreateDefault();
-				m_system->Initialize(&defaultConfig);
+            m_system->RegisterSystemInitializedEvent(m_onSystemInitializedHandler);
+            m_system->RegisterSystemConfigurationChangedEvent(m_onSystemConfigChangedHandler);
+            const GNSettingsRegistryManager& registryManager = m_system->GetSettingsRegistryManager();
+            if (AZStd::optional<GNConfiguration> config = registryManager.LoadSystemConfiguration(); config.has_value())
+            {
+                m_system->Initialize(&(*config));
+            }
+            else // load defaults if there is no config
+            {
+                const GNConfiguration defaultConfig = GNConfiguration::CreateDefault();
+                m_system->Initialize(&defaultConfig);
 
-				auto saveCallback = []([[maybe_unused]] const GNConfiguration& config, [[maybe_unused]] GNSettingsRegistryManager::Result result)
-				{
-					AZ_Warning("GeomNodes", result == GNSettingsRegistryManager::Result::Success,
-						"Unable to save the default GeomNodes configuration.");
-				};
-				registryManager.SaveSystemConfiguration(defaultConfig, saveCallback);
-			}
+                auto saveCallback =
+                    []([[maybe_unused]] const GNConfiguration& config, [[maybe_unused]] GNSettingsRegistryManager::Result result)
+                {
+                    AZ_Warning(
+                        "GeomNodes",
+                        result == GNSettingsRegistryManager::Result::Success,
+                        "Unable to save the default GeomNodes configuration.");
+                };
+                registryManager.SaveSystemConfiguration(defaultConfig, saveCallback);
+            }
         }
     }
 
@@ -102,13 +102,13 @@ namespace GeomNodes
 
     void EditorGeomNodesSystemComponent::Deactivate()
     {
-		m_onSystemInitializedHandler.Disconnect();
-		m_onSystemConfigChangedHandler.Disconnect();
-		if (m_system != nullptr)
-		{
-			m_system->Shutdown();
-			m_system = nullptr;
-		}
+        m_onSystemInitializedHandler.Disconnect();
+        m_onSystemConfigChangedHandler.Disconnect();
+        if (m_system != nullptr)
+        {
+            m_system->Shutdown();
+            m_system = nullptr;
+        }
 
         AzToolsFramework::EditorEvents::Bus::Handler::BusDisconnect();
         GeomNodesSystemComponent::Deactivate();

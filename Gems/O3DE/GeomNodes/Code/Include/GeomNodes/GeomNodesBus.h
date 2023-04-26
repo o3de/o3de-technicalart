@@ -23,8 +23,7 @@ namespace GeomNodes
         // Put your public methods here
     };
 
-    class GeomNodesBusTraits
-        : public AZ::EBusTraits
+    class GeomNodesBusTraits : public AZ::EBusTraits
     {
     public:
         //////////////////////////////////////////////////////////////////////////

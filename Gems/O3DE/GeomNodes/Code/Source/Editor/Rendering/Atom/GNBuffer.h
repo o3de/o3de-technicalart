@@ -75,8 +75,7 @@ namespace GeomNodes
 
         //! The format used by the buffer (must be one of the supported types in GetFormatForVertexStreamDataType).
         static constexpr auto VertexStreamFormat = GetFormatForVertexStreamDataType<VertexStreamDataType>();
-        static_assert(
-            VertexStreamFormat != AZ::RHI::Format::Unknown, "Cannot initialize a buffer with an unknown format.");
+        static_assert(VertexStreamFormat != AZ::RHI::Format::Unknown, "Cannot initialize a buffer with an unknown format.");
     };
 
     template<typename VertexStreamDataType>
@@ -116,7 +115,7 @@ namespace GeomNodes
         }
         else
         {
-            m_bufferAssetView = AZ::RPI::BufferAssetView{m_buffer, m_bufferViewDescriptor};
+            m_bufferAssetView = AZ::RPI::BufferAssetView{ m_buffer, m_bufferViewDescriptor };
             m_isValid = true;
         }
     }

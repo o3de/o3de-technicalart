@@ -13,7 +13,8 @@
 namespace GeomNodes
 {
     Validator::Validator()
-    {}
+    {
+    }
 
     Validator::~Validator()
     {
@@ -40,8 +41,7 @@ namespace GeomNodes
             else
             {
                 FunctorValidator* qValidator = new FunctorValidator(validator);
-                m_validatorToQValidator.insert(
-                    AZStd::pair<FunctorValidator::FunctorType, FunctorValidator*>(validator, qValidator));
+                m_validatorToQValidator.insert(AZStd::pair<FunctorValidator::FunctorType, FunctorValidator*>(validator, qValidator));
 
                 return qValidator;
             }

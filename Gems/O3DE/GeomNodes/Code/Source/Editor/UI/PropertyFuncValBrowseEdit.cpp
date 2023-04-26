@@ -12,8 +12,9 @@
 
 #include <AzToolsFramework/UI/PropertyEditor/PropertyQTConstants.h>
 
-#include <QLineEdit>
 #include <QHBoxLayout>
+#include <QLineEdit>
+
 
 namespace GeomNodes
 {
@@ -41,7 +42,11 @@ namespace GeomNodes
         m_browseEdit->setClearButtonEnabled(true);
         connect(m_browseEdit, &AzQtComponents::BrowseEdit::textChanged, this, &PropertyFuncValBrowseEditCtrl::ValueChangedByUser);
         connect(m_browseEdit, &AzQtComponents::BrowseEdit::textChanged, this, &PropertyFuncValBrowseEditCtrl::ValidateAndShowErrors);
-        connect(m_browseEdit, &AzQtComponents::BrowseEdit::textChanged, this, [this]([[maybe_unused]] const QString& text)
+        connect(
+            m_browseEdit,
+            &AzQtComponents::BrowseEdit::textChanged,
+            this,
+            [this]([[maybe_unused]] const QString& text)
             {
                 EBUS_EVENT(AzToolsFramework::PropertyEditorGUIMessages::Bus, RequestWrite, this);
             });
@@ -78,10 +83,7 @@ namespace GeomNodes
     void PropertyFuncValBrowseEditCtrl::SetValidator(FunctorValidator::FunctorType validator)
     {
         FunctorValidator* val = nullptr;
-        ValidatorBus::BroadcastResult(
-            val,
-            &ValidatorBus::Handler::GetValidator,
-            validator);
+        ValidatorBus::BroadcastResult(val, &ValidatorBus::Handler::GetValidator, validator);
 
         SetValidator(val);
     }
@@ -125,7 +127,8 @@ namespace GeomNodes
         m_notifyTarget = notifyTarget;
     }
 
-    void PropertyFuncValBrowseEditCtrl::ConsumeAttribute(AZ::u32 attrib, AzToolsFramework::PropertyAttributeReader* attrValue, [[maybe_unused]] const char* debugName)
+    void PropertyFuncValBrowseEditCtrl::ConsumeAttribute(
+        AZ::u32 attrib, AzToolsFramework::PropertyAttributeReader* attrValue, [[maybe_unused]] const char* debugName)
     {
         if (attrib == Attributes::FuncValidator)
         {
@@ -185,10 +188,10 @@ namespace GeomNodes
     //  Handler  ///////////////////////////////////////////////////////////////////
 
     PropertyFuncValBrowseEditHandler::PropertyFuncValBrowseEditHandler(ValidationHandler* valHdlr)
-        : AzToolsFramework::PropertyHandler <AZStd::string, PropertyFuncValBrowseEditCtrl>()
-        , m_validationHandler(valHdlr
-            )
-    {}
+        : AzToolsFramework::PropertyHandler<AZStd::string, PropertyFuncValBrowseEditCtrl>()
+        , m_validationHandler(valHdlr)
+    {
+    }
 
     AZ::u32 PropertyFuncValBrowseEditHandler::GetHandlerName(void) const
     {
@@ -202,17 +205,26 @@ namespace GeomNodes
         return ctrl;
     }
 
-    void PropertyFuncValBrowseEditHandler::ConsumeAttribute(PropertyFuncValBrowseEditCtrl* GUI, AZ::u32 attrib, AzToolsFramework::PropertyAttributeReader* attrValue, const char* debugName)
+    void PropertyFuncValBrowseEditHandler::ConsumeAttribute(
+        PropertyFuncValBrowseEditCtrl* GUI, AZ::u32 attrib, AzToolsFramework::PropertyAttributeReader* attrValue, const char* debugName)
     {
         GUI->ConsumeAttribute(attrib, attrValue, debugName);
     }
 
-    void PropertyFuncValBrowseEditHandler::WriteGUIValuesIntoProperty([[maybe_unused]] size_t index, PropertyFuncValBrowseEditCtrl* GUI, property_t& instance, [[maybe_unused]] AzToolsFramework::InstanceDataNode* node)
+    void PropertyFuncValBrowseEditHandler::WriteGUIValuesIntoProperty(
+        [[maybe_unused]] size_t index,
+        PropertyFuncValBrowseEditCtrl* GUI,
+        property_t& instance,
+        [[maybe_unused]] AzToolsFramework::InstanceDataNode* node)
     {
         instance = GUI->GetValue().toUtf8().data();
     }
 
-    bool PropertyFuncValBrowseEditHandler::ReadValuesIntoGUI([[maybe_unused]] size_t index, PropertyFuncValBrowseEditCtrl* GUI, const property_t& instance, [[maybe_unused]] AzToolsFramework::InstanceDataNode* node)
+    bool PropertyFuncValBrowseEditHandler::ReadValuesIntoGUI(
+        [[maybe_unused]] size_t index,
+        PropertyFuncValBrowseEditCtrl* GUI,
+        const property_t& instance,
+        [[maybe_unused]] AzToolsFramework::InstanceDataNode* node)
     {
         GUI->SetValue(instance.data());
         GUI->ForceValidate();
@@ -223,8 +235,7 @@ namespace GeomNodes
     {
         PropertyFuncValBrowseEditHandler* handler = aznew PropertyFuncValBrowseEditHandler(valHdlr);
         AzToolsFramework::PropertyTypeRegistrationMessages::Bus::Broadcast(
-            &AzToolsFramework::PropertyTypeRegistrationMessages::Bus::Handler::RegisterPropertyType,
-            handler);
+            &AzToolsFramework::PropertyTypeRegistrationMessages::Bus::Handler::RegisterPropertyType, handler);
         return handler;
     }
 } // namespace GeomNodes

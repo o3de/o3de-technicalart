@@ -57,7 +57,7 @@ namespace GeomNodes
             if (serializeContext->FindClassData(AZ::Uuid("{AA9713B7-70F1-43CB-9F95-5BEC9F44F556}")) == nullptr)
             {
                 serializeContext->Class<GNParamContext>()->Version(2)->Field("Properties", &GNParamContext::m_group);
-                    
+
                 serializeContext->Class<GNPropertyGroup>()
                     ->Field("Name", &GNPropertyGroup::m_name)
                     ->Field("Properties", &GNPropertyGroup::m_properties)
@@ -111,7 +111,7 @@ namespace GeomNodes
         AZ::u64 uCtr = m_properties.size();
         for (GNProperty* prop : m_properties)
         {
-            jsonString += prop->ToJSONString() ;
+            jsonString += prop->ToJSONString();
             uCtr--;
             if (uCtr > 0)
                 jsonString += ", ";
@@ -166,7 +166,7 @@ namespace GeomNodes
         case ParamType::String:
             return "STRING";
         }
-        
+
         return "UNKNOWN";
     }
 
@@ -193,7 +193,7 @@ namespace GeomNodes
     }
 
     // GNParamDataContext
-    
+
     bool GNParamDataContext::IsNil(int index) const
     {
         return index == (int)ParamType::Unknown;

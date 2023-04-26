@@ -14,8 +14,7 @@
 
 namespace GeomNodes
 {
-    class ValidatorTraits
-        : public AZ::EBusTraits
+    class ValidatorTraits : public AZ::EBusTraits
     {
     public:
         using Bus = AZ::EBus<ValidatorTraits>;

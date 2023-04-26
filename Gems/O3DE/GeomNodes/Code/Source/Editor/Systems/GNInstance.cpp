@@ -8,8 +8,9 @@
 
 #include "GNInstance.h"
 #include <Editor/Common/GNAPI.h>
-#include <Editor/Systems/GeomNodesSystem.h>
 #include <Editor/Common/GNConstants.h>
+#include <Editor/Systems/GeomNodesSystem.h>
+
 
 namespace GeomNodes
 {
@@ -33,7 +34,8 @@ namespace GeomNodes
         return m_blenderProcessWatcher && m_blenderProcessWatcher->IsProcessRunning();
     }
 
-    bool GNInstance::Init(const AZStd::string& filePath, const AZStd::string& scriptPath, const AZStd::string& exePath, AZ::EntityId entityId)
+    bool GNInstance::Init(
+        const AZStd::string& filePath, const AZStd::string& scriptPath, const AZStd::string& exePath, AZ::EntityId entityId)
     {
         m_entityId = entityId;
         m_path = filePath;
@@ -65,8 +67,8 @@ namespace GeomNodes
         AZStd::string blenderPath = GetGNSystem()->GetBlenderPath();
         if (blenderPath.empty())
         {
-			AZ_Error("GNInstance", false, "Blender instance failed to launch! Blender path is not set or valid.");
-			return false;
+            AZ_Error("GNInstance", false, "Blender instance failed to launch! Blender path is not set or valid.");
+            return false;
         }
 
         processLaunchInfo.m_commandlineParameters = AZStd::string::format(
@@ -80,8 +82,8 @@ namespace GeomNodes
         processLaunchInfo.m_showWindow = false;
         processLaunchInfo.m_processPriority = AzFramework::ProcessPriority::PROCESSPRIORITY_NORMAL;
 
-        AzFramework::ProcessWatcher* outProcess = AzFramework::ProcessWatcher::LaunchProcess(
-            processLaunchInfo, AzFramework::ProcessCommunicationType::COMMUNICATOR_TYPE_NONE);
+        AzFramework::ProcessWatcher* outProcess =
+            AzFramework::ProcessWatcher::LaunchProcess(processLaunchInfo, AzFramework::ProcessCommunicationType::COMMUNICATOR_TYPE_NONE);
 
         if (outProcess)
         {
@@ -104,28 +106,27 @@ namespace GeomNodes
 
     AZStd::string GNInstance::SendParamUpdates(const AZStd::string& params, const AZStd::string& objectName)
     {
-		auto msg = AZStd::string::format(
-			R"JSON(
+        auto msg = AZStd::string::format(
+            R"JSON(
                 {
                     "%s": [ %s ],
                     "%s": "%s",
                     "ParamUpdate": true
                 }
-            )JSON"
-			, Field::Params
-			, params.c_str()
-			, Field::Object
-			, objectName.c_str()
-		);
+            )JSON",
+            Field::Params,
+            params.c_str(),
+            Field::Object,
+            objectName.c_str());
 
-		SendIPCMsg(msg);
+        SendIPCMsg(msg);
 
         return msg;
     }
 
     void GNInstance::SendHeartbeat()
     {
-		SendIPCMsg(R"JSON(
+        SendIPCMsg(R"JSON(
                         {
                             "Alive": true 
                         }
@@ -134,7 +135,7 @@ namespace GeomNodes
 
     void GNInstance::RequestObjectParams()
     {
-		SendIPCMsg(R"JSON(
+        SendIPCMsg(R"JSON(
                         {
                             "FetchObjectParams": true 
                         }
@@ -143,39 +144,38 @@ namespace GeomNodes
 
     void GNInstance::CloseMap(AZ::u64 mapId)
     {
-		auto msg = AZStd::string::format(
-			R"JSON(
+        auto msg = AZStd::string::format(
+            R"JSON(
                     {
                         "%s": true,
                         "%s": %llu
                     }
                     )JSON",
-			Field::SHMClose,
-			Field::MapId,
-			mapId);
-		SendIPCMsg(msg);
+            Field::SHMClose,
+            Field::MapId,
+            mapId);
+        SendIPCMsg(msg);
     }
 
     void GNInstance::RequestExport(const AZStd::string& params, const AZStd::string& objectName, const AZStd::string& fbxPath)
     {
-		auto msg = AZStd::string::format(
-			R"JSON(
+        auto msg = AZStd::string::format(
+            R"JSON(
                     {
                         "%s": true,
                         "%s": [ %s ],
                         "%s": "%s",
                         "%s": "%s"
                     }
-                    )JSON"
-			, Field::Export
-			, Field::Params
-			, params.c_str()
-            , Field::Object
-            , objectName.c_str()
-            , Field::FBXPath
-            , fbxPath.c_str()
-			);
-		SendIPCMsg(msg);
+                    )JSON",
+            Field::Export,
+            Field::Params,
+            params.c_str(),
+            Field::Object,
+            objectName.c_str(),
+            Field::FBXPath,
+            fbxPath.c_str());
+        SendIPCMsg(msg);
     }
 
 } // namespace GeomNodes

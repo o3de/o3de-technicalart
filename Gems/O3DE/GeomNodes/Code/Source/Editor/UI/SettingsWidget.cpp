@@ -7,10 +7,11 @@
  */
 
 #include <AzCore/Component/ComponentApplicationBus.h>
-#include <AzToolsFramework/UI/PropertyEditor/ReflectedPropertyEditor.hxx>
 #include <AzToolsFramework/UI/PropertyEditor/InstanceDataHierarchy.h>
-#include <QBoxLayout>
+#include <AzToolsFramework/UI/PropertyEditor/ReflectedPropertyEditor.hxx>
 #include <Editor/UI/SettingsWidget.h>
+#include <QBoxLayout>
+
 
 namespace GeomNodes
 {
@@ -25,7 +26,7 @@ namespace GeomNodes
         void SettingsWidget::SetValue(const GNConfiguration& gnSystemConfiguration)
         {
             m_gnSystemConfiguration = gnSystemConfiguration;
-            
+
             blockSignals(true);
             m_propertyEditor->ClearInstances();
             m_propertyEditor->AddInstance(&m_gnSystemConfiguration);
@@ -52,30 +53,27 @@ namespace GeomNodes
             verticalLayout->addWidget(m_propertyEditor);
         }
 
-        void SettingsWidget::BeforePropertyModified(AzToolsFramework::InstanceDataNode* node)
+        void SettingsWidget::BeforePropertyModified([[maybe_unused]] AzToolsFramework::InstanceDataNode* node)
         {
-            (void)node;
         }
 
-        void SettingsWidget::AfterPropertyModified(AzToolsFramework::InstanceDataNode* /*node*/)
+        void SettingsWidget::AfterPropertyModified([[maybe_unused]] AzToolsFramework::InstanceDataNode* node)
         {
             emit onValueChanged(m_gnSystemConfiguration);
         }
 
-        void SettingsWidget::SetPropertyEditingActive(AzToolsFramework::InstanceDataNode* node)
+        void SettingsWidget::SetPropertyEditingActive([[maybe_unused]] AzToolsFramework::InstanceDataNode* node)
         {
-            (void)node;
         }
 
-        void SettingsWidget::SetPropertyEditingComplete(AzToolsFramework::InstanceDataNode* node)
+        void SettingsWidget::SetPropertyEditingComplete([[maybe_unused]] AzToolsFramework::InstanceDataNode* node)
         {
-            (void)node;
         }
 
         void SettingsWidget::SealUndoStack()
         {
         }
-    } // Editor
-} // GeomNodes
+    } // namespace Editor
+} // namespace GeomNodes
 
 #include <Editor/UI/moc_SettingsWidget.cpp>

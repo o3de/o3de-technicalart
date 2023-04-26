@@ -6,15 +6,17 @@
  *
  */
 
-#include <Editor/UI/ui_EditorWindow.h>
-#include <Editor/UI/EditorWindow.h>
-#include <Editor/UI/ConfigurationWidget.h>
-#include <Editor/Systems/GeomNodesSystem.h>
 #include <Editor/Configuration/GNConfiguration.h>
+#include <Editor/Systems/GeomNodesSystem.h>
+#include <Editor/UI/ConfigurationWidget.h>
+#include <Editor/UI/EditorWindow.h>
+#include <Editor/UI/ui_EditorWindow.h>
+
 
 #include <AzCore/Interface/Interface.h>
-#include <AzToolsFramework/API/ViewPaneOptions.h>
 #include <AzToolsFramework/API/ToolsApplicationAPI.h>
+#include <AzToolsFramework/API/ViewPaneOptions.h>
+
 
 namespace GeomNodes
 {
@@ -31,10 +33,13 @@ namespace GeomNodes
 
             auto* gnSystem = AZ::Interface<GNSystemInterface>::Get();
             const auto* gnSystemConfiguration = azdynamic_cast<const GNConfiguration*>(gnSystem->GetConfiguration());
-            
+
             m_ui->m_GeomNodesConfigurationWidget->SetConfiguration(*gnSystemConfiguration);
-            connect(m_ui->m_GeomNodesConfigurationWidget, &Editor::ConfigurationWidget::onConfigurationChanged, 
-                this, &EditorWindow::SaveConfiguration);
+            connect(
+                m_ui->m_GeomNodesConfigurationWidget,
+                &Editor::ConfigurationWidget::onConfigurationChanged,
+                this,
+                &EditorWindow::SaveConfiguration);
         }
 
         void EditorWindow::RegisterViewClass()
@@ -51,17 +56,23 @@ namespace GeomNodes
             auto* gnSystem = GetGNSystem();
             if (gnSystem == nullptr)
             {
-                AZ_Error("GeomNodes", false, "Unable to save the GeomNodes configuration. The GeomNodesSystem not initialized. Any changes have not been applied.");
+                AZ_Error(
+                    "GeomNodes",
+                    false,
+                    "Unable to save the GeomNodes configuration. The GeomNodesSystem not initialized. Any changes have not been applied.");
                 return;
             }
 
-            //update the GeomNodes system config if it has changed
+            // update the GeomNodes system config if it has changed
             const GNSettingsRegistryManager& settingsRegManager = gnSystem->GetSettingsRegistryManager();
             if (gnSystem->GetSystemConfiguration() != gnSystemConfiguration)
             {
                 auto saveCallback = [](const GNConfiguration& config, GNSettingsRegistryManager::Result result)
                 {
-                    AZ_Warning("GeomNodes", result == GNSettingsRegistryManager::Result::Success, "Unable to save the GeomNodes configuration. Any changes have not been applied.");
+                    AZ_Warning(
+                        "GeomNodes",
+                        result == GNSettingsRegistryManager::Result::Success,
+                        "Unable to save the GeomNodes configuration. Any changes have not been applied.");
                     if (result == GNSettingsRegistryManager::Result::Success)
                     {
                         if (auto* gnSystem = GetGNSystem())
@@ -73,6 +84,6 @@ namespace GeomNodes
                 settingsRegManager.SaveSystemConfiguration(gnSystemConfiguration, saveCallback);
             }
         }
-    }
-}
+    } // namespace Editor
+} // namespace GeomNodes
 #include <Editor/UI/moc_EditorWindow.cpp>

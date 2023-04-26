@@ -22,7 +22,6 @@ typedef unsigned int u32;
 
 typedef long (*HandlerCallback)(u64, const char*, u64);
 
-
 #define BRIDGE_EXPORT __declspec(dllexport)
 
 __declspec(dllexport) bool Init(u64 id, HandlerCallback cb);
@@ -40,7 +39,6 @@ __declspec(dllexport) bool OpenSHM(u64 mapId);
 __declspec(dllexport) bool ReadSHM(u64 uId, void** address, u64* length);
 __declspec(dllexport) void WriteSHM(u64 uId, const char* source, const u64 length);
 __declspec(dllexport) void ClearSHM(u64 uId);
-
 
 #ifdef __cplusplus
 }

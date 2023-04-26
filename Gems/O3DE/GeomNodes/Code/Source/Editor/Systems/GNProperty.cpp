@@ -35,8 +35,7 @@ namespace GeomNodes
                     })
                 ->Field("id", &GNProperty::m_id)
                 ->Field("name", &GNProperty::m_name)
-                ->Field("gnId", &GNProperty::m_gnId)
-                ;
+                ->Field("gnId", &GNProperty::m_gnId);
         }
     }
 
@@ -141,13 +140,13 @@ namespace GeomNodes
                 }
             }
 
-			retVal = aznew GNParamBoolean(name, value, context.GetReadOnlyPointer(), context.GetEntityId());
-			retVal->ReadSetGNId(context);
+            retVal = aznew GNParamBoolean(name, value, context.GetReadOnlyPointer(), context.GetEntityId());
+            retVal->ReadSetGNId(context);
         }
 
         return retVal;
     }
-    
+
     AZStd::string GNParamBoolean::ToJSONString() const
     {
         auto jsonString = AZStd::string::format(
@@ -158,16 +157,15 @@ namespace GeomNodes
                         "%s": "%s",
                         "%s": "%s"
                     }
-                )JSON"
-            , Field::Id
-            , m_gnId.c_str()
-            , Field::Value
-            , m_value ? 1 : 0
-            , Field::Type
-            , m_type.c_str()
-			, Field::Name
-			, m_name.c_str()
-        );
+                )JSON",
+            Field::Id,
+            m_gnId.c_str(),
+            Field::Value,
+            m_value ? 1 : 0,
+            Field::Type,
+            m_type.c_str(),
+            Field::Name,
+            m_name.c_str());
         return jsonString;
     }
 
@@ -196,13 +194,13 @@ namespace GeomNodes
         if (context.IsInt(valueIndex))
         {
             int value;
-			if (!context.ReadValue(value, Field::DefaultValue))
-			{
-				if (!context.ReadValue(value, Field::Value))
-				{
-					AZ_Error("GNParamInt", false, "Missing DefaultValue or Value keys in the JSON data\n");
-				}
-			}
+            if (!context.ReadValue(value, Field::DefaultValue))
+            {
+                if (!context.ReadValue(value, Field::Value))
+                {
+                    AZ_Error("GNParamInt", false, "Missing DefaultValue or Value keys in the JSON data\n");
+                }
+            }
             auto paramInt = aznew GNParamInt(name, value, context.GetReadOnlyPointer(), context.GetEntityId());
 
             int min, max;
@@ -238,16 +236,15 @@ namespace GeomNodes
                         "%s": "%s",
                         "%s": "%s"
                     }
-                )JSON"
-            , Field::Id
-            , m_gnId.c_str()
-            , Field::Value
-            , m_value
-            , Field::Type
-            , m_type.c_str()
-			, Field::Name
-			, m_name.c_str()
-        );
+                )JSON",
+            Field::Id,
+            m_gnId.c_str(),
+            Field::Value,
+            m_value,
+            Field::Type,
+            m_type.c_str(),
+            Field::Name,
+            m_name.c_str());
         return jsonString;
     }
 
@@ -260,8 +257,7 @@ namespace GeomNodes
 
         if (serializeContext)
         {
-            serializeContext->Class<GNParamValue, GNProperty>()->Version(1)->Field(
-                "value", &GNParamValue::m_value);
+            serializeContext->Class<GNParamValue, GNProperty>()->Version(1)->Field("value", &GNParamValue::m_value);
         }
     }
 
@@ -272,13 +268,13 @@ namespace GeomNodes
         if (context.IsValue(valueIndex))
         {
             double value;
-			if (!context.ReadValue(value, Field::DefaultValue))
-			{
-				if (!context.ReadValue(value, Field::Value))
-				{
-					AZ_Error("GNParamValue", false, "Missing DefaultValue or Value keys in the JSON data\n");
-				}
-			}
+            if (!context.ReadValue(value, Field::DefaultValue))
+            {
+                if (!context.ReadValue(value, Field::Value))
+                {
+                    AZ_Error("GNParamValue", false, "Missing DefaultValue or Value keys in the JSON data\n");
+                }
+            }
             auto paramValue = aznew GNParamValue(name, value, context.GetReadOnlyPointer(), context.GetEntityId());
             double min, max;
             if (context.ReadValue(min, Field::MinValue))
@@ -313,16 +309,15 @@ namespace GeomNodes
                         "%s": "%s",
                         "%s": "%s"
                     }
-                )JSON"
-            , Field::Id
-            , m_gnId.c_str()
-            , Field::Value
-            , m_value
-            , Field::Type
-            , m_type.c_str()
-			, Field::Name
-			, m_name.c_str()
-        );
+                )JSON",
+            Field::Id,
+            m_gnId.c_str(),
+            Field::Value,
+            m_value,
+            Field::Type,
+            m_type.c_str(),
+            Field::Name,
+            m_name.c_str());
         return jsonString;
     }
 
@@ -346,13 +341,13 @@ namespace GeomNodes
         if (context.IsString(valueIndex))
         {
             const char* value = nullptr;
-			if (!context.ReadValue(value, Field::DefaultValue))
-			{
-				if (!context.ReadValue(value, Field::Value))
-				{
-					AZ_Error("GNParamString", false, "Missing DefaultValue or Value keys in the JSON data\n");
-				}
-			}
+            if (!context.ReadValue(value, Field::DefaultValue))
+            {
+                if (!context.ReadValue(value, Field::Value))
+                {
+                    AZ_Error("GNParamString", false, "Missing DefaultValue or Value keys in the JSON data\n");
+                }
+            }
             retVal = aznew GNParamString(name, value, context.GetReadOnlyPointer(), context.GetEntityId());
             retVal->ReadSetGNId(context);
         }
@@ -375,16 +370,15 @@ namespace GeomNodes
                         "%s": "%s",
                         "%s": "%s"
                     }
-                )JSON"
-            , Field::Id
-            , m_gnId.c_str()
-            , Field::Value
-            , m_value.c_str()
-            , Field::Type
-            , m_type.c_str()
-			, Field::Name
-			, m_name.c_str()
-        );
+                )JSON",
+            Field::Id,
+            m_gnId.c_str(),
+            Field::Value,
+            m_value.c_str(),
+            Field::Type,
+            m_type.c_str(),
+            Field::Name,
+            m_name.c_str());
         return jsonString;
     }
 } // namespace GeomNodes

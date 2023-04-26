@@ -9,9 +9,10 @@
 #pragma once
 
 #include "Editor/Commons.h"
-#include <AzFramework/Process/ProcessWatcher.h>
 #include <AzCore/Component/EntityId.h>
 #include <AzCore/Component/TickBus.h>
+#include <AzFramework/Process/ProcessWatcher.h>
+
 
 namespace GeomNodes
 {

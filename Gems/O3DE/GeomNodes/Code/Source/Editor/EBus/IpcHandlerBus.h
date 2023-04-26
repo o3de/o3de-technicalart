@@ -22,11 +22,13 @@ namespace Ipc
         using BusIdType = AZ::EntityId;
         //////////////////////////////////////////////////////////////////////////
 
-        virtual ~IpcHandlerNotifications() {}
+        virtual ~IpcHandlerNotifications()
+        {
+        }
 
         //! Triggered when an IPC message is sent from the client(s) to the gem.
         virtual void OnMessageReceived(const AZ::u8* content, const AZ::u64 length) = 0;
     };
 
     using IpcHandlerNotificationBus = AZ::EBus<IpcHandlerNotifications>;
-}
+} // namespace Ipc

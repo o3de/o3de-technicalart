@@ -7,19 +7,17 @@
  */
 
 #include "GeomNodesSystem.h"
+#include "Editor/UI/GeomNodesValidator.h"
 #include "Editor/UI/PropertyFileSelect.h"
 #include "Editor/UI/ValidationHandler.h"
-#include "Editor/UI/GeomNodesValidator.h"
 #include <Editor/Common/GNAPI.h>
 #include <Editor/EBus/IpcHandlerBus.h>
+
 
 namespace GeomNodes
 {
     long IpcHandlerCB(AZ::u64 id, const char* data, AZ::u64 length)
     {
-        /*AZStd::string msg;
-        msg.assign(data, length);
-        AZ_Printf("GeomNodesSystem", "id: %llu data: %s length: %llu", id, msg.c_str(), length);*/
         Ipc::IpcHandlerNotificationBus::Event(
             AZ::EntityId(id), &Ipc::IpcHandlerNotificationBus::Events::OnMessageReceived, reinterpret_cast<const AZ::u8*>(data), length);
 
@@ -31,8 +29,8 @@ namespace GeomNodes
         , m_propertyHandlers()
         , m_validator(AZStd::make_unique<Validator>())
         , m_validationHandler(AZStd::make_unique<ValidationHandler>())
-        {
-        }
+    {
+    }
 
     GeomNodesSystem::~GeomNodesSystem()
     {
@@ -41,33 +39,33 @@ namespace GeomNodes
 
     void GeomNodesSystem::Initialize(const GNConfiguration* config)
     {
-		if (m_state == State::Initialized)
-		{
-			AZ_Warning("GeomNodesSystem", false, "GeomNodes system already initialized, Shutdown must be called first");
-			return;
-		}
+        if (m_state == State::Initialized)
+        {
+            AZ_Warning("GeomNodesSystem", false, "GeomNodes system already initialized, Shutdown must be called first");
+            return;
+        }
 
-		m_systemConfig = *config;
-		
-		API::Init(SERVER_ID, IpcHandlerCB);
+        m_systemConfig = *config;
 
-		RegisterHandlersAndBuses();
+        API::Init(SERVER_ID, IpcHandlerCB);
 
-		m_state = State::Initialized;
-		m_initializeEvent.Signal(&m_systemConfig);
+        RegisterHandlersAndBuses();
+
+        m_state = State::Initialized;
+        m_initializeEvent.Signal(&m_systemConfig);
     }
 
     void GeomNodesSystem::Shutdown()
     {
-		if (m_state != State::Initialized)
-		{
-			return;
-		}
+        if (m_state != State::Initialized)
+        {
+            return;
+        }
 
-		UnregisterHandlersAndBuses();
-		API::Uninitialize();
+        UnregisterHandlersAndBuses();
+        API::Uninitialize();
 
-		m_state = State::Shutdown;
+        m_state = State::Shutdown;
     }
 
     AZStd::string_view GeomNodesSystem::GetBlenderPath()
@@ -80,27 +78,30 @@ namespace GeomNodes
         return &m_systemConfig;
     }
 
-	const GNConfiguration& GeomNodesSystem::GetSystemConfiguration() const
-	{
-		return m_systemConfig;
-	}
+    const GNConfiguration& GeomNodesSystem::GetSystemConfiguration() const
+    {
+        return m_systemConfig;
+    }
 
     void GeomNodesSystem::SetLastPath(const AZStd::string& lastPath)
     {
         m_systemConfig.m_lastFilePath = lastPath;
         const GNSettingsRegistryManager& settingsRegManager = GetSettingsRegistryManager();
-		auto saveCallback = [](const GNConfiguration& config, GNSettingsRegistryManager::Result result)
-		{
-			AZ_Warning("GeomNodes", result == GNSettingsRegistryManager::Result::Success, "Unable to save the GeomNodes configuration. Any changes have not been applied.");
-			if (result == GNSettingsRegistryManager::Result::Success)
-			{
-				if (auto* gnSystem = GetGNSystem())
-				{
-					gnSystem->UpdateConfiguration(&config);
-				}
-			}
-		};
-		settingsRegManager.SaveSystemConfiguration(m_systemConfig, saveCallback);
+        auto saveCallback = [](const GNConfiguration& config, GNSettingsRegistryManager::Result result)
+        {
+            AZ_Warning(
+                "GeomNodes",
+                result == GNSettingsRegistryManager::Result::Success,
+                "Unable to save the GeomNodes configuration. Any changes have not been applied.");
+            if (result == GNSettingsRegistryManager::Result::Success)
+            {
+                if (auto* gnSystem = GetGNSystem())
+                {
+                    gnSystem->UpdateConfiguration(&config);
+                }
+            }
+        };
+        settingsRegManager.SaveSystemConfiguration(m_systemConfig, saveCallback);
     }
 
     AZStd::string GeomNodesSystem::GetLastPath()
@@ -110,11 +111,11 @@ namespace GeomNodes
 
     void GeomNodesSystem::UpdateConfiguration(const GNConfiguration* newConfig)
     {
-		if(m_systemConfig != *newConfig)
-		{
-			m_systemConfig = (*newConfig);
-			m_configChangeEvent.Signal(newConfig);
-		}
+        if (m_systemConfig != *newConfig)
+        {
+            m_systemConfig = (*newConfig);
+            m_configChangeEvent.Signal(newConfig);
+        }
     }
 
     const GNSettingsRegistryManager& GeomNodesSystem::GetSettingsRegistryManager() const
@@ -137,11 +138,6 @@ namespace GeomNodes
         m_propertyHandlers.push_back(PropertyFuncValBrowseEditHandler::Register(m_validationHandler.get()));
         m_propertyHandlers.push_back(PropertyFileSelectHandler::Register(m_validationHandler.get()));
         ValidatorBus::Handler::BusConnect();
-
-        //TODO: setup our IPC system. Since this is the gem it will be the server.
-        // only one handler. Then messages will have the sender id(EntityID) which will be used when sending
-        // the messages via the EBUS. when a component is registered as an EBUS handler they will receive
-        // the correct messages.
     }
 
     void GeomNodesSystem::UnregisterHandlersAndBuses()
@@ -151,8 +147,7 @@ namespace GeomNodes
         for (AzToolsFramework::PropertyHandlerBase* handler : m_propertyHandlers)
         {
             AzToolsFramework::PropertyTypeRegistrationMessages::Bus::Broadcast(
-                &AzToolsFramework::PropertyTypeRegistrationMessages::Bus::Handler::UnregisterPropertyType,
-                handler);
+                &AzToolsFramework::PropertyTypeRegistrationMessages::Bus::Handler::UnregisterPropertyType, handler);
             delete handler;
         }
     }
@@ -161,4 +156,4 @@ namespace GeomNodes
     {
         return azdynamic_cast<GeomNodesSystem*>(AZ::Interface<GeomNodes::GNSystemInterface>::Get());
     }
-}
+} // namespace GeomNodes

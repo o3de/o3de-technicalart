@@ -6,21 +6,21 @@
  *
  */
 
-#include <Editor/Components/EditorGeomNodesComponent.h>
-#include <Editor/UI/UI_common.h>
-#include <Editor/UI/Validators.h>
-#include <Editor/UI/Utils.h>
-#include <Editor/Systems/GNProperty.h>
-#include <Editor/Rendering/GNMeshController.h>
-#include <AzToolsFramework/API/ToolsApplicationAPI.h>
-#include <AzToolsFramework/API/EntityCompositionRequestBus.h>
 #include <AzCore/Utils/Utils.h>
+#include <AzToolsFramework/API/EntityCompositionRequestBus.h>
+#include <AzToolsFramework/API/ToolsApplicationAPI.h>
+#include <Editor/Components/EditorGeomNodesComponent.h>
+#include <Editor/Rendering/GNMeshController.h>
+#include <Editor/Systems/GNProperty.h>
+#include <Editor/UI/UI_common.h>
+#include <Editor/UI/Utils.h>
+#include <Editor/UI/Validators.h>
 
-#include <AzCore/JSON/prettywriter.h>
-#include <AzCore/JSON/stringbuffer.h>
 #include <Atom/Feature/Mesh/MeshFeatureProcessorInterface.h>
 #include <Atom/RPI.Public/Scene.h>
 #include <AzCore/Component/NonUniformScaleBus.h>
+#include <AzCore/JSON/prettywriter.h>
+#include <AzCore/JSON/stringbuffer.h>
 #include <AzCore/Settings/SettingsRegistryMergeUtils.h>
 
 namespace GeomNodes
@@ -43,22 +43,19 @@ namespace GeomNodes
                 ->Version(1)
                 ->Field("GNParamContext", &EditorGeomNodesComponent::m_paramContext)
                 ->Field("BlenderFile", &EditorGeomNodesComponent::m_blenderFile)
-				->Field("ObjectNameList", &EditorGeomNodesComponent::m_enumValues)
-				->Field("ObjectInfos", &EditorGeomNodesComponent::m_defaultObjectInfos)
-				//->Field("CurrentObject", &EditorGeomNodesComponent::m_currentObject)
+                ->Field("ObjectNameList", &EditorGeomNodesComponent::m_enumValues)
+                ->Field("ObjectInfos", &EditorGeomNodesComponent::m_defaultObjectInfos)
                 ->Field("CurrentObjectInfo", &EditorGeomNodesComponent::m_currentObjectInfo)
-                ->Field("IsInitialized", &EditorGeomNodesComponent::m_initialized)
-                ;
-            
+                ->Field("IsInitialized", &EditorGeomNodesComponent::m_initialized);
+
             GNParamContext::Reflect(context);
-            
 
             AZ::EditContext* ec = serializeContext->GetEditContext();
             if (ec)
             {
                 ec->Class<EditorGeomNodesComponent>(
-                    "Geometry Node",
-                    "The Geometry Node component allows you to load a blend file with geometry node and tweak exposed parameters. ")
+                      "Geometry Node",
+                      "The Geometry Node component allows you to load a blend file with geometry node and tweak exposed parameters. ")
                     ->ClassElement(AZ::Edit::ClassElements::EditorData, "")
                     ->Attribute(AZ::Edit::Attributes::Category, "Blender")
                     ->Attribute(AZ::Edit::Attributes::AppearsInAddComponentMenu, AZ_CRC("Game", 0x232b318c))
@@ -67,29 +64,24 @@ namespace GeomNodes
                     ->Attribute(AZ::Edit::Attributes::AppearsInAddComponentMenu, AZ_CRC("Layer", 0xe4db211a))
                     ->Attribute(AZ::Edit::Attributes::AutoExpand, true)
                     ->DataElement(
-                        Handlers::FileSelect,
-                        &EditorGeomNodesComponent::m_blenderFile,
-                        "Blender File",
-                        "Blender file with Geometry Nodes")
-                        ->Attribute(Attributes::FuncValidator, ConvertFunctorToVoid(&Validators::ValidBlenderOrEmpty))
-                        ->Attribute(Attributes::SelectFunction, blendFunctor)
-                        ->Attribute(Attributes::ValidationChange, &EditorGeomNodesComponent::OnPathChange)
-                        ->Attribute(AZ::Edit::Attributes::ReadOnly, &EditorGeomNodesComponent::GetWorkInProgress)
-					->DataElement(nullptr, &EditorGeomNodesComponent::m_paramContext, "Geom Nodes Parameters", "Parameter template")
+                        Handlers::FileSelect, &EditorGeomNodesComponent::m_blenderFile, "Blender File", "Blender file with Geometry Nodes")
+                    ->Attribute(Attributes::FuncValidator, ConvertFunctorToVoid(&Validators::ValidBlenderOrEmpty))
+                    ->Attribute(Attributes::SelectFunction, blendFunctor)
+                    ->Attribute(Attributes::ValidationChange, &EditorGeomNodesComponent::OnPathChange)
+                    ->Attribute(AZ::Edit::Attributes::ReadOnly, &EditorGeomNodesComponent::GetWorkInProgress)
+                    ->DataElement(nullptr, &EditorGeomNodesComponent::m_paramContext, "Geom Nodes Parameters", "Parameter template")
                     ->SetDynamicEditDataProvider(&EditorGeomNodesComponent::GetParamsEditData)
-                        ->Attribute(AZ::Edit::Attributes::Visibility, AZ::Edit::PropertyVisibility::ShowChildrenOnly)
-					->UIElement(AZ::Edit::UIHandlers::Button, "", "Export to static mesh")
-					->Attribute(AZ::Edit::Attributes::ChangeNotify, &EditorGeomNodesComponent::ExportToStaticMesh)
-					->Attribute(AZ::Edit::Attributes::ButtonText, &EditorGeomNodesComponent::ExportButtonText)
+                    ->Attribute(AZ::Edit::Attributes::Visibility, AZ::Edit::PropertyVisibility::ShowChildrenOnly)
+                    ->UIElement(AZ::Edit::UIHandlers::Button, "", "Export to static mesh")
+                    ->Attribute(AZ::Edit::Attributes::ChangeNotify, &EditorGeomNodesComponent::ExportToStaticMesh)
+                    ->Attribute(AZ::Edit::Attributes::ButtonText, &EditorGeomNodesComponent::ExportButtonText)
                     ->Attribute(AZ::Edit::Attributes::Visibility, &EditorGeomNodesComponent::IsBlenderFileLoaded)
                     ->Attribute(AZ::Edit::Attributes::ChangeNotify, AZ::Edit::PropertyRefreshLevels::EntireTree)
-                    ->Attribute(AZ::Edit::Attributes::ReadOnly, &EditorGeomNodesComponent::GetWorkInProgress)
-                    ;
+                    ->Attribute(AZ::Edit::Attributes::ReadOnly, &EditorGeomNodesComponent::GetWorkInProgress);
 
                 ec->Class<GNParamContext>("Geom Nodes Parameter Context", "Adding exposed Geometry Nodes parameters to the entity!")
                     ->DataElement(nullptr, &GNParamContext::m_group, "Properties", "Geometry Nodes properties")
-                    ->Attribute(AZ::Edit::Attributes::AutoExpand, true)
-                    ;
+                    ->Attribute(AZ::Edit::Attributes::AutoExpand, true);
 
                 ec->Class<GNPropertyGroup>("Geom Nodes Property group", "This is a  property group")
                     ->ClassElement(AZ::Edit::ClassElements::EditorData, "GNPropertyGroup's class attributes.")
@@ -106,7 +98,7 @@ namespace GeomNodes
 
                 ec->Class<GNParamBoolean>("Geom Nodes Property (bool)", "A Geom Nodes boolean property")
                     ->ClassElement(AZ::Edit::ClassElements::EditorData, "GNPropertyGroup's class attributes.")
-                        ->Attribute(AZ::Edit::Attributes::Visibility, AZ::Edit::PropertyVisibility::ShowChildrenOnly)
+                    ->Attribute(AZ::Edit::Attributes::Visibility, AZ::Edit::PropertyVisibility::ShowChildrenOnly)
                     ->DataElement(AZ::Edit::UIHandlers::Default, &GNParamBoolean::m_value, "m_value", "A boolean")
                     ->Attribute(AZ::Edit::Attributes::ReadOnly, &GNProperty::IsReadOnly)
                     ->Attribute(AZ::Edit::Attributes::ChangeNotify, &GNProperty::OnParamChange)
@@ -114,7 +106,7 @@ namespace GeomNodes
 
                 ec->Class<GNParamInt>("Geom Nodes Property (int)", "A Geom Nodes int property")
                     ->ClassElement(AZ::Edit::ClassElements::EditorData, "GNPropertyGroup's class attributes.")
-                        ->Attribute(AZ::Edit::Attributes::Visibility, AZ::Edit::PropertyVisibility::ShowChildrenOnly)
+                    ->Attribute(AZ::Edit::Attributes::Visibility, AZ::Edit::PropertyVisibility::ShowChildrenOnly)
                     ->DataElement(AZ::Edit::UIHandlers::Default, &GNParamInt::m_value, "m_value", "An int")
                     ->Attribute(AZ::Edit::Attributes::ReadOnly, &GNProperty::IsReadOnly)
                     ->Attribute(AZ::Edit::Attributes::ChangeNotify, &GNProperty::OnParamChange)
@@ -122,19 +114,19 @@ namespace GeomNodes
 
                 ec->Class<GNParamValue>("Geom Nodes Property (double)", "A Geom Nodes double property")
                     ->ClassElement(AZ::Edit::ClassElements::EditorData, "GNPropertyGroup's class attributes.")
-                        ->Attribute(AZ::Edit::Attributes::Visibility, AZ::Edit::PropertyVisibility::ShowChildrenOnly)
+                    ->Attribute(AZ::Edit::Attributes::Visibility, AZ::Edit::PropertyVisibility::ShowChildrenOnly)
                     ->DataElement(AZ::Edit::UIHandlers::Default, &GNParamValue::m_value, "m_value", "A double/value")
                     ->Attribute(AZ::Edit::Attributes::ReadOnly, &GNProperty::IsReadOnly)
-                        ->Attribute(AZ::Edit::Attributes::ChangeNotify, &GNProperty::OnParamChange)
-                        ->Attribute(AZ::Edit::Attributes::NameLabelOverride, &GNParamValue::m_name);
+                    ->Attribute(AZ::Edit::Attributes::ChangeNotify, &GNProperty::OnParamChange)
+                    ->Attribute(AZ::Edit::Attributes::NameLabelOverride, &GNParamValue::m_name);
 
                 ec->Class<GNParamString>("Geom Nodes Property (string)", "A Geom Nodes string property")
                     ->ClassElement(AZ::Edit::ClassElements::EditorData, "GNPropertyGroup's class attributes.")
-                        ->Attribute(AZ::Edit::Attributes::Visibility, AZ::Edit::PropertyVisibility::ShowChildrenOnly)
+                    ->Attribute(AZ::Edit::Attributes::Visibility, AZ::Edit::PropertyVisibility::ShowChildrenOnly)
                     ->DataElement(AZ::Edit::UIHandlers::Default, &GNParamString::m_value, "m_value", "A string")
                     ->Attribute(AZ::Edit::Attributes::ReadOnly, &GNProperty::IsReadOnly)
-                        ->Attribute(AZ::Edit::Attributes::ChangeNotify, &GNProperty::OnParamChange)
-                        ->Attribute(AZ::Edit::Attributes::NameLabelOverride, &GNParamString::m_name);
+                    ->Attribute(AZ::Edit::Attributes::ChangeNotify, &GNProperty::OnParamChange)
+                    ->Attribute(AZ::Edit::Attributes::NameLabelOverride, &GNParamString::m_name);
             }
         }
     }
@@ -162,7 +154,7 @@ namespace GeomNodes
 
                 const AZ::IO::FixedMaxPath gemPath = AZ::Utils::GetGemPath("GeomNodes");
                 const AZ::IO::FixedMaxPath exePath = AZ::Utils::GetExecutableDirectory();
-                AZ::IO::FixedMaxPath bridgePath = exePath / "Bridge.dll"; //TODO: make this platform agnostic
+                AZ::IO::FixedMaxPath bridgePath = exePath / "Bridge.dll"; // TODO: make this platform agnostic
                 if (!AZ::IO::SystemFile::Exists(bridgePath.c_str()))
                 {
                     auto registry = AZ::SettingsRegistry::Get();
@@ -173,7 +165,8 @@ namespace GeomNodes
                         return;
                     }
 
-                    bridgePath = projectBuildPath / "bin/profile/Bridge.dll"; //TODO: check if there is a way to get "bin/profile" in the registry or somewhere and not hard coded.
+                    bridgePath = projectBuildPath / "bin/profile/Bridge.dll"; // TODO: check if there is a way to get "bin/profile" in the
+                                                                              // registry or somewhere and not hard coded.
                     if (!AZ::IO::SystemFile::Exists(bridgePath.c_str()))
                     {
                         AZ_Error("GeomNodes", false, "Can't find Bridge.dll");
@@ -204,28 +197,28 @@ namespace GeomNodes
     void EditorGeomNodesComponent::OnParamChange()
     {
         SetWorkInProgress(true);
-        
+
         if (m_paramContext.m_group.m_properties.size() > 0)
         {
             // this checks if the user chooses another object.
-			auto gnParam = reinterpret_cast<GNParamString*>(m_paramContext.m_group.GetProperty(Field::Objects));
-			if (gnParam->m_value != m_currentObject)
-			{
-				m_currentObject = gnParam->m_value;
-				m_paramContext.m_group.Clear(); // clear the group/properties
+            auto gnParam = reinterpret_cast<GNParamString*>(m_paramContext.m_group.GetProperty(Field::Objects));
+            if (gnParam->m_value != m_currentObject)
+            {
+                m_currentObject = gnParam->m_value;
+                m_paramContext.m_group.Clear(); // clear the group/properties
                 CreateDataElements(m_paramContext.m_group);
-			}
+            }
         }
-        
-        if(m_instance)
+
+        if (m_instance)
         {
             if (!m_instance->IsValid())
             {
                 m_instance->RestartProcess();
             }
-            
-			m_currentObjectInfo = m_instance->SendParamUpdates(m_paramContext.m_group
-				.GetGroup(m_currentObject.c_str())->GetProperties(), m_currentObject);
+
+            m_currentObjectInfo =
+                m_instance->SendParamUpdates(m_paramContext.m_group.GetGroup(m_currentObject.c_str())->GetProperties(), m_currentObject);
         }
 
         AZ_Printf("EditorGeomNodesComponent", "%llu: Parameter has changed", (AZ::u64)GetEntityId());
@@ -237,7 +230,7 @@ namespace GeomNodes
         jsonDocument.Parse((const char*)content, length);
         if (!jsonDocument.HasParseError())
         {
-            // send back an "Alive" message to the client when it asks for a heartbeat. 
+            // send back an "Alive" message to the client when it asks for a heartbeat.
             if (jsonDocument.HasMember(Field::Heartbeat))
             {
                 m_instance->SendHeartbeat();
@@ -249,13 +242,15 @@ namespace GeomNodes
                     m_instance->RequestObjectParams();
                     m_initialized = true;
                 }
-                else if(m_fromActivate)
+                else if (m_fromActivate)
                 {
                     OnParamChange();
                 }
                 m_fromActivate = false;
             }
-            else if (jsonDocument.HasMember(Field::ObjectNames) && jsonDocument.HasMember(Field::Objects) && jsonDocument.HasMember(Field::Materials))
+            else if (
+                jsonDocument.HasMember(Field::ObjectNames) && jsonDocument.HasMember(Field::Objects) &&
+                jsonDocument.HasMember(Field::Materials))
             {
                 LoadObjects(jsonDocument[Field::ObjectNames], jsonDocument[Field::Objects]);
                 CreateDataElements(m_paramContext.m_group);
@@ -296,9 +291,10 @@ namespace GeomNodes
     {
         if (!m_workInProgress)
         {
-			m_instance->RequestExport(m_paramContext.m_group
-				.GetGroup(m_currentObject.c_str())->GetProperties()
-                , m_currentObject, m_controller->GenerateFBXPath());
+            m_instance->RequestExport(
+                m_paramContext.m_group.GetGroup(m_currentObject.c_str())->GetProperties(),
+                m_currentObject,
+                m_controller->GenerateFBXPath());
             SetWorkInProgress(true);
         }
     }
@@ -310,12 +306,14 @@ namespace GeomNodes
 
     void EditorGeomNodesComponent::SetWorkInProgress(bool flag)
     {
-		AZ::SystemTickBus::QueueFunction(
-            [=]() {
-				if (m_workInProgress != flag)
-				{
-    				m_workInProgress = flag;
-                    EBUS_EVENT(AzToolsFramework::ToolsApplicationEvents::Bus, InvalidatePropertyDisplay, AzToolsFramework::Refresh_EntireTree);
+        AZ::SystemTickBus::QueueFunction(
+            [=]()
+            {
+                if (m_workInProgress != flag)
+                {
+                    m_workInProgress = flag;
+                    EBUS_EVENT(
+                        AzToolsFramework::ToolsApplicationEvents::Bus, InvalidatePropertyDisplay, AzToolsFramework::Refresh_EntireTree);
                 }
             });
     }
@@ -340,11 +338,11 @@ namespace GeomNodes
 
     void EditorGeomNodesComponent::LoadObjects(const rapidjson::Value& objectNameArray, const rapidjson::Value& objectArray)
     {
-        
         // Populate m_enumValues that will store the list of object names
         LoadObjectNames(objectNameArray);
-        
-        // Load and save our param list object from json. Need this so it's faster to switch between objects and not need to send a request via IPC.
+
+        // Load and save our param list object from json. Need this so it's faster to switch between objects and not need to send a request
+        // via IPC.
         LoadParams(objectArray);
 
         m_currentObject = m_enumValues[0];
@@ -389,14 +387,16 @@ namespace GeomNodes
         CreateParam(m_currentObject, group);
 
         AZ::SystemTickBus::QueueFunction(
-            [=]() {
+            [=]()
+            {
                 EBUS_EVENT(AzToolsFramework::ToolsApplicationEvents::Bus, InvalidatePropertyDisplay, AzToolsFramework::Refresh_EntireTree);
                 AzToolsFramework::ToolsApplicationRequests::Bus::Broadcast(
                     &AzToolsFramework::ToolsApplicationRequests::Bus::Events::AddDirtyEntity, GetEntityId());
             });
     }
 
-    void EditorGeomNodesComponent::CreateObjectNames(const AZStd::string& objectName, const StringVector& enumValues, GNPropertyGroup& group)
+    void EditorGeomNodesComponent::CreateObjectNames(
+        const AZStd::string& objectName, const StringVector& enumValues, GNPropertyGroup& group)
     {
         ElementInfo ei;
         ei.m_editData.m_name = CacheString(Field::Objects);
@@ -406,7 +406,7 @@ namespace GeomNodes
 
         auto gnParam = aznew GNParamString(Field::Objects, "", &m_workInProgress, GetEntityId());
         gnParam->m_value = objectName;
-        
+
         ei.m_editData.m_attributes.push_back(
             AZ::Edit::AttributePair(AZ::Edit::Attributes::StringList, aznew AZ::AttributeContainerType<StringVector>(enumValues)));
 
@@ -421,32 +421,32 @@ namespace GeomNodes
 
         if (m_currentObjectInfo.empty())
         {
-			auto it = m_defaultObjectInfos.find(objectName);
-			if (it != m_defaultObjectInfos.end())
-			{
-				jsonBuffer = it->second;
-			}
+            auto it = m_defaultObjectInfos.find(objectName);
+            if (it != m_defaultObjectInfos.end())
+            {
+                jsonBuffer = it->second;
+            }
         }
-        else {
-			jsonBuffer = m_currentObjectInfo;
+        else
+        {
+            jsonBuffer = m_currentObjectInfo;
         }
-        
 
         if (!jsonBuffer.empty())
         {
-			rapidjson::Document jsonDocument;
-			jsonDocument.Parse(jsonBuffer.c_str(), jsonBuffer.size());
-			if (!jsonDocument.HasParseError())
-			{
-				GNPropertyGroup* subGroup = group.GetGroup(objectName.c_str());
-				if (subGroup == nullptr)
-				{
-					group.m_groups.emplace_back();
-					subGroup = &group.m_groups.back();
-					subGroup->m_name = objectName;
-				}
-				LoadProperties(jsonDocument[Field::Params], *subGroup);
-			}
+            rapidjson::Document jsonDocument;
+            jsonDocument.Parse(jsonBuffer.c_str(), jsonBuffer.size());
+            if (!jsonDocument.HasParseError())
+            {
+                GNPropertyGroup* subGroup = group.GetGroup(objectName.c_str());
+                if (subGroup == nullptr)
+                {
+                    group.m_groups.emplace_back();
+                    subGroup = &group.m_groups.back();
+                    subGroup->m_name = objectName;
+                }
+                LoadProperties(jsonDocument[Field::Params], *subGroup);
+            }
         }
     }
 
@@ -455,14 +455,14 @@ namespace GeomNodes
         // parse params
         for (rapidjson::Value::ConstValueIterator itr = paramVal.Begin(); itr != paramVal.End(); ++itr)
         {
-            //set this up so the context can do it's own parsing of the current GN param JSON object.
+            // set this up so the context can do it's own parsing of the current GN param JSON object.
             GNParamDataContext gndc;
             gndc.SetParamObject(itr);
             gndc.SetReadOnlyPointer(&m_workInProgress);
             gndc.SetEntityId(GetEntityId());
             auto propertyName = gndc.GetParamName();
             auto paramType = gndc.GetParamType();
-                
+
             // default value will differ based on the type
 
             if (GNProperty* gnParam = m_paramContext.ConstructGNParam(gndc, paramType, propertyName))
@@ -520,28 +520,26 @@ namespace GeomNodes
             }
 
             ed.m_attributes.push_back(AZ::Edit::AttributePair(AZ::Edit::Attributes::Step, aznew AZ::Edit::AttributeData<double>(0.1f)));
-            
+
             break;
         }
     }
 
-	void EditorGeomNodesComponent::GetRequiredServices([[maybe_unused]] AZ::ComponentDescriptor::DependencyArrayType& required)
-	{
-		//required.push_back(AZ_CRC("TransformService", 0x8ee22c50));
-	}
+    void EditorGeomNodesComponent::GetRequiredServices([[maybe_unused]] AZ::ComponentDescriptor::DependencyArrayType& required)
+    {
+    }
 
-	void EditorGeomNodesComponent::GetDependentServices(AZ::ComponentDescriptor::DependencyArrayType& dependent)
-	{
-		dependent.push_back(AZ_CRC("TransformService", 0x8ee22c50));
-	}
+    void EditorGeomNodesComponent::GetDependentServices(AZ::ComponentDescriptor::DependencyArrayType& dependent)
+    {
+        dependent.push_back(AZ_CRC("TransformService", 0x8ee22c50));
+    }
 
     void EditorGeomNodesComponent::GetProvidedServices(AZ::ComponentDescriptor::DependencyArrayType& provided)
     {
         provided.push_back(AZ_CRC_CE("EditorGeomNodesService"));
     }
 
-    void EditorGeomNodesComponent::GetIncompatibleServices(
-        [[maybe_unused]] AZ::ComponentDescriptor::DependencyArrayType& incompatible)
+    void EditorGeomNodesComponent::GetIncompatibleServices([[maybe_unused]] AZ::ComponentDescriptor::DependencyArrayType& incompatible)
     {
         incompatible.push_back(AZ_CRC("EditorGeomNodesService"));
     }
@@ -554,7 +552,7 @@ namespace GeomNodes
     {
         AzToolsFramework::Components::EditorComponentBase::Activate();
         EditorGeomNodesComponentRequestBus::Handler::BusConnect(GetEntityId());
-        
+
         m_controller = AZStd::make_unique<GNMeshController>(GetEntityId());
 
         m_fromActivate = true;
@@ -632,7 +630,8 @@ namespace GeomNodes
         if (GetEntity())
         {
             AZ::SystemTickBus::QueueFunction(
-                [=]() {
+                [=]()
+                {
                     AzToolsFramework::ToolsApplicationEvents::Bus::Broadcast(
                         &AzToolsFramework::ToolsApplicationEvents::InvalidatePropertyDisplay, AzToolsFramework::Refresh_EntireTree);
                 });
@@ -651,4 +650,4 @@ namespace GeomNodes
         }
         return nullptr;
     }
-}
+} // namespace GeomNodes

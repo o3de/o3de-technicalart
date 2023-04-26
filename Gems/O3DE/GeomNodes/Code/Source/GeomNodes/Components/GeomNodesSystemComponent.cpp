@@ -18,9 +18,7 @@ namespace GeomNodes
     {
         if (auto serializeContext = azrtti_cast<AZ::SerializeContext*>(context))
         {
-            serializeContext->Class<GeomNodesSystemComponent, AZ::Component>()
-                ->Version(0)
-                ;
+            serializeContext->Class<GeomNodesSystemComponent, AZ::Component>()->Version(0);
         }
     }
 
