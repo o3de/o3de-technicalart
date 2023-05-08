@@ -1,0 +1,18 @@
+{
+    "Amazon": {
+        "AssetProcessor": {
+            "Settings": {
+                "ScanFolder GeomNodes/Assets": {
+                    "watch": "@GEMROOT:GeomNodes@/Assets",
+                    "recursive": 1,
+                    "order": 101
+                },
+                "ScanFolder GeomNodes/Registry": {
+                    "watch": "@GEMROOT:GeomNodes@/Registry",
+                    "recursive": 1,
+                    "order": 102
+                }
+            }
+        }
+    }
+}
