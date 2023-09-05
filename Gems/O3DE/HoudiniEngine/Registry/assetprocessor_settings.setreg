@@ -1,0 +1,18 @@
+{
+    "Amazon": {
+        "AssetProcessor": {
+            "Settings": {
+                "ScanFolder HoudiniEngine/Assets": {
+                    "watch": "@GEMROOT:HoudiniEngine@/Assets",
+                    "recursive": 1,
+                    "order": 101
+                },
+                "ScanFolder HoudiniEngine/Registry": {
+                    "watch": "@GEMROOT:HoudiniEngine@/Registry",
+                    "recursive": 1,
+                    "order": 102
+                }
+            }
+        }
+    }
+}

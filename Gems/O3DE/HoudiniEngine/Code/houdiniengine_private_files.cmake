@@ -1,0 +1,19 @@
+
+set(FILES
+    Source/HoudiniEngineModuleInterface.h
+    Source/Clients/HoudiniEngineSystemComponent.cpp
+    Source/Clients/HoudiniEngineSystemComponent.h
+    Game/HoudiniMeshComponent.cpp
+    Game/HoudiniMeshComponent.h
+    Game/HoudiniMeshData.cpp
+    Game/HoudiniMeshData.h
+    Game/HoudiniModelData.cpp
+    Game/HoudiniModelData.h
+    Game/HoudiniRenderMesh.h
+    Game/HoudiniRenderMesh.cpp
+    Game/HoudiniAttributeBuffer.h
+    Game/HoudiniBuffer.h
+    Source/HoudiniConstants.h
+    Source/Math/MathHelper.h
+    Source/Math/MathHelper.cpp
+)

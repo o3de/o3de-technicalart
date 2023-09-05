@@ -1,0 +1,13 @@
+{
+    "shaders": [
+        {
+            "file": "./MinimalPBR_ForwardPass.shader"
+        },
+        {
+            "file": "DefaultHoudini.shader"
+        },
+        {
+            "file": "Shaders/Shadow/Shadowmap.shader"
+        }
+    ]
+}

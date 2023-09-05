@@ -1,0 +1,15 @@
+<toolboxmacros shelfName="HoudiniShelf" prettyName="Houdini" showByDefault="true">
+ 
+ <macro title="HOUDINI-ON" shortcut=""      icon="Gems/HoudiniEngine/Assets/Editor/Scripts/Shelves/icons/houdini_on.png" 
+                                            icon-hover="Gems/HoudiniEngine/Assets/Editor/Scripts/Shelves/icons/houdini_hover.png" 
+                                            tooltip="HOUDINI - ENABLED">
+  <command type="1" text="general.set_cvar(r'hou_state', 1)" bVariableToggle="1"/>
+ </macro> 
+ 
+ <macro title="HOUDINI-OFF" shortcut=""     icon="Gems/HoudiniEngine/Assets/Editor/Scripts/Shelves/icons/houdini_off.png" 
+                                            icon-hover="Gems/HoudiniEngine/Assets/Editor/Scripts/Shelves/icons/houdini_hover.png" 
+                                            tooltip="HOUDINI - DISABLED">
+  <command type="1" text="general.set_cvar(r'hou_state', 0)" bVariableToggle="1"/>
+ </macro>
+
+</toolboxmacros>
